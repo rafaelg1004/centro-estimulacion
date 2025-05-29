@@ -5,7 +5,7 @@ function VerRegistros({onEditar}) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/registros')
+    fetch('https://centro-backend-production.up.railway.app/api/registros')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {

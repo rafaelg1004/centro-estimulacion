@@ -20,7 +20,7 @@ const ListaValoraciones = () => {
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
 
-      const res = await fetch(`https://hopeful-insight.railway.app//api/valoraciones?${params.toString()}`);
+      const res = await fetch(`https://centro-backend-production.up.railway.app/api/valoraciones?${params.toString()}`);
       if (!res.ok) throw new Error("Error al buscar valoraciones");
       const data = await res.json();
       setValoraciones(data);

@@ -45,7 +45,7 @@ const RegistroPaciente = () => {
       firma: firmaData,
     };
 
-   fetch("https://hopeful-insight.railway.app//api/registro", {
+   fetch("https://centro-backend-production.up.railway.app/api/registro", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",

@@ -132,7 +132,7 @@ const ValoracionIngreso = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://hopeful-insight.railway.app//api/valoraciones", {
+      const response = await fetch("https://centro-backend-production.up.railway.app/api/valoraciones", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formulario),
