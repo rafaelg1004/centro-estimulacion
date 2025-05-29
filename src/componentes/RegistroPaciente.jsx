@@ -45,7 +45,7 @@ const RegistroPaciente = () => {
       firma: firmaData,
     };
 
-   fetch("http://localhost:4000/api/registro", {
+   fetch("https://hopeful-insight.railway.app//api/registro", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",

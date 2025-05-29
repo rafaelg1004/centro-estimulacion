@@ -36,7 +36,7 @@ const DetalleValoracion = () => {
   };*/
   const exportarPDF2 = async () => {
   try {
-    const response = await fetch("http://localhost:4000/api/exportar-pdf", {
+    const response = await fetch("https://hopeful-insight.railway.app//api/exportar-pdf", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -63,7 +63,7 @@ const DetalleValoracion = () => {
 };
 
   useEffect(() => {
-    fetch(`http://localhost:4000/api/valoraciones/${id}`)
+    fetch(`https://hopeful-insight.railway.app/api/valoraciones/${id}`)
       .then((res) => res.json())
       .then((data) => setValoracion(data))
       .catch((err) => console.error("Error al cargar valoración:", err));
