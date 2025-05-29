@@ -1,0 +1,117 @@
+/* DetalleValoracion.css */
+
+.detalle-container {
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+  background: #ffffff;
+  color: #333;
+  border: 2px solid #f8bbd0; /* Naranja/dorado del logo */
+  border-radius: 8px;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  background-color: #fff8e1; /* tono claro del fondo del logo */
+  padding: 20px;
+  border-bottom: 4px solid #f8bbd0; /* color principal del logo */
+  border-radius: 10px 10px 0 0;
+  gap: 20px;
+}
+
+.logo-container {
+  flex: 0 0 auto;
+}
+
+.logo-empresa {
+  height: 100px;
+  width: auto;
+}
+
+.titulo-container {
+  flex: 1;
+  text-align: left;
+}
+
+.titulo {
+  margin: 0;
+  color: #f8bbd0; /* tono fuerte de naranja */
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.subtitulo {
+  margin: 0;
+  color: #754879; /* tono marrón suave complementario */
+  font-size: 20px;
+}
+
+.detalle-section {
+  margin-bottom: 25px;
+  page-break-after: always;
+}
+
+.detalle-section h3 {
+  background-color: #f8bbd0;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+ul {
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.firmas-container {
+  display: flex;
+  gap: 20px;
+  justify-content: start;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.firmas-container img {
+  width: 200px;
+  height: auto;
+  border: 2px solid #f8bbd0;
+  padding: 5px;
+  background: #fff3e0;
+}
+
+.btn-exportar {
+  background-color: #f8bbd0;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 30px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-exportar:hover {
+  background-color: #f8bbd0;
+}
+
+/* Para asegurar que cada sección comience en una nueva página al exportar PDF */
+@media print {
+  .detalle-section {
+    margin-bottom: 25px;
+
+    page-break-before: always;
+  }
+}
