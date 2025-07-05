@@ -26,7 +26,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`)
+    fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setPaciente(data));
   }, [id]);
@@ -55,10 +55,10 @@ export default function ValoracionIngresoProgramaPerinatal() {
       [name]: value,
     }));
   };
-const handleSiguiente = () => {
-  console.log("Avanzando al paso 6");
-  setPaso(6);
-};
+//const handleSiguiente = () => {
+  //console.log("Avanzando al paso 6");
+  //setPaso(6);
+//};
   const siguiente = () => setPaso((prev) => prev + 1);
   const anterior = () => setPaso((prev) => prev - 1);
 
@@ -72,7 +72,7 @@ const handleSiguiente = () => {
       };
       console.log("Datos que se envían al backend:", datosAEnviar);
 
-      const response = await fetch("https://mi-backend-787730618984.us-central1.run.app/api/consentimiento-perinatal", {
+      const response = await fetch("http://18.216.20.125:4000/api/consentimiento-perinatal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosAEnviar),

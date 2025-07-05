@@ -191,7 +191,7 @@ const ValoracionIngreso = () => {
   useEffect(() => {
     if (pacienteId && !formularioCargado) {
       fetch(
-        `https://mi-backend-787730618984.us-central1.run.app/api/pacientes/${pacienteId}`
+        `http://18.216.20.125:4000/api/pacientes/${pacienteId}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -415,9 +415,24 @@ const ValoracionIngreso = () => {
   const confirmarGuardado = async () => {
     setMostrarConfirmacion(false);
 
+    // Subir la firma a S3 si está en base64
+    let firmaUrl = formulario.firmaFisioterapeuta;
+    if (firmaUrl && firmaUrl.startsWith("data:image")) {
+      firmaUrl = await subirFirmaAS3(firmaUrl);
+    }
+
+    // Si tienes más firmas, repite el proceso para cada una:
+    let firmaRepresentanteUrl = formulario.firmaRepresentante;
+    if (firmaRepresentanteUrl && firmaRepresentanteUrl.startsWith("data:image")) {
+      firmaRepresentanteUrl = await subirFirmaAS3(firmaRepresentanteUrl);
+    }
+
+    // Construye el objeto final para guardar
     const dataToSend = {
       ...formulario,
-      paciente: pacienteId, // <-- AGREGA ESTA LÍNEA
+      paciente: pacienteId,
+      firmaFisioterapeuta: firmaUrl,
+      firmaRepresentante: firmaRepresentanteUrl,
       consentimiento_nombreAcudiente: consentimiento.consentimiento_nombreAcudiente,
       consentimiento_ccAcudiente: consentimiento.consentimiento_ccAcudiente,
       consentimiento_lugarExpedicion: consentimiento.consentimiento_lugarExpedicion,
@@ -432,7 +447,7 @@ const ValoracionIngreso = () => {
 
     try {
       const response = await fetch(
-        "https://mi-backend-787730618984.us-central1.run.app/api/valoraciones",
+        "http://18.216.20.125:4000/api/valoraciones",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -467,6 +482,31 @@ const ValoracionIngreso = () => {
       [name]: dataURL,
     }));
   };
+
+  async function subirFirmaAS3(firmaBase64) {
+    if (!firmaBase64) return "";
+    function dataURLtoFile(dataurl, filename) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, { type: mime });
+    }
+    const file = dataURLtoFile(firmaBase64, 'firma.png');
+    const formData = new FormData();
+    formData.append('imagen', file);
+
+    const res = await fetch('http://18.216.20.125:4000/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    return data.url; // URL pública de S3
+  }
 
   return (
     <form

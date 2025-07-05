@@ -12,7 +12,7 @@ export default function DetallePacienteAdulto() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`)
+    fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setPaciente(data))
       .catch(() => setError("No se pudo cargar el paciente"));

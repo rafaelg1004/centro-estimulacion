@@ -19,7 +19,7 @@ export default function EditarConsentimientoPerinatal() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/consentimiento-perinatal/${id}`)
+    fetch(`http://18.216.20.125:4000/api/consentimiento-perinatal/${id}`)
       .then(res => res.json())
       .then(data => {
         console.log("Respuesta API:", data); // <-- Agrega esto
@@ -87,7 +87,7 @@ export default function EditarConsentimientoPerinatal() {
     };
 
     try {
-      await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/consentimiento-perinatal/${id}`, {
+      await fetch(`http://18.216.20.125:4000/api/consentimiento-perinatal/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),

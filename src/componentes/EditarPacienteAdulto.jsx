@@ -46,7 +46,7 @@ export default function EditarPacienteAdulto() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`)
+    fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => {
         setFormulario({
@@ -84,7 +84,7 @@ export default function EditarPacienteAdulto() {
     }
     try {
       const res = await fetch(
-        `https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`,
+        `http://18.216.20.125:4000/api/pacientes-adultos/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

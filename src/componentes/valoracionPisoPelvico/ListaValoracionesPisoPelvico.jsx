@@ -12,7 +12,7 @@ export default function ListaValoracionesPisoPelvico() {
 
   const buscarValoraciones = async (q = "") => {
     setCargando(true);
-    let url = "https://mi-backend-787730618984.us-central1.run.app/api/valoracion-piso-pelvico";
+    let url = "http://18.216.20.125:4000/api/valoracion-piso-pelvico";
     if (q.trim() !== "") {
       url += `/buscar?q=${encodeURIComponent(q)}`;
     }
@@ -30,7 +30,7 @@ export default function ListaValoracionesPisoPelvico() {
       ids.map(async id => {
         if (!pacientes[id]) {
           try {
-            const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`);
+            const res = await fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`);
             const paciente = await res.json();
             nuevosPacientes[id] = paciente.nombres
               ? `${paciente.nombres} ${paciente.apellidos || ""}`.trim()
@@ -63,7 +63,7 @@ export default function ListaValoracionesPisoPelvico() {
 
   const eliminarValoracion = async (id) => {
     try {
-      const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoracion-piso-pelvico/${id}`, {
+      const res = await fetch(`http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");

@@ -12,7 +12,7 @@ export default function EditarClase() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/clases/${id}`)
+    fetch(`http://18.216.20.125:4000/api/clases/${id}`)
       .then(res => res.json())
       .then(data => {
         setNombre(data.nombre || "");
@@ -34,7 +34,7 @@ export default function EditarClase() {
       cancelButtonColor: "#d1d5db", // gris pastel
     });
     if (!result.isConfirmed) return;
-    await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/clases/${id}`, {
+    await fetch(`http://18.216.20.125:4000/api/clases/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, fecha, descripcion }),

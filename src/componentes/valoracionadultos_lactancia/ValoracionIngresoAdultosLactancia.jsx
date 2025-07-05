@@ -137,7 +137,7 @@ export default function ValoracionIngresoAdultosLactancia() {
 
   // Traer datos del paciente adulto
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`)
+    fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
@@ -209,7 +209,7 @@ export default function ValoracionIngresoAdultosLactancia() {
 
     // Ahora sí, envía los datos al backend
     try {
-      const res = await fetch("https://mi-backend-787730618984.us-central1.run.app/api/valoracion-ingreso-adultos-lactancia", {
+      const res = await fetch("http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formularioSinId),

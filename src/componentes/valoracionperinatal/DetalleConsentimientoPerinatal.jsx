@@ -22,7 +22,7 @@ export default function DetalleConsentimientoPerinatal() {
   const [consentimiento, setConsentimiento] = useState(null);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/consentimiento-perinatal/${id}`)
+    fetch(`http://18.216.20.125:4000/api/consentimiento-perinatal/${id}`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.sesionesIntensivo)) {

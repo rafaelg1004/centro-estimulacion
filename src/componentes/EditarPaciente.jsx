@@ -19,7 +19,7 @@ export default function EditarPaciente() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes/${id}`)
+    fetch(`http://18.216.20.125:4000/api/pacientes/${id}`)
       .then(res => res.json())
       .then(setPaciente);
   }, [id]);
@@ -59,7 +59,7 @@ export default function EditarPaciente() {
       }
     }
     try {
-      const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes/${id}`, {
+      const res = await fetch(`http://18.216.20.125:4000/api/pacientes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(paciente),

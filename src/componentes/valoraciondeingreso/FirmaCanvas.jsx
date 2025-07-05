@@ -3,60 +3,32 @@ import SignatureCanvas from "react-signature-canvas";
 
 const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) => {
   const sigRef = useRef();
-  const [mostrarConfirmarEditar, setMostrarConfirmarEditar] = useState(false);
-  const [subiendo, setSubiendo] = useState(false);
+  const [firmaTemporal, setFirmaTemporal] = useState(""); // base64 temporal
+  const [mostrarConfirmarGuardar, setMostrarConfirmarGuardar] = useState(false);
 
-  // Convierte base64 a archivo
-  function dataURLtoFile(dataurl, filename) {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-  }
-
-  const guardarFirma = async () => {
-    if (
-      typeof setFormulario === "function" &&
-      sigRef.current &&
-      !sigRef.current.isEmpty()
-    ) {
+  // Guardar firma en base64 temporalmente
+  const guardarFirmaTemporal = () => {
+    if (sigRef.current && !sigRef.current.isEmpty()) {
       const nuevaFirma = sigRef.current.getTrimmedCanvas().toDataURL("image/png");
-      setSubiendo(true);
-      try {
-        // 1. Convierte base64 a archivo
-        const file = dataURLtoFile(nuevaFirma, 'firma.png');
-        const formData = new FormData();
-        formData.append('imagen', file);
-
-        // 2. Sube el archivo al backend
-        const res = await fetch('http://18.216.20.125:4000/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        const data = await res.json();
-
-        // 3. Guarda solo la URL en el formulario
-        setFormulario(name, data.url);
-        if (typeof onFirmaChange === "function") {
-          onFirmaChange(name, data.url, true);
-        }
-      } catch (error) {
-        alert("Error subiendo la firma. Intenta de nuevo.");
-      }
-      setSubiendo(false);
+      setFirmaTemporal(nuevaFirma);
     }
+  };
+
+  const confirmarGuardarFirma = () => {
+    setFormulario(name, firmaTemporal); // Guarda solo base64 en el formulario
+    if (typeof onFirmaChange === "function") {
+      onFirmaChange(name, firmaTemporal, true);
+    }
+    setFirmaTemporal("");
+    setMostrarConfirmarGuardar(false);
   };
 
   const limpiarFirma = () => {
     if (sigRef.current) sigRef.current.clear();
+    setFirmaTemporal("");
   };
 
-  // Confirmar antes de editar la firma existente
+  // Si ya hay una firma guardada, mostrar la imagen y opción de editar
   if (formulario[name]) {
     return (
       <div className="flex flex-col items-center mb-2">
@@ -70,30 +42,57 @@ const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) 
         <button
           type="button"
           className="mt-2 text-xs bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded"
-          onClick={() => setMostrarConfirmarEditar(true)}
+          onClick={() => setFormulario(name, "")}
         >
           Editar firma
         </button>
+      </div>
+    );
+  }
 
-        {/* Modal de confirmación para editar */}
-        {mostrarConfirmarEditar && (
+  // Si hay una firma temporal, mostrar la previsualización y opciones
+  if (firmaTemporal) {
+    return (
+      <div className="flex flex-col items-center mb-2">
+        <img
+          src={firmaTemporal}
+          alt={label}
+          className="border border-indigo-400 rounded bg-white mb-2"
+          style={{ width: 340, height: 120, objectFit: "contain" }}
+        />
+        <span className="text-xs text-gray-700">{label} (sin guardar)</span>
+        <div className="flex gap-2 mt-2">
+          <button
+            type="button"
+            className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded"
+            onClick={() => setMostrarConfirmarGuardar(true)}
+          >
+            Guardar firma
+          </button>
+          <button
+            type="button"
+            className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+            onClick={limpiarFirma}
+          >
+            Cancelar
+          </button>
+        </div>
+        {/* Modal de confirmación para guardar */}
+        {mostrarConfirmarGuardar && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-xs w-full text-center">
-              <h2 className="text-base font-bold mb-4">¿Estás seguro de editar la firma?</h2>
-              <p className="mb-4 text-sm text-gray-700">Si continúas, la firma actual se eliminará y podrás ingresar una nueva.</p>
+              <h2 className="text-base font-bold mb-4">¿Guardar esta firma?</h2>
+              <p className="mb-4 text-sm text-gray-700">La firma se guardará y no podrá editarse sin borrar la actual.</p>
               <div className="flex justify-center gap-4">
                 <button
                   className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-                  onClick={() => {
-                    setFormulario(name, "");
-                    setMostrarConfirmarEditar(false);
-                  }}
+                  onClick={confirmarGuardarFirma}
                 >
-                  Sí, editar
+                  Sí, guardar
                 </button>
                 <button
                   className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400"
-                  onClick={() => setMostrarConfirmarEditar(false)}
+                  onClick={() => setMostrarConfirmarGuardar(false)}
                 >
                   Cancelar
                 </button>
@@ -105,7 +104,7 @@ const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) 
     );
   }
 
-  // Si no hay firma, mostrar el pad y el botón guardar
+  // Si no hay firma, mostrar el pad y el botón guardar temporal
   return (
     <div className="flex flex-col items-center mb-2">
       <SignatureCanvas
@@ -121,16 +120,14 @@ const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) 
         <button
           type="button"
           className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded"
-          onClick={guardarFirma}
-          disabled={subiendo}
+          onClick={guardarFirmaTemporal}
         >
-          {subiendo ? "Subiendo..." : "Guardar firma"}
+          Previsualizar firma
         </button>
         <button
           type="button"
           className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
           onClick={limpiarFirma}
-          disabled={subiendo}
         >
           Limpiar
         </button>

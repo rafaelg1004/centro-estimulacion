@@ -466,12 +466,12 @@ export default function EditarValoracionPisoPelvico() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoracion-piso-pelvico/${id}`)
+    fetch(`http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`)
       .then(res => res.json())
       .then(async data => {
         // Si data.paciente es un ID, trae los datos completos del paciente adulto
         if (data.paciente && typeof data.paciente === "string") {
-          const resPaciente = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${data.paciente}`);
+          const resPaciente = await fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${data.paciente}`);
           const datosPaciente = await resPaciente.json();
           setPaciente(datosPaciente);
           // Mezcla SOLO los campos que existen en FORMULARIO_INICIAL
@@ -505,7 +505,7 @@ export default function EditarValoracionPisoPelvico() {
   const actualizarValoracion = async () => {
     try {
       const response = await fetch(
-        `https://mi-backend-787730618984.us-central1.run.app/api/valoracion-piso-pelvico/${id}`,
+        `http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

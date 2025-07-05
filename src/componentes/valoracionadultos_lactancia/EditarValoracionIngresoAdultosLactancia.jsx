@@ -131,7 +131,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoracion-ingreso-adultos-lactancia/${id}`)
+    fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
@@ -197,7 +197,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
 
     const { _id, ...formularioSinId } = formulario;
 
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoracion-ingreso-adultos-lactancia/${id}`, {
+    fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

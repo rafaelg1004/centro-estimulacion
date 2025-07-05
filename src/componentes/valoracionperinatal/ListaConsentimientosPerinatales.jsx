@@ -11,7 +11,7 @@ export default function ListaConsentimientosPerinatales() {
 
   const buscarConsentimientos = async (q = "") => {
     setCargando(true);
-    let url = "https://mi-backend-787730618984.us-central1.run.app/api/consentimiento-perinatal";
+    let url = "http://18.216.20.125:4000/api/consentimiento-perinatal";
     if (q.trim() !== "") {
       url += `/buscar?q=${encodeURIComponent(q)}`;
     }
@@ -39,7 +39,7 @@ export default function ListaConsentimientosPerinatales() {
 
   const eliminarConsentimiento = async (id) => {
     try {
-      const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/consentimiento-perinatal/${id}`, {
+      const res = await fetch(`http://18.216.20.125:4000/api/consentimiento-perinatal/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");

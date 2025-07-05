@@ -12,7 +12,7 @@ export default function RegistroUsuario() {
     e.preventDefault();
     setError(""); setMensaje("");
     try {
-      const res = await fetch("https://mi-backend-787730618984.us-central1.run.app/api/auth/register", {
+      const res = await fetch("http://18.216.20.125:4000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, usuario, nombre, password }),

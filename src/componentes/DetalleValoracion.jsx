@@ -12,7 +12,7 @@ const DetalleValoracion = () => {
 
   const exportarWord = async () => {
     try {
-      const response = await fetch("https://mi-backend-787730618984.us-central1.run.app/api/exportar-word", {
+      const response = await fetch("http://18.216.20.125:4000/api/exportar-word", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(valoracion),
@@ -36,7 +36,7 @@ const DetalleValoracion = () => {
   };
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoraciones/${id}`)
+    fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`)
       .then((res) => res.json())
       .then((data) => setValoracion(data))
       .catch((err) => console.error("Error al cargar valoración:", err));

@@ -12,7 +12,7 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   const buscarValoraciones = async (q = "") => {
     setCargando(true);
     try {
-      let url = "https://mi-backend-787730618984.us-central1.run.app/api/valoracion-ingreso-adultos-lactancia";
+      let url = "http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia";
       if (q.trim() !== "") {
         url += `/buscar?q=${encodeURIComponent(q)}`;
       }
@@ -44,7 +44,7 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
 
   const eliminarValoracion = async (id) => {
     try {
-      const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoracion-ingreso-adultos-lactancia/${id}`, {
+      const res = await fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");

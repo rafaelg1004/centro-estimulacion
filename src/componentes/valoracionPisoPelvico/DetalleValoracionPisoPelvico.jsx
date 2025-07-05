@@ -81,13 +81,13 @@ export default function DetalleValoracionPisoPelvico() {
   const [paciente, setPaciente] = useState(null);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoracion-piso-pelvico/${id}`)
+    fetch(`http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`)
       .then(res => res.json())
       .then(async data => {
         setValoracion(data);
         if (data.paciente) {
           try {
-            const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${data.paciente}`);
+            const res = await fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${data.paciente}`);
             const pacienteData = await res.json();
             setPaciente(pacienteData);
           } catch {

@@ -468,7 +468,7 @@ export default function ValoracionPisoPelvico() {
     // Solo buscar si hay id
     if (id) {
       fetch(
-        `https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos/${id}`
+        `http://18.216.20.125:4000/api/pacientes-adultos/${id}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -492,7 +492,7 @@ export default function ValoracionPisoPelvico() {
   const guardarValoracion = async () => {
     try {
       const response = await fetch(
-        "https://mi-backend-787730618984.us-central1.run.app/api/valoracion-piso-pelvico",
+        "http://18.216.20.125:4000/api/valoracion-piso-pelvico",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

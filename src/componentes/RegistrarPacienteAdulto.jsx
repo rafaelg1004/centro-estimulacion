@@ -68,7 +68,7 @@ export default function RegistrarPacienteAdulto() {
     }
     try {
       const res = await fetch(
-        "https://mi-backend-787730618984.us-central1.run.app/api/pacientes-adultos",
+        "/api/pacientes-adultos",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

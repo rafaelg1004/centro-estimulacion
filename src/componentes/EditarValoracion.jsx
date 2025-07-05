@@ -45,7 +45,7 @@ export default function EditarValoracion() {
   const [mostrarConfirmarFinalizar, setMostrarConfirmarFinalizar] = useState(false);
 
   useEffect(() => {
-    fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoraciones/${id}`)
+    fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`)
       .then(res => res.json())
       .then(data => {
         setValoracion(data);
@@ -64,7 +64,7 @@ export default function EditarValoracion() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoraciones/${id}`, {
+    await fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(valoracion),

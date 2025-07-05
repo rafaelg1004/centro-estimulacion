@@ -23,7 +23,7 @@ const ListaValoraciones = () => {
 
       //const res = await fetch(`https://centro-backend-production.up.railway.app/api/valoraciones?${params.toString()}`);
       //const res = await fetch(`http://localhost:4000/api/valoraciones?${params.toString()}`);      //local
-      const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoraciones?${params.toString()}`);
+      const res = await fetch(`http://18.216.20.125:4000/api/valoraciones?${params.toString()}`);
       if (!res.ok) throw new Error("Error al buscar valoraciones");
       const data = await res.json();
       setValoraciones(data);
@@ -36,7 +36,7 @@ const ListaValoraciones = () => {
 
   const eliminarValoracion = async (id) => {
     try {
-      const res = await fetch(`https://mi-backend-787730618984.us-central1.run.app/api/valoraciones/${id}`, {
+      const res = await fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");
