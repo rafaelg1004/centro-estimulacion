@@ -10,6 +10,31 @@ import Paso7ConsentimientoEducacionNacimientoPerinatal from "./Paso7Consentimien
 import Paso8ConsentimientoEducacionIntensivoPerinatal from "./Paso8ConsentimientoEducacionIntensivoPerinatal";
 import Swal from "sweetalert2";
 
+// Funciones de utilidad para S3
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
+}
+
 const FORMULARIO_INICIAL = {
   fecha: "",
   hora: "",
@@ -26,7 +51,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`)
+    fetch(`/api/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setPaciente(data));
   }, [id]);
@@ -66,13 +91,38 @@ export default function ValoracionIngresoProgramaPerinatal() {
     if (e && e.preventDefault) e.preventDefault();
 
     try {
-      const datosAEnviar = {
-        ...formulario,
-        paciente: paciente._id,
-      };
+      console.log('=== PROCESANDO FIRMAS PERINATAL ===');
+      const datosAEnviar = { ...formulario };
+      
+      // Lista de campos que pueden contener firmas en valoraciones perinatales
+      const camposFirmas = [
+        'firmaPaciente',
+        'firmaFisioterapeuta',
+        'firmaAutorizacion',
+        'firmaPacienteGeneral',
+        'firmaConsentimientoFisico',
+        'firmaProfesionalConsentimientoFisico',
+        'firmaConsentimientoEducacion',
+        'firmaProfesionalConsentimientoEducacion',
+        'firmaConsentimientoIntensivo',
+        'firmaProfesionalConsentimientoIntensivo'
+      ];
+
+      // Procesar cada campo de firma
+      for (const campo of camposFirmas) {
+        if (datosAEnviar[campo] && typeof datosAEnviar[campo] === 'string' && datosAEnviar[campo].startsWith('data:image')) {
+          console.log(`Subiendo ${campo} a S3...`);
+          datosAEnviar[campo] = await subirFirmaAS3(datosAEnviar[campo]);
+          console.log(`✓ ${campo} subida a S3: ${datosAEnviar[campo]}`);
+        }
+      }
+
+      // Agregar referencia al paciente
+      datosAEnviar.paciente = paciente._id;
+      
       console.log("Datos que se envían al backend:", datosAEnviar);
 
-      const response = await fetch("http://18.216.20.125:4000/api/consentimiento-perinatal", {
+      const response = await fetch("/api/consentimiento-perinatal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosAEnviar),
@@ -94,6 +144,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
         });
       }
     } catch (error) {
+      console.error('Error al guardar valoración perinatal:', error);
       Swal.fire({
         icon: "error",
         title: "Error",

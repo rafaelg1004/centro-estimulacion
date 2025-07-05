@@ -78,7 +78,7 @@ export default function RegistroPaciente() {
     }
     try {
       const res = await fetch(
-        "http://18.216.20.125:4000/api/pacientes",
+        "/api/pacientes",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

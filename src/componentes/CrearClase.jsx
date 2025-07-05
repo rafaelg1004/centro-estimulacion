@@ -10,7 +10,7 @@ export default function CrearClase() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://18.216.20.125:4000/api/clases", {
+    const res = await fetch("/api/clases", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, fecha, descripcion }),

@@ -7,7 +7,6 @@ import Paso4PlanIntervencion from "./Paso4PlanIntervencion.jsx";
 import Paso5Autorizacion from "./Paso5Autorizacion.jsx";
 import PasoLactanciaPrenatal from "./PasoLactanciaPrenatal.jsx";
 import PasoConsentimientoLactancia from "./PasoConsentimientoLactancia.jsx";
-import Swal from 'sweetalert2';
 
 const InputField = ({ label, name, type = "text", value, onChange, touched, required, disabled }) => {
   const id = `input-${name}`;
@@ -137,7 +136,7 @@ export default function ValoracionIngresoAdultosLactancia() {
 
   // Traer datos del paciente adulto
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`)
+    fetch(`/api/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
@@ -202,29 +201,60 @@ export default function ValoracionIngresoAdultosLactancia() {
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
-    // Agrega aquí los datos fijos de la doctora
-    const { _id, ...formularioSinId } = formulario;
-    formularioSinId.nombreProfesionalConsentimientoLactancia = "Dayan Ivonne Villegas Gamboa";
-    formularioSinId.registroProfesionalConsentimientoLactancia = "52862625";
-
-    // Ahora sí, envía los datos al backend
     try {
-      const res = await fetch("http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia", {
+      // Crear una copia limpia del formulario
+      let dataToSend = { ...formulario };
+      
+      // Remover el _id si existe
+      const { _id, ...formularioSinId } = dataToSend;
+      dataToSend = formularioSinId;
+
+      // Lista de campos de firma en este formulario
+      const firmasFormulario = [
+        "firmaPacientePrenatal",
+        "firmaPaciente", 
+        "firmaFisioterapeuta",
+        "firmaAutorizacion",
+        "firmaPacienteSesion1",
+        "firmaPacienteSesion2",
+        "firmaFisioterapeutaPlanIntervencion",
+        "firmaFisioterapeutaPrenatal",
+        "firmaPacientePrenatalFinal",
+        "firmaConsentimientoLactancia",
+        "firmaProfesionalConsentimientoLactancia"
+      ];
+
+      console.log('=== PROCESANDO FIRMAS LACTANCIA ===');
+      
+      // Procesar todas las firmas y subir a S3 si son base64
+      for (const campo of firmasFormulario) {
+        if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
+          console.log(`Subiendo firma ${campo} a S3...`);
+          dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
+          console.log(`✓ Firma ${campo} subida exitosamente`);
+        }
+      }
+
+      // Agrega los datos fijos de la doctora
+      dataToSend.nombreProfesionalConsentimientoLactancia = "Dayan Ivonne Villegas Gamboa";
+      dataToSend.registroProfesionalConsentimientoLactancia = "52862625";
+
+      console.log('Enviando datos al backend...');
+      const res = await fetch("/api/valoracion-ingreso-adultos-lactancia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formularioSinId),
+        body: JSON.stringify(dataToSend),
       });
+      
       if (!res.ok) throw new Error("Error en la respuesta del servidor");
-      // Opcional: await res.json();
-      // Mostrar SweetAlert de éxito si quieres
-      // Swal.fire('¡Guardado!', 'La valoración fue guardada correctamente.', 'success');
+      
+      console.log('✓ Valoración guardada exitosamente');
       setFormulario(FORMULARIO_INICIAL);
       setPaso(1);
       navigate("/valoraciones-adultos-lactancia");
     } catch (error) {
-      // Manejo de error
-      // Swal.fire('Error', 'Ocurrió un error al guardar la valoración.', 'error');
-      console.error("Error en fetch:", error);
+      console.error("Error guardando valoración:", error);
+      alert('Error al guardar la valoración. Por favor, inténtalo de nuevo.');
     }
   };
 
@@ -310,4 +340,28 @@ export default function ValoracionIngresoAdultosLactancia() {
       </form>
     </div>
   );
+}
+
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
 }

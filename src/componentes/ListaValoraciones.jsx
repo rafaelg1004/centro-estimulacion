@@ -23,7 +23,7 @@ const ListaValoraciones = () => {
 
       //const res = await fetch(`https://centro-backend-production.up.railway.app/api/valoraciones?${params.toString()}`);
       //const res = await fetch(`http://localhost:4000/api/valoraciones?${params.toString()}`);      //local
-      const res = await fetch(`http://18.216.20.125:4000/api/valoraciones?${params.toString()}`);
+      const res = await fetch(`/api/valoraciones?${params.toString()}`);
       if (!res.ok) throw new Error("Error al buscar valoraciones");
       const data = await res.json();
       setValoraciones(data);
@@ -36,14 +36,27 @@ const ListaValoraciones = () => {
 
   const eliminarValoracion = async (id) => {
     try {
-      const res = await fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`, {
+      console.log(`Eliminando valoración ${id}...`);
+      const res = await fetch(`/api/valoraciones/${id}`, {
         method: "DELETE",
       });
+      
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");
+      
+      const resultado = await res.json();
+      console.log('Resultado de eliminación:', resultado);
+      
       setValoraciones(valoraciones.filter(v => v._id !== id));
-      setMensaje("Valoración eliminada correctamente");
-      setTimeout(() => setMensaje(""), 4000);
-    } catch {
+      
+      // Mostrar mensaje con información de imágenes eliminadas
+      const mensajeCompleto = resultado.imagenesEliminadas > 0 
+        ? `Valoración eliminada correctamente (${resultado.imagenesEliminadas} imágenes eliminadas de S3)`
+        : "Valoración eliminada correctamente";
+        
+      setMensaje(mensajeCompleto);
+      setTimeout(() => setMensaje(""), 6000);
+    } catch (error) {
+      console.error('Error eliminando valoración:', error);
       setMensaje("No se pudo eliminar la valoración");
       setTimeout(() => setMensaje(""), 4000);
     }
@@ -161,8 +174,15 @@ const ListaValoraciones = () => {
         )}
         {confirmarId && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
-            <div className="bg-white border border-pink-200 text-pink-800 px-6 py-4 rounded-2xl shadow-lg flex flex-col items-center gap-4 max-w-md w-full">
-              <span className="font-bold">¿Seguro que deseas eliminar esta valoración?</span>
+            <div className="bg-white border border-pink-200 text-pink-800 px-6 py-6 rounded-2xl shadow-lg flex flex-col items-center gap-4 max-w-md w-full">
+              <div className="text-center">
+                <h3 className="font-bold text-lg mb-2">¿Seguro que deseas eliminar esta valoración?</h3>
+                <p className="text-sm text-gray-600">
+                  Esta acción eliminará permanentemente la valoración y todas las imágenes asociadas de S3.
+                  <br />
+                  <strong>Esta acción no se puede deshacer.</strong>
+                </p>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={async () => {
@@ -171,7 +191,7 @@ const ListaValoraciones = () => {
                   }}
                   className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl font-bold shadow transition"
                 >
-                  Sí, eliminar
+                  Sí, eliminar todo
                 </button>
                 <button
                   onClick={() => setConfirmarId(null)}

@@ -44,8 +44,24 @@ export default function EditarValoracion() {
   const [cargando, setCargando] = useState(true);
   const [mostrarConfirmarFinalizar, setMostrarConfirmarFinalizar] = useState(false);
 
+  // Definir los arrays de firmas al inicio
+  const firmasFormulario = [
+    "firmaProfesional",
+    "firmaRepresentante",
+    "firmaAcudiente",
+    "firmaFisioterapeuta",
+    "firmaAutorizacion",
+    // agrega aquí cualquier otro campo de firma que uses
+  ];
+
+  const firmasConsentimiento = [
+    "consentimiento_firmaAcudiente",
+    "consentimiento_firmaFisio",
+    // agrega aquí cualquier otro campo de firma en consentimiento
+  ];
+
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`)
+    fetch(`/api/valoraciones/${id}`)
       .then(res => res.json())
       .then(data => {
         setValoracion(data);
@@ -64,12 +80,107 @@ export default function EditarValoracion() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(valoracion),
-    });
-    navigate(`/valoraciones/${id}`);
+
+    try {
+      // Crear una copia limpia de la valoración
+      let dataToSend = { ...valoracion };
+
+      console.log('=== INICIANDO PROCESO DE GUARDADO ===');
+      console.log('Datos actuales en el formulario:', dataToSend);
+
+      // Obtener la valoración original una sola vez para comparar
+      console.log('Obteniendo valoración original de la BD...');
+      const valoracionOriginal = await fetch(`/api/valoraciones/${id}`)
+        .then(res => res.json());
+      
+      console.log('Valoración original de la BD:', valoracionOriginal);
+
+      // Subir todas las firmas del formulario principal y actualizar dataToSend
+      console.log('Procesando firmas del formulario principal...');
+      for (const campo of firmasFormulario) {
+        console.log(`\n--- Procesando campo: ${campo} ---`);
+        console.log(`Valor actual: ${dataToSend[campo] ? dataToSend[campo].substring(0, 50) + '...' : 'null'}`);
+        console.log(`Valor original: ${valoracionOriginal[campo] ? valoracionOriginal[campo].substring(0, 50) + '...' : 'null'}`);
+        
+        if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
+          console.log(`✓ ${campo} es base64, necesita subirse a S3`);
+          
+          // Si había una imagen anterior guardada, eliminarla
+          if (valoracionOriginal[campo] && 
+              valoracionOriginal[campo].includes('amazonaws.com') &&
+              !valoracionOriginal[campo].startsWith("data:image")) {
+            console.log(`✓ Hay imagen anterior en S3 para ${campo}: ${valoracionOriginal[campo]}`);
+            console.log(`Eliminando imagen anterior...`);
+            const resultadoEliminacion = await eliminarImagenDeS3(valoracionOriginal[campo]);
+            console.log(`Resultado eliminación:`, resultadoEliminacion);
+          } else if (valoracionOriginal[campo]) {
+            console.log(`⚠️ Imagen original existe pero no es de S3: ${valoracionOriginal[campo].substring(0, 50)}...`);
+          } else {
+            console.log(`✗ No hay imagen anterior en ${campo} para eliminar`);
+          }
+          
+          // Subir la nueva firma y reemplazar en dataToSend
+          console.log(`Subiendo nueva imagen para ${campo}...`);
+          const nuevaUrl = await subirFirmaAS3(dataToSend[campo]);
+          console.log(`Nueva URL obtenida: ${nuevaUrl}`);
+          dataToSend[campo] = nuevaUrl;
+        } else {
+          console.log(`✗ ${campo} no es base64, se mantiene sin cambios`);
+        }
+      }
+
+      // Subir todas las firmas del consentimiento y actualizar dataToSend
+      console.log('\nProcesando firmas del consentimiento...');
+      for (const campo of firmasConsentimiento) {
+        console.log(`\n--- Procesando campo consentimiento: ${campo} ---`);
+        console.log(`Valor actual: ${dataToSend[campo] ? dataToSend[campo].substring(0, 50) + '...' : 'null'}`);
+        console.log(`Valor original: ${valoracionOriginal[campo] ? valoracionOriginal[campo].substring(0, 50) + '...' : 'null'}`);
+        
+        if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
+          console.log(`✓ ${campo} es base64, necesita subirse a S3`);
+          
+          // Si había una imagen anterior guardada, eliminarla
+          if (valoracionOriginal[campo] && 
+              valoracionOriginal[campo].includes('amazonaws.com') &&
+              !valoracionOriginal[campo].startsWith("data:image")) {
+            console.log(`✓ Hay imagen anterior en S3 para ${campo}: ${valoracionOriginal[campo]}`);
+            console.log(`Eliminando imagen anterior...`);
+            const resultadoEliminacion = await eliminarImagenDeS3(valoracionOriginal[campo]);
+            console.log(`Resultado eliminación:`, resultadoEliminacion);
+          } else if (valoracionOriginal[campo]) {
+            console.log(`⚠️ Imagen original existe pero no es de S3: ${valoracionOriginal[campo].substring(0, 50)}...`);
+          } else {
+            console.log(`✗ No hay imagen anterior en ${campo} para eliminar`);
+          }
+          
+          // Subir la nueva firma y reemplazar en dataToSend
+          console.log(`Subiendo nueva imagen para ${campo}...`);
+          const nuevaUrl = await subirFirmaAS3(dataToSend[campo]);
+          console.log(`Nueva URL obtenida: ${nuevaUrl}`);
+          dataToSend[campo] = nuevaUrl;
+        } else {
+          console.log(`✗ ${campo} no es base64, se mantiene sin cambios`);
+        }
+      }
+
+      console.log('\n=== DATOS FINALES A ENVIAR ===');
+      console.log('dataToSend final:', dataToSend);
+
+      const response = await fetch(`/api/valoraciones/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar la valoración');
+      }
+
+      navigate(`/valoraciones/${id}`);
+    } catch (error) {
+      console.error('Error al guardar la valoración:', error);
+      alert('Error al guardar los cambios. Por favor, inténtalo de nuevo.');
+    }
   };
 
   const onFirmaChange = (nombre, nuevaFirma) => {
@@ -266,4 +377,58 @@ export default function EditarValoracion() {
       </form>
     </div>
   );
+}
+
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
+}
+
+async function eliminarImagenDeS3(imageUrl) {
+  try {
+    console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
+    
+    const res = await fetch('/api/delete-image', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+    
+    console.log(`Respuesta del servidor - Status: ${res.status}`);
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error(`Error del servidor:`, errorData);
+      throw new Error(`Error al eliminar imagen: ${errorData.error || res.statusText}`);
+    }
+    
+    const data = await res.json();
+    console.log(`✓ Imagen eliminada exitosamente:`, data);
+    return data;
+  } catch (error) {
+    console.error('Error eliminando imagen de S3:', error);
+    // No es crítico si falla la eliminación, continuamos con la subida
+    return { error: error.message };
+  }
 }

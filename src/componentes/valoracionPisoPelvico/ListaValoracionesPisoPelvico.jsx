@@ -12,7 +12,7 @@ export default function ListaValoracionesPisoPelvico() {
 
   const buscarValoraciones = async (q = "") => {
     setCargando(true);
-    let url = "http://18.216.20.125:4000/api/valoracion-piso-pelvico";
+    let url = "/api/valoracion-piso-pelvico";
     if (q.trim() !== "") {
       url += `/buscar?q=${encodeURIComponent(q)}`;
     }
@@ -30,7 +30,7 @@ export default function ListaValoracionesPisoPelvico() {
       ids.map(async id => {
         if (!pacientes[id]) {
           try {
-            const res = await fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${id}`);
+            const res = await fetch(`/api/pacientes-adultos/${id}`);
             const paciente = await res.json();
             nuevosPacientes[id] = paciente.nombres
               ? `${paciente.nombres} ${paciente.apellidos || ""}`.trim()
@@ -63,14 +63,25 @@ export default function ListaValoracionesPisoPelvico() {
 
   const eliminarValoracion = async (id) => {
     try {
-      const res = await fetch(`http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`, {
+      // Eliminar la valoración del backend (esto también debería eliminar las imágenes S3)
+      const res = await fetch(`/api/valoracion-piso-pelvico/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");
+      
+      const resultado = await res.json();
+      
       setValoraciones(valoraciones.filter(v => v._id !== id));
-      setMensaje("Valoración eliminada correctamente");
+      
+      // Mostrar mensaje con información de imágenes eliminadas
+      const mensajeCompleto = resultado.imagenesEliminadas && resultado.imagenesEliminadas > 0
+        ? `Valoración eliminada correctamente. ${resultado.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
+        : "Valoración eliminada correctamente";
+        
+      setMensaje(mensajeCompleto);
       setTimeout(() => setMensaje(""), 4000);
-    } catch {
+    } catch (error) {
+      console.error('Error al eliminar valoración:', error);
       setMensaje("No se pudo eliminar la valoración");
       setTimeout(() => setMensaje(""), 4000);
     }

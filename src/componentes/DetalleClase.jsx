@@ -18,14 +18,14 @@ export default function DetalleClase() {
   const [facturaAgregar, setFacturaAgregar] = useState("");
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/clases/${id}`)
+    fetch(`/api/clases/${id}`)
       .then(res => res.json())
       .then(setClase);
   }, [id]);
 
   useEffect(() => {
     if (ninoId) {
-      fetch(`http://18.216.20.125:4000/api/pagoPaquete/por-nino/${ninoId}`)
+      fetch(`/api/pagoPaquete/por-nino/${ninoId}`)
         .then(res => res.json())
         .then(setPaquetes);
     } else {
@@ -40,7 +40,7 @@ export default function DetalleClase() {
       return;
     }
     const delayDebounce = setTimeout(() => {
-      fetch(`http://18.216.20.125:4000/api/pacientes/buscar?q=${encodeURIComponent(busquedaNino)}`)
+      fetch(`/api/pacientes/buscar?q=${encodeURIComponent(busquedaNino)}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setNinos(data);
@@ -63,12 +63,12 @@ export default function DetalleClase() {
       alert("No quedan clases disponibles en este paquete/factura.");
       return;
     }
-    await fetch(`http://18.216.20.125:4000/api/clases/${id}/agregar-nino`, {
+    await fetch(`/api/clases/${id}/agregar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId, numeroFactura: facturaAgregar }),
     });
-    fetch(`http://18.216.20.125:4000/api/clases/${id}`)
+    fetch(`/api/clases/${id}`)
       .then(res => res.json())
       .then(setClase);
     setNinoId("");
@@ -85,13 +85,13 @@ export default function DetalleClase() {
     const firma = sigRef.current.toDataURL("image/png");
     const numeroFactura = getFacturaDeNino(firmaNinoId);
 
-    await fetch(`http://18.216.20.125:4000/api/clases/${id}/firma-nino`, {
+    await fetch(`/api/clases/${id}/firma-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId: firmaNinoId, firma, numeroFactura }),
     });
 
-    fetch(`http://18.216.20.125:4000/api/clases/${id}`)
+    fetch(`/api/clases/${id}`)
       .then(res => res.json())
       .then(setClase);
 
@@ -110,12 +110,12 @@ export default function DetalleClase() {
       cancelButtonColor: "#d1d5db", // gris pastel
     });
     if (!result.isConfirmed) return;
-    await fetch(`http://18.216.20.125:4000/api/clases/${id}/eliminar-nino`, {
+    await fetch(`/api/clases/${id}/eliminar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId }),
     });
-    fetch(`http://18.216.20.125:4000/api/clases/${id}`)
+    fetch(`/api/clases/${id}`)
       .then(res => res.json())
       .then(setClase);
   };

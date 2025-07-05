@@ -19,7 +19,7 @@ export default function EditarConsentimientoPerinatal() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/consentimiento-perinatal/${id}`)
+    fetch(`/api/consentimiento-perinatal/${id}`)
       .then(res => res.json())
       .then(data => {
         console.log("Respuesta API:", data); // <-- Agrega esto
@@ -87,7 +87,7 @@ export default function EditarConsentimientoPerinatal() {
     };
 
     try {
-      await fetch(`http://18.216.20.125:4000/api/consentimiento-perinatal/${id}`, {
+      await fetch(`/api/consentimiento-perinatal/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),

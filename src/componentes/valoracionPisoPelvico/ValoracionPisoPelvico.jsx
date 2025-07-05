@@ -14,6 +14,31 @@ import Paso10PalpacionInterna from "./Paso10PalpacionInterna";
 import Paso11EvaluacionTRP from "./Paso11EvaluacionTRP";
 import Paso12Consentimiento from "./Paso12Consentimiento";
 
+// Funciones de utilidad para S3
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
+}
+
 const FORMULARIO_INICIAL = {
   // Paso 1: Datos Generales
   nombres: "",
@@ -468,7 +493,7 @@ export default function ValoracionPisoPelvico() {
     // Solo buscar si hay id
     if (id) {
       fetch(
-        `http://18.216.20.125:4000/api/pacientes-adultos/${id}`
+        `/api/pacientes-adultos/${id}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -491,17 +516,42 @@ export default function ValoracionPisoPelvico() {
 
   const guardarValoracion = async () => {
     try {
+      // Crear una copia limpia del formulario
+      let dataToSend = { ...formulario };
+
+      // Lista de campos de firma en piso pélvico
+      const firmasFormulario = [
+        "firmaFisioterapeuta",
+        "firmaAutorizacion", 
+        "firmaConsentimiento",
+        "firmaPaciente"
+        // Agregar otros campos de firma según tu modelo
+      ];
+
+      console.log('=== PROCESANDO FIRMAS PISO PÉLVICO ===');
+      
+      // Procesar todas las firmas y subir a S3 si son base64
+      for (const campo of firmasFormulario) {
+        if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
+          console.log(`Subiendo firma ${campo} a S3...`);
+          dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
+          console.log(`✓ Firma ${campo} subida exitosamente`);
+        }
+      }
+
+      console.log('Enviando datos al backend...');
       const response = await fetch(
-        "http://18.216.20.125:4000/api/valoracion-piso-pelvico",
+        "/api/valoracion-piso-pelvico",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ...formulario,
+            ...dataToSend,
             paciente: id, // referencia al paciente adulto
           }),
         }
       );
+      
       if (response.ok) {
         await Swal.fire("¡Guardado!", "La valoración fue guardada exitosamente.", "success");
         navigate(`/pacientes-adultos/${id}`);
@@ -509,6 +559,7 @@ export default function ValoracionPisoPelvico() {
         await Swal.fire("Error", "No se pudo guardar la valoración.", "error");
       }
     } catch (error) {
+      console.error("Error guardando valoración piso pélvico:", error);
       await Swal.fire("Error", "Ocurrió un error al guardar.", "error");
     }
   };

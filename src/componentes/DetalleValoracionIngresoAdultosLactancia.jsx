@@ -33,7 +33,7 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`)
+    fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(res => res.json())
       .then(data => {
         setValoracion(data);

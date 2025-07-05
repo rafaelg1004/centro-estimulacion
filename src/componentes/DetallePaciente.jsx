@@ -12,23 +12,23 @@ export default function DetallePaciente() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/pacientes/${id}`)
+    fetch(`/api/pacientes/${id}`)
       .then(res => res.json())
       .then(data => setPaciente(data))
       .catch(() => setError("No se pudo cargar el paciente"));
 
-    fetch(`http://18.216.20.125:4000/api/pagoPaquete/por-nino/${id}`)
+    fetch(`/api/pagoPaquete/por-nino/${id}`)
       .then(res => res.json())
       .then(setPaquetes);
 
-    fetch(`http://18.216.20.125:4000/api/clases/paciente/${id}`)
+    fetch(`/api/clases/paciente/${id}`)
       .then(res => res.json())
       .then(setClases);
   }, [id]);
 
   const eliminarFactura = async (facturaId) => {
     if (window.confirm("¿Seguro que deseas eliminar esta factura?")) {
-      await fetch(`http://18.216.20.125:4000/api/pagoPaquete/${facturaId}`, {
+      await fetch(`/api/pagoPaquete/${facturaId}`, {
         method: "DELETE",
       });
       setPaquetes(paquetes.filter(p => p._id !== facturaId));

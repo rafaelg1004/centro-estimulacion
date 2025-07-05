@@ -11,7 +11,7 @@ export default function RegistrarPaquete() {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://18.216.20.125:4000/api/pacientes/${id}`)
+      fetch(`/api/pacientes/${id}`)
         .then(res => res.json())
         .then(setPaciente);
     }
@@ -19,7 +19,7 @@ export default function RegistrarPaquete() {
 
   const registrarPaquete = async (e) => {
     e.preventDefault();
-    await fetch("http://18.216.20.125:4000/api/pagoPaquete", {
+    await fetch("/api/pagoPaquete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nino: id, numeroFactura, clasesPagadas, fechaPago }),

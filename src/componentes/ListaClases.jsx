@@ -10,14 +10,14 @@ export default function ListaClases() {
 
   useEffect(() => {
     setCargando(true);
-    fetch("http://18.216.20.125:4000/api/clases")
+    fetch("/api/clases")
       .then(res => res.json())
       .then(setClases)
       .finally(() => setCargando(false));
   }, []);
 
   const eliminarClase = async (id) => {
-    await fetch(`http://18.216.20.125:4000/api/clases/${id}`, {
+    await fetch(`/api/clases/${id}`, {
       method: "DELETE",
     });
     setClases(clases.filter(c => c._id !== id));

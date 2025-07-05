@@ -19,7 +19,7 @@ export default function EditarPaciente() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/pacientes/${id}`)
+    fetch(`/api/pacientes/${id}`)
       .then(res => res.json())
       .then(setPaciente);
   }, [id]);
@@ -59,7 +59,7 @@ export default function EditarPaciente() {
       }
     }
     try {
-      const res = await fetch(`http://18.216.20.125:4000/api/pacientes/${id}`, {
+      const res = await fetch(`/api/pacientes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(paciente),

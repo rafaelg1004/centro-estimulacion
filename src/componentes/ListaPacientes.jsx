@@ -16,8 +16,8 @@ export default function ListaPacientes({ tipo }) {
   useEffect(() => {
     setCargando(true);
     let url = "";
-    if (tipoBusqueda === "nino") url = "http://18.216.20.125:4000/api/pacientes";
-    else if (tipoBusqueda === "adulto") url = "http://18.216.20.125:4000/api/pacientes-adultos";
+    if (tipoBusqueda === "nino") url = "/api/pacientes";
+    else if (tipoBusqueda === "adulto") url = "/api/pacientes-adultos";
     fetch(url)
       .then((res) => res.json())
       .then((data) => setPacientes(Array.isArray(data) ? data : []))
@@ -28,7 +28,7 @@ export default function ListaPacientes({ tipo }) {
   const eliminarPaciente = async (id) => {
     try {
       if (tipoBusqueda === "nino") {
-        const res = await fetch(`http://18.216.20.125:4000/api/clases/paciente/${id}`);
+        const res = await fetch(`/api/clases/paciente/${id}`);
         const clases = await res.json();
         if (clases.length > 0) {
           setError("No puedes eliminar este paciente porque está inscrito en una o más clases.");
@@ -37,9 +37,9 @@ export default function ListaPacientes({ tipo }) {
       }
       let url = "";
       if (tipoBusqueda === "nino") {
-        url = `http://18.216.20.125:4000/api/pacientes/${id}`;
+        url = `/api/pacientes/${id}`;
       } else if (tipoBusqueda === "adulto") {
-        url = `http://18.216.20.125:4000/api/pacientes-adultos/${id}`;
+        url = `/api/pacientes-adultos/${id}`;
       }
       await fetch(url, { method: "DELETE" });
       setPacientes(pacientes.filter(p => p._id !== id));
@@ -54,15 +54,15 @@ export default function ListaPacientes({ tipo }) {
     try {
       let url = "";
       if (!valor) {
-        if (tipoBusqueda === "nino") url = "http://18.216.20.125:4000/api/pacientes";
-        else if (tipoBusqueda === "adulto") url = "http://18.216.20.125:4000/api/pacientes-adultos";
+        if (tipoBusqueda === "nino") url = "/api/pacientes";
+        else if (tipoBusqueda === "adulto") url = "/api/pacientes-adultos";
         const res = await fetch(url);
         const data = await res.json();
         setPacientes(data);
         return;
       }
-      if (tipoBusqueda === "nino") url = `http://18.216.20.125:4000/api/pacientes/buscar?q=${encodeURIComponent(valor)}`;
-      else if (tipoBusqueda === "adulto") url = `http://18.216.20.125:4000/api/pacientes-adultos/buscar?q=${encodeURIComponent(valor)}`;
+      if (tipoBusqueda === "nino") url = `/api/pacientes/buscar?q=${encodeURIComponent(valor)}`;
+      else if (tipoBusqueda === "adulto") url = `/api/pacientes-adultos/buscar?q=${encodeURIComponent(valor)}`;
       const res = await fetch(url);
       const data = await res.json();
       setPacientes(data);

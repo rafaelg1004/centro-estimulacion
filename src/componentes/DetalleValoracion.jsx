@@ -12,7 +12,7 @@ const DetalleValoracion = () => {
 
   const exportarWord = async () => {
     try {
-      const response = await fetch("http://18.216.20.125:4000/api/exportar-word", {
+      const response = await fetch("/api/exportar-word", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(valoracion),
@@ -36,7 +36,7 @@ const DetalleValoracion = () => {
   };
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/valoraciones/${id}`)
+    fetch(`/api/valoraciones/${id}`)
       .then((res) => res.json())
       .then((data) => setValoracion(data))
       .catch((err) => console.error("Error al cargar valoración:", err));

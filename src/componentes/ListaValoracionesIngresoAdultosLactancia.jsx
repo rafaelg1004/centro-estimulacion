@@ -12,7 +12,7 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   const buscarValoraciones = async (q = "") => {
     setCargando(true);
     try {
-      let url = "http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia";
+      let url = "/api/valoracion-ingreso-adultos-lactancia";
       if (q.trim() !== "") {
         url += `/buscar?q=${encodeURIComponent(q)}`;
       }
@@ -44,14 +44,25 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
 
   const eliminarValoracion = async (id) => {
     try {
-      const res = await fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`, {
+      // Eliminar la valoración del backend (esto también debería eliminar las imágenes S3)
+      const res = await fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");
+      
+      const resultado = await res.json();
+      
       setValoraciones(valoraciones.filter(v => v._id !== id));
-      setMensaje("Valoración eliminada correctamente");
+      
+      // Mostrar mensaje con información de imágenes eliminadas
+      const mensajeCompleto = resultado.imagenesEliminadas && resultado.imagenesEliminadas > 0
+        ? `Valoración eliminada correctamente. ${resultado.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
+        : "Valoración eliminada correctamente";
+        
+      setMensaje(mensajeCompleto);
       setTimeout(() => setMensaje(""), 4000);
-    } catch {
+    } catch (error) {
+      console.error('Error al eliminar valoración:', error);
       setMensaje("No se pudo eliminar la valoración");
       setTimeout(() => setMensaje(""), 4000);
     }

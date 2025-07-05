@@ -8,7 +8,6 @@ import Paso5Autorizacion from "./Paso5Autorizacion.jsx";
 import PasoLactanciaPrenatal from "./PasoLactanciaPrenatal.jsx";
 import PasoConsentimientoLactancia from "./PasoConsentimientoLactancia.jsx";
 import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
-import Swal from 'sweetalert2';
 
 const InputField = ({ label, name, type = "text", value, onChange, touched, required, disabled }) => {
   const id = `input-${name}`;
@@ -131,7 +130,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`)
+    fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
@@ -195,27 +194,72 @@ export default function EditarValoracionIngresoAdultosLactancia() {
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
-    const { _id, ...formularioSinId } = formulario;
+    try {
+      // Crear una copia limpia de la valoración
+      let dataToSend = { ...formulario };
+      
+      // Remover el _id
+      const { _id, ...formularioSinId } = dataToSend;
+      dataToSend = formularioSinId;
 
-    fetch(`http://18.216.20.125:4000/api/valoracion-ingreso-adultos-lactancia/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formularioSinId),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Error en la respuesta del servidor");
-        return res.json();
-      })
-      .then(data => {
-        Swal.fire('¡Actualizado!', 'La valoración fue actualizada correctamente.', 'success');
-        navigate(`/valoracion-ingreso-adultos-lactancia/${id}`);
-      })
-      .catch(error => {
-        Swal.fire('Error', 'Ocurrió un error al actualizar la valoración.', 'error');
-        console.error("Error en fetch:", error);
+      // Obtener la valoración original para comparar imágenes
+      console.log('Obteniendo valoración original de la BD...');
+      const valoracionOriginal = await fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`)
+        .then(res => res.json());
+
+      // Lista de campos de firma
+      const firmasFormulario = [
+        "firmaPacientePrenatal",
+        "firmaPaciente", 
+        "firmaFisioterapeuta",
+        "firmaAutorizacion",
+        "firmaPacienteSesion1",
+        "firmaPacienteSesion2",
+        "firmaFisioterapeutaPlanIntervencion",
+        "firmaFisioterapeutaPrenatal",
+        "firmaPacientePrenatalFinal",
+        "firmaConsentimientoLactancia",
+        "firmaProfesionalConsentimientoLactancia"
+      ];
+
+      console.log('=== PROCESANDO FIRMAS LACTANCIA (EDICIÓN) ===');
+      
+      // Procesar todas las firmas
+      for (const campo of firmasFormulario) {
+        if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
+          console.log(`Procesando firma ${campo} - es base64, necesita subirse a S3`);
+          
+          // Si había una imagen anterior, eliminarla
+          if (valoracionOriginal[campo] && 
+              valoracionOriginal[campo].includes('amazonaws.com') &&
+              !valoracionOriginal[campo].startsWith("data:image")) {
+            console.log(`Eliminando imagen anterior para ${campo}: ${valoracionOriginal[campo]}`);
+            await eliminarImagenDeS3(valoracionOriginal[campo]);
+          }
+          
+          // Subir la nueva firma
+          console.log(`Subiendo nueva imagen para ${campo}`);
+          dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
+        }
+      }
+
+      console.log('Enviando datos actualizados al backend...');
+      const res = await fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
       });
+
+      if (!res.ok) throw new Error("Error en la respuesta del servidor");
+      
+      console.log('✓ Valoración actualizada exitosamente');
+      navigate(`/valoracion-ingreso-adultos-lactancia/${id}`);
+    } catch (error) {
+      console.error("Error actualizando valoración:", error);
+      alert('Error al actualizar la valoración. Por favor, inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -331,4 +375,54 @@ export default function EditarValoracionIngresoAdultosLactancia() {
       </form>
     </div>
   );
+}
+
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
+}
+
+async function eliminarImagenDeS3(imageUrl) {
+  try {
+    console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
+    
+    const res = await fetch('/api/delete-image', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(`Error al eliminar imagen: ${errorData.error || res.statusText}`);
+    }
+    
+    const data = await res.json();
+    console.log(`✓ Imagen eliminada exitosamente:`, data);
+    return data;
+  } catch (error) {
+    console.error('Error eliminando imagen de S3:', error);
+    return { error: error.message };
+  }
 }

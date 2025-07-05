@@ -15,7 +15,7 @@ export default function Login({ onLogin }) {
     setCargando(true);
     setShake(false);
     try {
-      const res = await fetch("http://18.216.20.125:4000/api/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: usuarioOEmail, usuario: usuarioOEmail, password }),

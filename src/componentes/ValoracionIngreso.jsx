@@ -191,7 +191,7 @@ const ValoracionIngreso = () => {
   useEffect(() => {
     if (pacienteId && !formularioCargado) {
       fetch(
-        `http://18.216.20.125:4000/api/pacientes/${pacienteId}`
+        `/api/pacientes/${pacienteId}`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -415,39 +415,59 @@ const ValoracionIngreso = () => {
   const confirmarGuardado = async () => {
     setMostrarConfirmacion(false);
 
-    // Subir la firma a S3 si está en base64
-    let firmaUrl = formulario.firmaFisioterapeuta;
-    if (firmaUrl && firmaUrl.startsWith("data:image")) {
-      firmaUrl = await subirFirmaAS3(firmaUrl);
-    }
-
-    // Si tienes más firmas, repite el proceso para cada una:
-    let firmaRepresentanteUrl = formulario.firmaRepresentante;
-    if (firmaRepresentanteUrl && firmaRepresentanteUrl.startsWith("data:image")) {
-      firmaRepresentanteUrl = await subirFirmaAS3(firmaRepresentanteUrl);
-    }
-
-    // Construye el objeto final para guardar
-    const dataToSend = {
-      ...formulario,
-      paciente: pacienteId,
-      firmaFisioterapeuta: firmaUrl,
-      firmaRepresentante: firmaRepresentanteUrl,
-      consentimiento_nombreAcudiente: consentimiento.consentimiento_nombreAcudiente,
-      consentimiento_ccAcudiente: consentimiento.consentimiento_ccAcudiente,
-      consentimiento_lugarExpedicion: consentimiento.consentimiento_lugarExpedicion,
-      consentimiento_nombreNino: consentimiento.consentimiento_nombreNino,
-      consentimiento_registroCivil: consentimiento.consentimiento_registroCivil,
-      consentimiento_fecha: consentimiento.consentimiento_fecha,
-      consentimiento_firmaAcudiente: consentimiento.consentimiento_firmaAcudiente,
-      consentimiento_ccFirmaAcudiente: consentimiento.consentimiento_ccFirmaAcudiente,
-      consentimiento_firmaFisio: consentimiento.consentimiento_firmaFisio,
-      consentimiento_ccFirmaFisioterapeuta: consentimiento.consentimiento_ccFirmaFisioterapeuta,
-    };
-
     try {
+      // Crear una copia limpia del formulario principal
+      let dataToSend = { ...formulario };
+
+      // Lista de campos de firma en el formulario principal
+      const firmasFormulario = [
+        "firmaProfesional",
+        "firmaRepresentante",
+        "firmaAcudiente",
+        "firmaFisioterapeuta",
+        "firmaAutorizacion",
+        // agrega aquí cualquier otro campo de firma que uses en el formulario principal
+      ];
+
+      // Lista de campos de firma en el consentimiento
+      const firmasConsentimiento = [
+        "consentimiento_firmaAcudiente",
+        "consentimiento_firmaFisio",
+        // agrega aquí cualquier otro campo de firma en consentimiento
+      ];
+
+      // Subir todas las firmas del formulario principal y actualizar dataToSend
+      for (const campo of firmasFormulario) {
+        if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
+          console.log(`Subiendo nueva imagen para ${campo}`);
+          dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
+        }
+      }
+
+      // Subir todas las firmas del consentimiento y actualizar dataToSend
+      for (const campo of firmasConsentimiento) {
+        if (consentimiento[campo] && consentimiento[campo].startsWith("data:image")) {
+          console.log(`Subiendo nueva imagen para ${campo}`);
+          dataToSend[campo] = await subirFirmaAS3(consentimiento[campo]);
+        } else if (consentimiento[campo]) {
+          // Si no es base64, mantener el valor actual
+          dataToSend[campo] = consentimiento[campo];
+        }
+      }
+
+      // Agregar información del consentimiento (no firmas)
+      dataToSend.paciente = pacienteId;
+      dataToSend.consentimiento_nombreAcudiente = consentimiento.consentimiento_nombreAcudiente;
+      dataToSend.consentimiento_ccAcudiente = consentimiento.consentimiento_ccAcudiente;
+      dataToSend.consentimiento_lugarExpedicion = consentimiento.consentimiento_lugarExpedicion;
+      dataToSend.consentimiento_nombreNino = consentimiento.consentimiento_nombreNino;
+      dataToSend.consentimiento_registroCivil = consentimiento.consentimiento_registroCivil;
+      dataToSend.consentimiento_fecha = consentimiento.consentimiento_fecha;
+      dataToSend.consentimiento_ccFirmaAcudiente = consentimiento.consentimiento_ccFirmaAcudiente;
+      dataToSend.consentimiento_ccFirmaFisioterapeuta = consentimiento.consentimiento_ccFirmaFisioterapeuta;
+
       const response = await fetch(
-        "http://18.216.20.125:4000/api/valoraciones",
+        "/api/valoraciones",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -500,7 +520,7 @@ const ValoracionIngreso = () => {
     const formData = new FormData();
     formData.append('imagen', file);
 
-    const res = await fetch('http://18.216.20.125:4000/api/upload', {
+    const res = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
     });

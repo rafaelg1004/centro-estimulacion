@@ -14,6 +14,57 @@ import Paso10PalpacionInterna from "./Paso10PalpacionInterna";
 import Paso11EvaluacionTRP from "./Paso11EvaluacionTRP";
 import Paso12Consentimiento from "./Paso12Consentimiento";
 
+// Funciones de utilidad para S3
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
+}
+
+async function eliminarImagenDeS3(imageUrl) {
+  try {
+    console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
+    
+    const res = await fetch('/api/delete-image', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ imageUrl }),
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(`Error al eliminar imagen: ${errorData.error || res.statusText}`);
+    }
+    
+    const data = await res.json();
+    console.log(`✓ Imagen eliminada exitosamente:`, data);
+    return data;
+  } catch (error) {
+    console.error('Error eliminando imagen de S3:', error);
+    return { error: error.message };
+  }
+}
+
 const FORMULARIO_INICIAL = {
   // Paso 1: Datos Generales
   nombres: "",
@@ -466,12 +517,12 @@ export default function EditarValoracionPisoPelvico() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`)
+    fetch(`/api/valoracion-piso-pelvico/${id}`)
       .then(res => res.json())
       .then(async data => {
         // Si data.paciente es un ID, trae los datos completos del paciente adulto
         if (data.paciente && typeof data.paciente === "string") {
-          const resPaciente = await fetch(`http://18.216.20.125:4000/api/pacientes-adultos/${data.paciente}`);
+          const resPaciente = await fetch(`/api/pacientes-adultos/${data.paciente}`);
           const datosPaciente = await resPaciente.json();
           setPaciente(datosPaciente);
           // Mezcla SOLO los campos que existen en FORMULARIO_INICIAL
@@ -504,12 +555,58 @@ export default function EditarValoracionPisoPelvico() {
 
   const actualizarValoracion = async () => {
     try {
+      console.log('Procesando formulario antes de actualizar...');
+      const dataToSend = { ...formulario };
+      
+      // Lista de campos que pueden contener firmas/imágenes
+      const camposFirmas = [
+        'firmaPaciente',
+        'firmaFisioterapeuta', 
+        'firmaAutorizacion',
+        'consentimientoFirma'
+      ];
+
+      // Obtener valoración actual para comparar firmas existentes
+      let valoracionActual = {};
+      try {
+        const resActual = await fetch(`/api/valoracion-piso-pelvico/${id}`);
+        if (resActual.ok) {
+          valoracionActual = await resActual.json();
+        }
+      } catch (error) {
+        console.log('No se pudo obtener valoración actual:', error);
+      }
+
+      // Procesar cada campo de firma
+      for (const campo of camposFirmas) {
+        if (dataToSend[campo] && typeof dataToSend[campo] === 'string') {
+          // Si es base64 (data:image), subirla a S3
+          if (dataToSend[campo].startsWith('data:image')) {
+            console.log(`Subiendo ${campo} a S3...`);
+            
+            // Eliminar firma anterior si existe y es URL de S3
+            if (valoracionActual[campo] && valoracionActual[campo].includes('amazonaws.com')) {
+              console.log(`Eliminando ${campo} anterior de S3: ${valoracionActual[campo]}`);
+              await eliminarImagenDeS3(valoracionActual[campo]);
+            }
+            
+            // Subir nueva firma
+            dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
+            console.log(`✓ ${campo} subida a S3: ${dataToSend[campo]}`);
+          }
+          // Si ya es URL de S3, mantenerla como está
+          else if (dataToSend[campo].includes('amazonaws.com')) {
+            console.log(`✓ ${campo} ya es URL de S3, manteniéndola: ${dataToSend[campo]}`);
+          }
+        }
+      }
+
       const response = await fetch(
-        `http://18.216.20.125:4000/api/valoracion-piso-pelvico/${id}`,
+        `/api/valoracion-piso-pelvico/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formulario),
+          body: JSON.stringify(dataToSend),
         }
       );
       if (response.ok) {
@@ -519,6 +616,7 @@ export default function EditarValoracionPisoPelvico() {
         await Swal.fire("Error", "No se pudo actualizar la valoración.", "error");
       }
     } catch (error) {
+      console.error('Error al actualizar valoración:', error);
       await Swal.fire("Error", "Ocurrió un error al actualizar.", "error");
     }
   };
