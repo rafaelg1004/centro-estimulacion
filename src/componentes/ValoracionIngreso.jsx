@@ -8,6 +8,7 @@ import Paso5Diagnostico from "./valoraciondeingreso/Paso5Diagnostico";
 import Paso6Firmas from "./valoraciondeingreso/Paso6Firmas";
 import Paso7Autorizacion from "./valoraciondeingreso/Paso7Autorizacion";
 import Paso8Consentimiento from "./valoraciondeingreso/Paso8Consentimiento";
+import { API_CONFIG, apiRequest } from "../config/api";
 
 const InputField = ({
   label,
@@ -129,7 +130,7 @@ const ValoracionIngreso = () => {
     firmaRepresentante: "",
     autorizacion: "",
     consentimiento: "",
-    diagnostico: "",
+    diagnosticoFisioterapeutico: "",
     planTratamiento: "",
     nombreAcudiente: "",
     cedulaAcudiente: "",
@@ -145,55 +146,93 @@ const ValoracionIngreso = () => {
     anioFirma: "",
     cedulaAutorizacion: "",
     firmaAutorizacion: "",
-    ontologico_ControlCefalico_si: false,
-    tiempo_ControlCefalico: "",
-    observaciones_ControlCefalico: "",
-
-    ontologico_Rolados_si: false,
-    tiempo_Rolados: "",
-    observaciones_Rolados: "",
-
-    ontologico_Sedente_si: false,
-    tiempo_Sedente: "",
-    observaciones_Sedente: "",
-
-    ontologico_Gateo_si: false,
-    tiempo_Gateo: "",
-    observaciones_Gateo: "",
-
-    ontologico_Bipedo_si: false,
-    tiempo_Bipedo: "",
-    observaciones_Bipedo: "",
-
-    ontologico_Marcha_si: false,
-    tiempo_Marcha: "",
-    observaciones_Marcha: "",
-    frecuenciaCardiaca: "",
-    frecuenciaRespiratoria: "",
-    temperatura: "",
-    tejidoTegumentario: "",
-    reflejosOsteotendinosos: "",
-    reflejosAnormales: "",
-    reflejosPatologicos: "",
-    tonoMuscular: "",
-    controlMotor: "",
-    desplazamientos: "",
-    sensibilidad: "",
-    perfilSensorial: "",
-    deformidades: "",
-    aparatosOrtopedicos: "",
-    sistemaPulmonar: "",
-    problemasAsociados: "",
+    // Campos del nuevo desarrollo ontológico
+    sostieneCabeza_si: false,
+    sostieneCabeza_no: false,
+    sostieneCabeza_observaciones: "",
+    seVoltea_si: false,
+    seVoltea_no: false,
+    seVoltea_observaciones: "",
+    seSientaSinApoyo_si: false,
+    seSientaSinApoyo_no: false,
+    seSientaSinApoyo_observaciones: "",
+    gatea_si: false,
+    gatea_no: false,
+    gatea_observaciones: "",
+    sePoneDePerApoyado_si: false,
+    sePoneDePerApoyado_no: false,
+    sePoneDePerApoyado_observaciones: "",
+    caminaSolo_si: false,
+    caminaSolo_no: false,
+    caminaSolo_observaciones: "",
+    correSalta_si: false,
+    correSalta_no: false,
+    correSalta_observaciones: "",
+    sigueObjetosMirada_si: false,
+    sigueObjetosMirada_no: false,
+    sigueObjetosMirada_observaciones: "",
+    llevaObjetosBoca_si: false,
+    llevaObjetosBoca_no: false,
+    llevaObjetosBoca_observaciones: "",
+    pasaObjetosEntreManos_si: false,
+    pasaObjetosEntreManos_no: false,
+    pasaObjetosEntreManos_observaciones: "",
+    pinzaSuperior_si: false,
+    pinzaSuperior_no: false,
+    pinzaSuperior_observaciones: "",
+    encajaPiezasGrandes_si: false,
+    encajaPiezasGrandes_no: false,
+    encajaPiezasGrandes_observaciones: "",
+    dibujaGarabatos_si: false,
+    dibujaGarabatos_no: false,
+    dibujaGarabatos_observaciones: "",
+    balbucea_si: false,
+    balbucea_no: false,
+    balbucea_observaciones: "",
+    diceMamaPapa_si: false,
+    diceMamaPapa_no: false,
+    diceMamaPapa_observaciones: "",
+    senalaQueQuiere_si: false,
+    senalaQueQuiere_no: false,
+    senalaQueQuiere_observaciones: "",
+    dice5a10Palabras_si: false,
+    dice5a10Palabras_no: false,
+    dice5a10Palabras_observaciones: "",
+    entiendeOrdenesSimples_si: false,
+    entiendeOrdenesSimples_no: false,
+    entiendeOrdenesSimples_observaciones: "",
+    usaFrases2Palabras_si: false,
+    usaFrases2Palabras_no: false,
+    usaFrases2Palabras_observaciones: "",
+    sonrieSocialmente_si: false,
+    sonrieSocialmente_no: false,
+    sonrieSocialmente_observaciones: "",
+    respondeNombre_si: false,
+    respondeNombre_no: false,
+    respondeNombre_observaciones: "",
+    interesaOtrosNinos_si: false,
+    interesaOtrosNinos_no: false,
+    interesaOtrosNinos_observaciones: "",
+    juegoSimbolico_si: false,
+    juegoSimbolico_no: false,
+    juegoSimbolico_observaciones: "",
+    seDespideLanzaBesos_si: false,
+    seDespideLanzaBesos_no: false,
+    seDespideLanzaBesos_observaciones: "",
+    nivelDesarrolloAcorde_si: false,
+    nivelDesarrolloAcorde_no: false,
+    areasRequierenAcompanamiento: "",
+    actividadesSugeridasCasa: "",
+    estimulacionEntornoDiario: "",
+    seguimientoSugeridoFecha: "",
+    rutinaDiaria: "",
   };
   const [formulario, setFormulario] = useState(FORMULARIO_INICIAL);
   const [touched, setTouched] = useState({});
 
   useEffect(() => {
     if (pacienteId && !formularioCargado) {
-      fetch(
-        `/api/pacientes/${pacienteId}`
-      )
-        .then((res) => res.json())
+      apiRequest(`/pacientes/${pacienteId}`)
         .then((data) => {
           setFormulario((f) => ({
             ...f,
@@ -298,7 +337,6 @@ const ValoracionIngreso = () => {
       "problemasSueno",
       "descripcionSueno",
       "duermeCon",
-      "patronSueno",
       "pesadillas",
       "siesta",
       "dificultadesComer",
@@ -466,15 +504,14 @@ const ValoracionIngreso = () => {
       dataToSend.consentimiento_ccFirmaAcudiente = consentimiento.consentimiento_ccFirmaAcudiente;
       dataToSend.consentimiento_ccFirmaFisioterapeuta = consentimiento.consentimiento_ccFirmaFisioterapeuta;
 
-      const response = await fetch(
-        "/api/valoraciones",
+      await apiRequest(
+        "/valoraciones",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(dataToSend),
         }
       );
-      if (!response.ok) throw new Error("Error al guardar");
       setMostrarBanner(true);
       setFormulario(FORMULARIO_INICIAL);
       setConsentimiento({
@@ -520,7 +557,7 @@ const ValoracionIngreso = () => {
     const formData = new FormData();
     formData.append('imagen', file);
 
-    const res = await fetch('/api/upload', {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
     });

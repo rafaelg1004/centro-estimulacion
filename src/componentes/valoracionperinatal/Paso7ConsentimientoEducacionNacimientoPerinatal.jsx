@@ -44,11 +44,17 @@ export default function Paso7ConsentimientoEducacionNacimientoPerinatal({
         <br />
         {/* Aquí va la tabla/lista de sesiones con fecha y firma */}
         <div className="overflow-x-auto">
+          <div className="mb-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+            <p className="text-sm text-yellow-800">
+              <strong>📅 Importante:</strong> Por favor programa las fechas de las sesiones y firma donde corresponda. 
+              Al menos una sesión debe ser programada para continuar.
+            </p>
+          </div>
           <table className="min-w-full border text-sm mb-4">
             <thead>
               <tr className="bg-indigo-100">
                 <th className="px-2 py-1 border">Sesión</th>
-                <th className="px-2 py-1 border">Fecha</th>
+                <th className="px-2 py-1 border">Fecha *</th>
                 <th className="px-2 py-1 border">Firma Paciente</th>
               </tr>
             </thead>
@@ -61,7 +67,7 @@ export default function Paso7ConsentimientoEducacionNacimientoPerinatal({
                       type="date"
                       name={`fechaSesion${idx + 1}`}
                       value={formulario[`fechaSesion${idx + 1}`] || ""}
-                      onChange={e => handleChange({ [`fechaSesion${idx + 1}`]: e.target.value })}
+                      onChange={handleChange}
                       className="border rounded p-1"
                     />
                   </td>
@@ -129,13 +135,24 @@ export default function Paso7ConsentimientoEducacionNacimientoPerinatal({
           Anterior
         </button>
         <button
-          type="submit"
+          type="button"
           onClick={e => {
             e.preventDefault();
             if (!formulario.firmaPacienteGeneral) {
               alert("Por favor, firma antes de continuar.");
               return;
             }
+            
+            // Debug: mostrar datos de sesiones antes de continuar
+            console.log('=== PASO 7 - DATOS DE SESIONES ===');
+            sesiones.forEach((_, idx) => {
+              const fecha = formulario[`fechaSesion${idx + 1}`];
+              const firma = formulario[`firmaPacienteSesion${idx + 1}`];
+              if (fecha || firma) {
+                console.log(`Sesión ${idx + 1}: fecha=${fecha}, firma=${firma ? 'SÍ' : 'NO'}`);
+              }
+            });
+            
             onSubmit();
           }}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded transition"

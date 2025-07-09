@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 //import Swal from "sweetalert2";
 import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { HeartIcon } from "@heroicons/react/24/solid"; // Para el botón de piso pélvico
+import { apiRequest } from "../config/api";
 
 export default function DetallePacienteAdulto() {
   const { id } = useParams();
@@ -12,8 +13,7 @@ export default function DetallePacienteAdulto() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/pacientes-adultos/${id}`)
-      .then(res => res.json())
+    apiRequest(`/pacientes-adultos/${id}`)
       .then(data => setPaciente(data))
       .catch(() => setError("No se pudo cargar el paciente"));
   }, [id]);

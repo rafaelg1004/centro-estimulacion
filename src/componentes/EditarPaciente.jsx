@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { apiRequest } from "../config/api";
 
 const EPS_LIST = [
   "Nueva EPS", "Sanitas EPS", "Sura EPS", "Famisanar EPS", "Aliansalud EPS: MinTrabajo",
@@ -19,8 +20,7 @@ export default function EditarPaciente() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`/api/pacientes/${id}`)
-      .then(res => res.json())
+    apiRequest(`/pacientes/${id}`)
       .then(setPaciente);
   }, [id]);
 
@@ -59,12 +59,11 @@ export default function EditarPaciente() {
       }
     }
     try {
-      const res = await fetch(`/api/pacientes/${id}`, {
+      await apiRequest(`/pacientes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(paciente),
       });
-      if (!res.ok) throw new Error("Error al actualizar paciente");
       await Swal.fire({
         icon: "success",
         title: "¡Actualizado!",

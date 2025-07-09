@@ -39,7 +39,7 @@ export default function Paso6ConsentimientoFisicoPerinatal({ formulario, handleC
           Anterior
         </button>
         <button
-          type="submit"
+          type="button"
           onClick={onSubmit}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded transition"
         >

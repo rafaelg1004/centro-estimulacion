@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiRequest } from "../config/api";
 
 function calcularEdad(fechaNacimiento) {
   if (!fechaNacimiento) return "";
@@ -67,15 +68,14 @@ export default function RegistrarPacienteAdulto() {
       }
     }
     try {
-      const res = await fetch(
-        "/api/pacientes-adultos",
+      await apiRequest(
+        "/pacientes-adultos",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formulario),
         }
       );
-      if (!res.ok) throw new Error("Error al registrar paciente adulto");
       setMensaje("Paciente adulto registrado correctamente");
       setFormulario(FORMULARIO_INICIAL);
     } catch (err) {

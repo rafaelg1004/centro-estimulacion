@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { apiRequest } from "../config/api";
+
 import { Link } from "react-router-dom";
 import Spinner from "./ui/Spinner"; // Ajusta la ruta si tu Spinner está en otro lugar
 
@@ -12,12 +14,11 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   const buscarValoraciones = async (q = "") => {
     setCargando(true);
     try {
-      let url = "/api/valoracion-ingreso-adultos-lactancia";
+      let url = "/valoracion-ingreso-adultos-lactancia";
       if (q.trim() !== "") {
         url += `/buscar?q=${encodeURIComponent(q)}`;
       }
-      const res = await fetch(url);
-      const data = await res.json();
+      const data = await apiRequest(url);
       setValoraciones(Array.isArray(data) ? data : []);
     } catch {
       setValoraciones([]);
@@ -45,7 +46,7 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   const eliminarValoracion = async (id) => {
     try {
       // Eliminar la valoración del backend (esto también debería eliminar las imágenes S3)
-      const res = await fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`, {
+      const res = await apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");

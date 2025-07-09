@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiRequest } from "../config/api";
 
 function calcularEdad(fechaNacimiento) {
   if (!fechaNacimiento) return "";
@@ -46,8 +47,7 @@ export default function EditarPacienteAdulto() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/pacientes-adultos/${id}`)
-      .then(res => res.json())
+    apiRequest(`/pacientes-adultos/${id}`)
       .then(data => {
         setFormulario({
           ...FORMULARIO_INICIAL,

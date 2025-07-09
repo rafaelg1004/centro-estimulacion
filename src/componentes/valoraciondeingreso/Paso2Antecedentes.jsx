@@ -92,12 +92,12 @@ const Paso2Antecedentes = ({
               ]}
             />
             <InputField
-              label="Tiempo de embarazo (semanas)"
-              name="tiempoEmbarazo"
+              label="Tiempo de gestación (semanas)"
+              name="tiempoGestacion"
               type="number"
-              value={formulario.tiempoEmbarazo || ""}
+              value={formulario.tiempoGestacion || ""}
               onChange={handleChange}
-              touched={touched.tiempoEmbarazo}
+              touched={touched.tiempoGestacion}
               min={20}
               max={45}
               placeholder="Ej: 38"
@@ -111,11 +111,11 @@ const Paso2Antecedentes = ({
             />
             <InputField
               label="¿Atendida oportunamente?"
-              name="atendidoOportunamente"
+              name="atendida"
               type="select"
-              value={formulario.atendidoOportunamente || ""}
+              value={formulario.atendida || ""}
               onChange={handleChange}
-              touched={touched.atendidoOportunamente}
+              touched={touched.atendida}
               options={[
                 { value: "", label: "Seleccione" },
                 { value: "Sí", label: "Sí" },

@@ -62,7 +62,10 @@ export default function Paso8ConsentimientoEducacionIntensivoPerinatal({
                       type="date"
                       name={`fechaSesionIntensivo${idx + 1}`}
                       value={formulario[`fechaSesionIntensivo${idx + 1}`] || ""}
-                      onChange={e => handleChange({ [`fechaSesionIntensivo${idx + 1}`]: e.target.value })}
+                      onChange={e => {
+                        const fieldName = `fechaSesionIntensivo${idx + 1}`;
+                        handleChange({ [fieldName]: e.target.value });
+                      }}
                       className="border rounded p-1"
                     />
                   </td>

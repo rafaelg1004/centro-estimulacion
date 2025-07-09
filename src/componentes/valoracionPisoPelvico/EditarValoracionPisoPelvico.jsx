@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { apiRequest, API_CONFIG } from "../../config/api";
+
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Paso1DatosGenerales from "./Paso1DatosGenerales";
@@ -31,7 +33,7 @@ async function subirFirmaAS3(firmaBase64) {
   const formData = new FormData();
   formData.append('imagen', file);
 
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   });
@@ -43,7 +45,7 @@ async function eliminarImagenDeS3(imageUrl) {
   try {
     console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
     
-    const res = await fetch('/api/delete-image', {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/api/delete-image`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -517,12 +519,12 @@ export default function EditarValoracionPisoPelvico() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`/api/valoracion-piso-pelvico/${id}`)
+    apiRequest(`/valoracion-piso-pelvico/${id}`)
       .then(res => res.json())
       .then(async data => {
         // Si data.paciente es un ID, trae los datos completos del paciente adulto
         if (data.paciente && typeof data.paciente === "string") {
-          const resPaciente = await fetch(`/api/pacientes-adultos/${data.paciente}`);
+          const resPaciente = await apiRequest(`/pacientes-adultos/${data.paciente}`);
           const datosPaciente = await resPaciente.json();
           setPaciente(datosPaciente);
           // Mezcla SOLO los campos que existen en FORMULARIO_INICIAL
@@ -569,7 +571,7 @@ export default function EditarValoracionPisoPelvico() {
       // Obtener valoración actual para comparar firmas existentes
       let valoracionActual = {};
       try {
-        const resActual = await fetch(`/api/valoracion-piso-pelvico/${id}`);
+        const resActual = await apiRequest(`/valoracion-piso-pelvico/${id}`);
         if (resActual.ok) {
           valoracionActual = await resActual.json();
         }

@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { apiRequest } from "../config/api";
 
 export default function RegistrarPaquete() {
   const { id } = useParams(); // <-- este es el id del paciente si vienes de /paquetes/nuevo/:id
@@ -11,17 +12,15 @@ export default function RegistrarPaquete() {
 
   useEffect(() => {
     if (id) {
-      fetch(`/api/pacientes/${id}`)
-        .then(res => res.json())
+      apiRequest(`/pacientes/${id}`)
         .then(setPaciente);
     }
   }, [id]);
 
   const registrarPaquete = async (e) => {
     e.preventDefault();
-    await fetch("/api/pagoPaquete", {
+    await apiRequest("/pagoPaquete", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nino: id, numeroFactura, clasesPagadas, fechaPago }),
     });
     setNumeroFactura("");

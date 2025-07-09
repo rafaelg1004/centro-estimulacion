@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { apiRequest, API_CONFIG } from "../../config/api";
+
 import { useParams, useNavigate } from "react-router-dom";
 import Paso1DatosPersonales from "./Paso1DatosPersonales.jsx";
 import Paso2Antecedentes from "./Paso2Antecedentes.jsx";
@@ -136,7 +138,7 @@ export default function ValoracionIngresoAdultosLactancia() {
 
   // Traer datos del paciente adulto
   useEffect(() => {
-    fetch(`/api/pacientes-adultos/${id}`)
+    apiRequest(`/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
@@ -240,7 +242,7 @@ export default function ValoracionIngresoAdultosLactancia() {
       dataToSend.registroProfesionalConsentimientoLactancia = "52862625";
 
       console.log('Enviando datos al backend...');
-      const res = await fetch("/api/valoracion-ingreso-adultos-lactancia", {
+      const res = await apiRequest("/valoracion-ingreso-adultos-lactancia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
@@ -358,7 +360,7 @@ async function subirFirmaAS3(firmaBase64) {
   const formData = new FormData();
   formData.append('imagen', file);
 
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   });

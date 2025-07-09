@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./login.css";
+import { apiRequest, API_ENDPOINTS, logAPIConfig } from '../config/api';
 
 export default function Login({ onLogin }) {
   const [usuarioOEmail, setUsuarioOEmail] = useState("");
@@ -9,19 +10,24 @@ export default function Login({ onLogin }) {
   const [exito, setExito] = useState(false);
   const [shake, setShake] = useState(false);
 
+  // Log de configuración en desarrollo
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      logAPIConfig();
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setCargando(true);
     setShake(false);
     try {
-      const res = await fetch("/api/auth/login", {
+      const data = await apiRequest(API_ENDPOINTS.LOGIN, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: usuarioOEmail, usuario: usuarioOEmail, password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error de autenticación");
+      
       localStorage.setItem("token", data.token);
       setExito(true);
       setTimeout(() => {

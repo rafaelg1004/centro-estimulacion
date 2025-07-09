@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const Paso3Habitos = ({
   formulario,
@@ -10,31 +10,6 @@ const Paso3Habitos = ({
   InputField,
   setFormulario, // Asegúrate de tener esto disponible
 }) => {
-  // Inicializa rutinaDiaria como array si no existe
-  const [rutina, setRutina] = useState(formulario.rutinaDiaria || [
-    { desde: "", hasta: "", actividad: "" }
-  ]);
-
-  // Actualiza el array en el estado local y en el formulario principal
-  const handleRutinaChange = (idx, field, value) => {
-    const nuevaRutina = rutina.map((item, i) =>
-      i === idx ? { ...item, [field]: value } : item
-    );
-    setRutina(nuevaRutina);
-    setFormulario(prev => ({
-      ...prev,
-      rutinaDiaria: nuevaRutina
-    }));
-  };
-
-  const agregarFila = () => {
-    const nuevaRutina = [...rutina, { desde: "", hasta: "", actividad: "" }];
-    setRutina(nuevaRutina);
-    setFormulario(prev => ({
-      ...prev,
-      rutinaDiaria: nuevaRutina
-    }));
-  };
 
   return (
     <div className="space-y-4">
@@ -58,7 +33,7 @@ const Paso3Habitos = ({
           ]}
         />
 
-        {/* Campos relacionados con el sueño, solo habilitados si problemasSueno === "SI" */}
+        {/* Campos relacionados con el sueño */}
         <InputField
           label="Descripción del sueño"
           name="descripcionSueno"
@@ -73,15 +48,6 @@ const Paso3Habitos = ({
           value={formulario.duermeCon || ""}
           onChange={handleChange}
           touched={touched.duermeCon}
-          disabled={formulario.problemasSueno !== "SI"}
-        />
-        <InputField
-          label="Patrón del Sueño"
-          name="patronSueno"
-          value={formulario.patronSueno || ""}
-          onChange={handleChange}
-          touched={touched.patronSueno}
-          disabled={formulario.problemasSueno !== "SI"}
         />
         <InputField
           label="Pesadillas"
@@ -89,7 +55,6 @@ const Paso3Habitos = ({
           value={formulario.pesadillas || ""}
           onChange={handleChange}
           touched={touched.pesadillas}
-          disabled={formulario.problemasSueno !== "SI"}
         />
         <InputField
           label="Siesta"
@@ -97,7 +62,6 @@ const Paso3Habitos = ({
           value={formulario.siesta || ""}
           onChange={handleChange}
           touched={touched.siesta}
-          disabled={formulario.problemasSueno !== "SI"}
         />
 
         {/* Dificultades al comer: select Sí/No */}
@@ -126,15 +90,13 @@ const Paso3Habitos = ({
           disabled={formulario.dificultadesComer !== "SI"}
         />
 
-        {/* Alimentos preferidos */}
+        {/* Alimentos preferidos - siempre habilitados */}
         <InputField
           label="Alimentos preferidos"
           name="alimentosPreferidos"
           value={formulario.alimentosPreferidos || ""}
           onChange={handleChange}
           touched={touched.alimentosPreferidos}
-        disabled={formulario.dificultadesComer !== "SI"}
-        
         />
         <InputField
           label="Alimentos que no le gustan"
@@ -142,9 +104,6 @@ const Paso3Habitos = ({
           value={formulario.alimentosNoLeGustan || ""}
           onChange={handleChange}
           touched={touched.alimentosNoLeGustan}
-          disabled={
-             formulario.dificultadesComer !== "SI"
-          }
         />
 
         {/* Vive con los padres: select Sí/No */}
@@ -226,53 +185,22 @@ const Paso3Habitos = ({
           onChange={handleChange}
           touched={touched.relacionDesconocidos}
         />
-        <InputField
-          label="Rutina diaria"
-          name="rutinaDiaria"
-          value={formulario.rutinaDiaria || ""}
-          onChange={handleChange}
-          touched={touched.rutinaDiaria}
-        />
         <div className="md:col-span-2">
-          <label className="block font-semibold mb-1">Rutina diaria</label>
-          <div className="space-y-2">
-            {rutina.map((item, idx) => (
-              <div key={idx} className="flex gap-2 items-center">
-                <input
-                  type="time"
-                  value={item.desde}
-                  onChange={e => handleRutinaChange(idx, "desde", e.target.value)}
-                  className="border rounded px-2 py-1"
-                  placeholder="Desde"
-                />
-                <span>a</span>
-                <input
-                  type="time"
-                  value={item.hasta}
-                  onChange={e => handleRutinaChange(idx, "hasta", e.target.value)}
-                  className="border rounded px-2 py-1"
-                  placeholder="Hasta"
-                />
-                <input
-                  type="text"
-                  value={item.actividad}
-                  onChange={e => handleRutinaChange(idx, "actividad", e.target.value)}
-                  className="border rounded px-2 py-1 flex-1"
-                  placeholder="Actividad"
-                />
-                {idx === rutina.length - 1 && (
-                  <button
-                    type="button"
-                    onClick={agregarFila}
-                    className="bg-green-500 text-white px-2 py-1 rounded font-bold"
-                    title="Agregar actividad"
-                  >
-                    +
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          <label className="block text-sm font-semibold mb-1" htmlFor="rutinaDiaria">
+            Rutina diaria
+          </label>
+          <textarea
+            id="rutinaDiaria"
+            name="rutinaDiaria"
+            value={formulario.rutinaDiaria || ""}
+            onChange={handleChange}
+            placeholder="Describa la rutina diaria del niño/a..."
+            rows={4}
+            className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          {touched.rutinaDiaria && (!formulario.rutinaDiaria || formulario.rutinaDiaria === "") && (
+            <span className="text-red-500 text-xs">Este campo es obligatorio</span>
+          )}
         </div>
       </div>
       <div className="flex justify-between pt-6">

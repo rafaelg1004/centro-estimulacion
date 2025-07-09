@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { apiRequest, API_CONFIG } from "../../config/api";
+
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Paso1DatosGenerales from "./Paso1DatosGenerales";
@@ -31,7 +33,7 @@ async function subirFirmaAS3(firmaBase64) {
   const formData = new FormData();
   formData.append('imagen', file);
 
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   });
@@ -540,8 +542,8 @@ export default function ValoracionPisoPelvico() {
       }
 
       console.log('Enviando datos al backend...');
-      const response = await fetch(
-        "/api/valoracion-piso-pelvico",
+      await apiRequest(
+        "/valoracion-piso-pelvico",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -552,12 +554,8 @@ export default function ValoracionPisoPelvico() {
         }
       );
       
-      if (response.ok) {
-        await Swal.fire("¡Guardado!", "La valoración fue guardada exitosamente.", "success");
-        navigate(`/pacientes-adultos/${id}`);
-      } else {
-        await Swal.fire("Error", "No se pudo guardar la valoración.", "error");
-      }
+      await Swal.fire("¡Guardado!", "La valoración fue guardada exitosamente.", "success");
+      navigate(`/pacientes-adultos/${id}`);
     } catch (error) {
       console.error("Error guardando valoración piso pélvico:", error);
       await Swal.fire("Error", "Ocurrió un error al guardar.", "error");

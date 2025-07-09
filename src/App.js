@@ -38,6 +38,7 @@ import ValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/Valoracio
 import ListaValoracionesPisoPelvico from "./componentes/valoracionPisoPelvico/ListaValoracionesPisoPelvico";
 import DetalleValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/DetalleValoracionPisoPelvico";
 import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/EditarValoracionPisoPelvico";
+import APIStatusIndicator from "./componentes/APIStatusIndicator";
 
 import {
   HomeIcon,
@@ -54,6 +55,18 @@ import {
   
   
 } from "@heroicons/react/24/solid";
+import { logAPIConfig, testAPIConnection } from "./config/api";
+
+// DEBUG: Mostrar configuración al iniciar
+console.log('🚀 === INICIANDO APLICACIÓN ===');
+logAPIConfig();
+
+// DEBUG: Probar conectividad al iniciar (opcional)
+if (process.env.NODE_ENV === 'development') {
+  setTimeout(() => {
+    testAPIConnection();
+  }, 2000); // Esperar 2 segundos después de cargar
+}
 
 function App() {
   const [usuario, setUsuario] = useState(localStorage.getItem("token"));
@@ -93,6 +106,9 @@ function RutasAutenticadas({ usuario, setUsuario }) {
 
   return (
     <div className="flex min-h-screen">
+      {/* Indicador de estado de API (solo en desarrollo) */}
+      {process.env.NODE_ENV === 'development' && <APIStatusIndicator />}
+      
       {/* Botón hamburguesa solo en móvil */}
       {usuario && (
         <button

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { apiRequest } from "../../config/api";
+
 import { Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
 
@@ -12,12 +14,11 @@ export default function ListaValoracionesPisoPelvico() {
 
   const buscarValoraciones = async (q = "") => {
     setCargando(true);
-    let url = "/api/valoracion-piso-pelvico";
+    let url = "/valoracion-piso-pelvico";
     if (q.trim() !== "") {
       url += `/buscar?q=${encodeURIComponent(q)}`;
     }
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await apiRequest(url);
     setValoraciones(data);
     setCargando(false);
 
@@ -30,7 +31,7 @@ export default function ListaValoracionesPisoPelvico() {
       ids.map(async id => {
         if (!pacientes[id]) {
           try {
-            const res = await fetch(`/api/pacientes-adultos/${id}`);
+            const res = await apiRequest(`/pacientes-adultos/${id}`);
             const paciente = await res.json();
             nuevosPacientes[id] = paciente.nombres
               ? `${paciente.nombres} ${paciente.apellidos || ""}`.trim()
@@ -64,7 +65,7 @@ export default function ListaValoracionesPisoPelvico() {
   const eliminarValoracion = async (id) => {
     try {
       // Eliminar la valoración del backend (esto también debería eliminar las imágenes S3)
-      const res = await fetch(`/api/valoracion-piso-pelvico/${id}`, {
+      const res = await apiRequest(`/valoracion-piso-pelvico/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { apiRequest } from "../../config/api";
+
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
 import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
@@ -22,7 +24,7 @@ export default function DetalleConsentimientoPerinatal() {
   const [consentimiento, setConsentimiento] = useState(null);
 
   useEffect(() => {
-    fetch(`/api/consentimiento-perinatal/${id}`)
+    apiRequest(`/consentimiento-perinatal/${id}`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.sesionesIntensivo)) {

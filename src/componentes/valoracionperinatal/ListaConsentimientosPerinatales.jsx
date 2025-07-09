@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { apiRequest } from "../../config/api";
+
 import { Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
 
@@ -11,12 +13,11 @@ export default function ListaConsentimientosPerinatales() {
 
   const buscarConsentimientos = async (q = "") => {
     setCargando(true);
-    let url = "/api/consentimiento-perinatal";
+    let url = "/consentimiento-perinatal";
     if (q.trim() !== "") {
       url += `/buscar?q=${encodeURIComponent(q)}`;
     }
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await apiRequest(url);
     setConsentimientos(data);
     setCargando(false);
   };
@@ -40,7 +41,7 @@ export default function ListaConsentimientosPerinatales() {
   const eliminarConsentimiento = async (id) => {
     try {
       // Eliminar el consentimiento del backend (esto también debería eliminar las imágenes S3)
-      const res = await fetch(`/api/consentimiento-perinatal/${id}`, {
+      const res = await apiRequest(`/consentimiento-perinatal/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("No se pudo eliminar en el backend");

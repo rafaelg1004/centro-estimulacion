@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiRequest } from "../config/api";
 
 export default function RegistroUsuario() {
   const [email, setEmail] = useState("");
@@ -12,13 +13,10 @@ export default function RegistroUsuario() {
     e.preventDefault();
     setError(""); setMensaje("");
     try {
-      const res = await fetch("/api/auth/register", {
+      const data = await apiRequest("/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, usuario, nombre, password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error de registro");
       setMensaje(data.mensaje);
       setEmail(""); setUsuario(""); setNombre(""); setPassword("");
     } catch (err) {

@@ -130,11 +130,11 @@ const Paso7Autorizacion = ({
             Nombre del representante
           </label>
           <input
-            id="nnombreAcudiente"
+            id="nombreAcudiente"
             type="text"
             name="nombreAcudiente"
             value={formulario.nombreAcudiente|| ""}
-                readOnly
+            readOnly
             className="w-full border rounded-md p-2 bg-gray-100"
           />
         </div>
@@ -153,37 +153,6 @@ const Paso7Autorizacion = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label htmlFor="nombreFisioterapeuta" className="block text-sm font-medium mb-1">
-            Nombre del Profesional
-          </label>
-          <input
-            id="nombreFisioterapeuta"
-            type="text"
-            name="nombreFisioterapeuta"
-            value={formulario.nombreFisioterapeuta || ""}
-            readOnly
-            className="w-full border rounded-md p-2 bg-gray-100"
-            placeholder="Nombre del Profesional"
-          />
-        </div>
-        <div>
-          <label htmlFor="cedulaFisioterapeuta" className="block text-sm font-medium mb-1">
-            Cédula del Profesional
-          </label>
-          <input
-            id="cedulaFisioterapeuta"
-            type="text"
-            name="cedulaFisioterapeuta"
-            value={formulario.cedulaFisioterapeuta || ""}
-            readOnly
-            className="w-full border rounded-md p-2 bg-gray-100"
-            placeholder="Cédula del Profesional"
-          />
-        </div>
-      </div>
-
       <FirmaCanvas
         label="Firma de Autorización"
         name="firmaAutorizacion"
@@ -192,20 +161,21 @@ const Paso7Autorizacion = ({
       />
     </div>
 
-    <div className="flex justify-between items-center pt-6 mt-8">
+    <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6 mt-8">
       <button
         type="button"
         onClick={() => setPaso(6)}
-        className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+        className="w-full sm:w-auto bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
       >
         Anterior
       </button>
       <button
         type="button"
-        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded"
+        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 sm:px-6 rounded text-sm sm:text-base"
         onClick={() => setPaso(8)}
       >
-        Siguiente: Consentimiento Informado
+        <span className="hidden sm:inline">Siguiente: Consentimiento Informado</span>
+        <span className="sm:hidden">Siguiente: Consentimiento</span>
       </button>
     </div>
   </div>

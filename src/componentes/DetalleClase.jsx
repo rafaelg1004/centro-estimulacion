@@ -3,6 +3,7 @@ import SignaturePad from "react-signature-canvas";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserPlusIcon, TrashIcon, DocumentCheckIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
+import { apiRequest } from "../config/api";
 
 export default function DetalleClase() {
   const { id } = useParams();
@@ -18,15 +19,13 @@ export default function DetalleClase() {
   const [facturaAgregar, setFacturaAgregar] = useState("");
 
   useEffect(() => {
-    fetch(`/api/clases/${id}`)
-      .then(res => res.json())
+    apiRequest(`/clases/${id}`)
       .then(setClase);
   }, [id]);
 
   useEffect(() => {
     if (ninoId) {
-      fetch(`/api/pagoPaquete/por-nino/${ninoId}`)
-        .then(res => res.json())
+      apiRequest(`/pagoPaquete/por-nino/${ninoId}`)
         .then(setPaquetes);
     } else {
       setPaquetes([]);
@@ -40,8 +39,7 @@ export default function DetalleClase() {
       return;
     }
     const delayDebounce = setTimeout(() => {
-      fetch(`/api/pacientes/buscar?q=${encodeURIComponent(busquedaNino)}`)
-        .then(res => res.json())
+      apiRequest(`/pacientes/buscar?q=${encodeURIComponent(busquedaNino)}`)
         .then(data => {
           if (Array.isArray(data)) setNinos(data);
           else setNinos([]);
@@ -63,13 +61,12 @@ export default function DetalleClase() {
       alert("No quedan clases disponibles en este paquete/factura.");
       return;
     }
-    await fetch(`/api/clases/${id}/agregar-nino`, {
+    await apiRequest(`/clases/${id}/agregar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId, numeroFactura: facturaAgregar }),
     });
-    fetch(`/api/clases/${id}`)
-      .then(res => res.json())
+    apiRequest(`/clases/${id}`)
       .then(setClase);
     setNinoId("");
     setBusquedaNino("");
@@ -85,14 +82,13 @@ export default function DetalleClase() {
     const firma = sigRef.current.toDataURL("image/png");
     const numeroFactura = getFacturaDeNino(firmaNinoId);
 
-    await fetch(`/api/clases/${id}/firma-nino`, {
+    await apiRequest(`/clases/${id}/firma-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId: firmaNinoId, firma, numeroFactura }),
     });
 
-    fetch(`/api/clases/${id}`)
-      .then(res => res.json())
+    apiRequest(`/clases/${id}`)
       .then(setClase);
 
     setFirmaNinoId("");
@@ -110,13 +106,12 @@ export default function DetalleClase() {
       cancelButtonColor: "#d1d5db", // gris pastel
     });
     if (!result.isConfirmed) return;
-    await fetch(`/api/clases/${id}/eliminar-nino`, {
+    await apiRequest(`/clases/${id}/eliminar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId }),
     });
-    fetch(`/api/clases/${id}`)
-      .then(res => res.json())
+    apiRequest(`/clases/${id}`)
       .then(setClase);
   };
 

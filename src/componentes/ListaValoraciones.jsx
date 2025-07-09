@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
+import { apiRequest } from "../config/api";
 
 const ListaValoraciones = () => {
   const [valoraciones, setValoraciones] = useState([]);
@@ -21,11 +22,7 @@ const ListaValoraciones = () => {
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
 
-      //const res = await fetch(`https://centro-backend-production.up.railway.app/api/valoraciones?${params.toString()}`);
-      //const res = await fetch(`http://localhost:4000/api/valoraciones?${params.toString()}`);      //local
-      const res = await fetch(`/api/valoraciones?${params.toString()}`);
-      if (!res.ok) throw new Error("Error al buscar valoraciones");
-      const data = await res.json();
+      const data = await apiRequest(`/valoraciones?${params.toString()}`);
       setValoraciones(data);
     } catch (err) {
       setError('No se pudieron cargar las valoraciones.');
@@ -37,13 +34,10 @@ const ListaValoraciones = () => {
   const eliminarValoracion = async (id) => {
     try {
       console.log(`Eliminando valoración ${id}...`);
-      const res = await fetch(`/api/valoraciones/${id}`, {
+      const resultado = await apiRequest(`/valoraciones/${id}`, {
         method: "DELETE",
       });
       
-      if (!res.ok) throw new Error("No se pudo eliminar en el backend");
-      
-      const resultado = await res.json();
       console.log('Resultado de eliminación:', resultado);
       
       setValoraciones(valoraciones.filter(v => v._id !== id));

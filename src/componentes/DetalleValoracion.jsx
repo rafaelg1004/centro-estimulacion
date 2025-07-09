@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./DetalleValoracion.css";
 import logo from "../assents/LOGO.png";
 import { ArrowDownTrayIcon, PencilSquareIcon, HomeIcon } from "@heroicons/react/24/solid";
+import { apiRequest, API_CONFIG } from "../config/api";
 
 const DetalleValoracion = () => {
   const { id } = useParams();
@@ -12,7 +13,7 @@ const DetalleValoracion = () => {
 
   const exportarWord = async () => {
     try {
-      const response = await fetch("/api/exportar-word", {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/exportar-word`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(valoracion),
@@ -36,8 +37,7 @@ const DetalleValoracion = () => {
   };
 
   useEffect(() => {
-    fetch(`/api/valoraciones/${id}`)
-      .then((res) => res.json())
+    apiRequest(`/valoraciones/${id}`)
       .then((data) => setValoracion(data))
       .catch((err) => console.error("Error al cargar valoración:", err));
   }, [id]);
@@ -147,16 +147,7 @@ const DetalleValoracion = () => {
             <p><strong>Juega con:</strong> {valoracion.juegaCon}</p>
             <p><strong>Juegos preferidos:</strong> {valoracion.juegosPreferidos}</p>
             <p><strong>Relación con desconocidos:</strong> {valoracion.relacionDesconocidos}</p>
-            <p><strong>Rutina diaria:</strong></p>
-            <ul className="list-disc ml-6">
-              {(valoracion.rutinaDiaria || []).map((item, idx) => (
-                <li key={idx}>
-                  <span className="font-semibold">{item.actividad}</span>
-                  {" — "}
-                  {item.desde} a {item.hasta}
-                </li>
-              ))}
-            </ul>
+            <p><strong>Rutina diaria:</strong> {valoracion.rutinaDiaria}</p>
           </div>
         </section>
 
@@ -214,10 +205,32 @@ const DetalleValoracion = () => {
 
         {/* DIAGNÓSTICO Y PLAN DE TRATAMIENTO */}
         <section className="mb-8 bg-indigo-50 rounded-xl p-4 shadow">
-          <h3 className="text-lg font-semibold text-indigo-600 border-b pb-1 mb-2">Diagnóstico y Plan de Tratamiento</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <p><strong>Diagnóstico:</strong> {valoracion.diagnostico}</p>
-            <p><strong>Plan de Tratamiento:</strong> {valoracion.planTratamiento}</p>
+          <h3 className="text-lg font-semibold text-indigo-600 border-b pb-1 mb-4">Diagnóstico y Plan de Tratamiento</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <p className="font-semibold text-indigo-700">Diagnóstico Fisioterapéutico:</p>
+              <p className="text-sm text-gray-700 mt-1">
+                {valoracion.diagnosticoFisioterapeutico === 'opcion1' ? 
+                  "Paciente con adecuado desarrollo neuromotor acorde a su edad cronológica, con adquisición oportuna de los hitos del desarrollo en las áreas de motricidad gruesa, motricidad fina, lenguaje y socioemocional." :
+                valoracion.diagnosticoFisioterapeutico === 'opcion2' ?
+                  "Se evidencia un retraso en el desarrollo neuromotor en relación con la edad cronológica del niño(a), observándose la ausencia o inmadurez en hitos esperados. Este retraso puede estar asociado a falta de estimulación." :
+                  valoracion.diagnosticoFisioterapeutico || "No especificado"
+                }
+              </p>
+            </div>
+            
+            <div>
+              <p className="font-semibold text-indigo-700">Plan de Tratamiento:</p>
+              <p className="text-sm text-gray-700 mt-1">
+                {valoracion.planTratamiento === 'opcion1' ? 
+                  "Se propone iniciar un proceso de estimulación adecuada con el objetivo de favorecer el desarrollo integral del niño(a), fortaleciendo áreas como la motricidad, el lenguaje, la interacción social y la exploración sensorial." :
+                valoracion.planTratamiento === 'opcion2' ?
+                  "Se propone iniciar un proceso de estimulación adecuada con el objetivo de favorecer el desarrollo integral del niño(a), fortaleciendo áreas como la motricidad, el lenguaje, la interacción social y la exploración sensorial. Se trabajará con sesiones grupales estructuradas y orientación a la familia, además de sesiones personalizadas." :
+                  valoracion.planTratamiento || "No especificado"
+                }
+              </p>
+            </div>
           </div>
         </section>
 

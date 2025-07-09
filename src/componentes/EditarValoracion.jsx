@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiRequest, API_CONFIG } from "../config/api";
 import Paso1DatosPaciente from "./valoraciondeingreso/Paso1DatosPaciente";
 import Paso2Antecedentes from "./valoraciondeingreso/Paso2Antecedentes";
 import Paso3Habitos from "./valoraciondeingreso/Paso3Habitos";
@@ -8,6 +9,142 @@ import Paso5Diagnostico from "./valoraciondeingreso/Paso5Diagnostico";
 import Paso6Firmas from "./valoraciondeingreso/Paso6Firmas";
 import Paso7Autorizacion from "./valoraciondeingreso/Paso7Autorizacion";
 import Paso8Consentimiento from "./valoraciondeingreso/Paso8Consentimiento";
+
+// ========== SOLUCIÓN PARA CHROME MÓVIL ==========
+// Detección de Chrome móvil
+function isMobileChrome() {
+  const userAgent = navigator.userAgent;
+  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const isChrome = /Chrome/i.test(userAgent) && !/Edg/i.test(userAgent);
+  return isMobile && isChrome;
+}
+
+// Headers optimizados para Chrome móvil
+const MOBILE_CHROME_HEADERS = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+  'Cache-Control': 'no-cache',
+  'Connection': 'keep-alive',
+  'X-Requested-With': 'XMLHttpRequest'
+};
+
+// Función de retry con backoff exponencial
+async function retryRequest(requestFn, maxRetries = 3, baseDelay = 1000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await requestFn();
+      return result;
+    } catch (error) {
+      console.log(`🔄 Intento ${attempt} falló:`, error.message);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // Backoff exponencial con jitter
+      const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000;
+      console.log(`⏳ Esperando ${delay.toFixed(0)}ms antes del siguiente intento...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+// Función de envío optimizada para Chrome móvil
+async function sendToBackendMobileOptimized(url, data, options = {}) {
+  console.log('🔧 Iniciando envío optimizado para Chrome móvil...');
+  console.log('📱 Dispositivo detectado:', isMobileChrome() ? 'Chrome Móvil' : 'Otro');
+  
+  // Preparar headers
+  const headers = isMobileChrome() 
+    ? { ...MOBILE_CHROME_HEADERS, ...options.headers }
+    : { 'Content-Type': 'application/json', ...options.headers };
+  
+  // Función de envío base
+  const makeRequest = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, isMobileChrome() ? 45000 : 10000); // Timeout más largo para móvil
+    
+    try {
+      console.log('📤 Enviando request a:', url);
+      
+      const fetchOptions = {
+        method: options.method || 'POST',
+        headers,
+        signal: controller.signal,
+        // Opciones específicas para móvil
+        ...(isMobileChrome() && {
+          cache: 'no-cache',
+          mode: 'cors',
+          credentials: 'same-origin'
+        })
+      };
+      
+      // Solo agregar body si no es GET
+      if (options.method !== 'GET') {
+        console.log('📊 Tamaño del payload:', new Blob([JSON.stringify(data)]).size, 'bytes');
+        fetchOptions.body = JSON.stringify(data);
+      }
+      
+      const response = await fetch(url, fetchOptions);
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Respuesta exitosa recibida');
+      return result;
+      
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error.name === 'AbortError') {
+        throw new Error('⏰ Timeout - La solicitud tardó demasiado. Intenta cerrar otras pestañas.');
+      }
+      
+      throw error;
+    }
+  };
+  
+  // Ejecutar con retry para Chrome móvil
+  if (isMobileChrome()) {
+    return await retryRequest(makeRequest, 3, 2000);
+  } else {
+    return await makeRequest();
+  }
+}
+
+// Limpieza de datos específica para móvil
+function cleanFormDataForMobile(data) {
+  const cleaned = JSON.parse(JSON.stringify(data));
+  
+  // Eliminar campos undefined/null que pueden causar problemas en móvil
+  function removeEmptyFields(obj) {
+    if (obj === null || obj === undefined) return;
+    Object.keys(obj).forEach(key => {
+      if (obj[key] === null || obj[key] === undefined || obj[key] === '') {
+        delete obj[key];
+      } else if (typeof obj[key] === 'object' && !Array.isArray(obj[key]) && obj[key] !== null) {
+        removeEmptyFields(obj[key]);
+      }
+    });
+  }
+  
+  removeEmptyFields(cleaned);
+  
+  // Validar arrays críticos
+  if (cleaned.sesiones && !Array.isArray(cleaned.sesiones)) {
+    console.warn('⚠️ Sesiones no es un array, convirtiendo...');
+    cleaned.sesiones = [];
+  }
+  
+  return cleaned;
+}
+// ========== FIN SOLUCIÓN CHROME MÓVIL ==========
 
 const InputField = ({ label, name, type = "text", value, onChange, touched, required, disabled }) => {
   const id = `input-${name}`;
@@ -61,10 +198,42 @@ export default function EditarValoracion() {
   ];
 
   useEffect(() => {
-    fetch(`/api/valoraciones/${id}`)
-      .then(res => res.json())
+    // Capturar información del dispositivo para debugging móvil
+    const deviceInfo = {
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      memory: navigator.deviceMemory || 'no disponible',
+      connectionType: navigator.connection?.effectiveType || 'no disponible',
+      timestamp: new Date().toISOString()
+    };
+    
+    console.log('📱 Información del dispositivo:', deviceInfo);
+    
+    // OPTIMIZACIÓN: Cargar SOLO la valoración específica, no todas
+    console.log('🚀 OPTIMIZACIÓN: Cargando solo valoración específica ID:', id);
+    const startTime = performance.now();
+    
+    // Usar endpoint optimizado que solo devuelve UNA valoración
+    apiRequest(`/valoraciones/${id}`)
       .then(data => {
+        const loadTime = performance.now() - startTime;
+        console.log(`✅ Valoración cargada en ${loadTime.toFixed(0)}ms`);
+        console.log('📊 Tamaño de la valoración:', JSON.stringify(data).length, 'caracteres');
+        
         setValoracion(data);
+        setCargando(false);
+      })
+      .catch(error => {
+        console.error('❌ Error cargando valoración:', error);
+        const loadTime = performance.now() - startTime;
+        console.log(`💥 Error después de ${loadTime.toFixed(0)}ms`);
+        
+        // Mostrar error específico para usuarios
+        alert('Error al cargar la valoración. Intenta recargar la página.');
         setCargando(false);
       });
   }, [id]);
@@ -81,6 +250,19 @@ export default function EditarValoracion() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Mostrar indicador especial para Chrome móvil
+    if (isMobileChrome()) {
+      console.log('📱 CHROME MÓVIL DETECTADO - Usando optimizaciones especiales');
+      setCargando(true);
+      
+      // Verificar conexión
+      if (!navigator.onLine) {
+        alert('❌ Sin conexión a internet. Verifica tu conexión e intenta nuevamente.');
+        setCargando(false);
+        return;
+      }
+    }
+
     try {
       // Crear una copia limpia de la valoración
       let dataToSend = { ...valoracion };
@@ -90,8 +272,11 @@ export default function EditarValoracion() {
 
       // Obtener la valoración original una sola vez para comparar
       console.log('Obteniendo valoración original de la BD...');
-      const valoracionOriginal = await fetch(`/api/valoraciones/${id}`)
-        .then(res => res.json());
+      const valoracionOriginal = await sendToBackendMobileOptimized(
+        `/api/valoraciones/${id}`,
+        {},
+        { method: 'GET' }
+      );
       
       console.log('Valoración original de la BD:', valoracionOriginal);
 
@@ -166,20 +351,38 @@ export default function EditarValoracion() {
       console.log('\n=== DATOS FINALES A ENVIAR ===');
       console.log('dataToSend final:', dataToSend);
 
-      const response = await fetch(`/api/valoraciones/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
-      });
+      // Limpiar datos y usar envío optimizado para Chrome móvil
+      const dataToSendCleaned = cleanFormDataForMobile(dataToSend);
+      console.log('📱 Datos limpiados para móvil:', dataToSendCleaned);
 
-      if (!response.ok) {
-        throw new Error('Error al actualizar la valoración');
+      const response = await sendToBackendMobileOptimized(
+        `/api/valoraciones/${id}`, 
+        dataToSendCleaned,
+        { method: 'PUT' }
+      );
+
+      if (!response) {
+        throw new Error('Error al actualizar la valoración - respuesta vacía');
       }
 
       navigate(`/valoraciones/${id}`);
     } catch (error) {
       console.error('Error al guardar la valoración:', error);
-      alert('Error al guardar los cambios. Por favor, inténtalo de nuevo.');
+      
+      // Mensajes específicos para Chrome móvil
+      if (isMobileChrome()) {
+        if (error.message.includes('Timeout')) {
+          alert('⏰ La conexión está lenta. Intenta:\n• Cerrar otras pestañas\n• Conectarte a WiFi\n• Intentar nuevamente');
+        } else if (error.message.includes('Failed to fetch')) {
+          alert('🌐 Problema de conexión. Verifica tu internet e intenta nuevamente.');
+        } else {
+          alert(`📱 Error en Chrome móvil: ${error.message}\n\nIntentos recomendados:\n• Cerrar otras apps\n• Recargar la página\n• Intentar nuevamente`);
+        }
+      } else {
+        alert('Error al guardar los cambios. Por favor, inténtalo de nuevo.');
+      }
+      
+      setCargando(false);
     }
   };
 
@@ -395,7 +598,7 @@ async function subirFirmaAS3(firmaBase64) {
   const formData = new FormData();
   formData.append('imagen', file);
 
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   });
@@ -407,25 +610,14 @@ async function eliminarImagenDeS3(imageUrl) {
   try {
     console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
     
-    const res = await fetch('/api/delete-image', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
+    const result = await sendToBackendMobileOptimized(
+      '/api/delete-image',
+      { imageUrl },
+      { method: 'DELETE' }
+    );
     
-    console.log(`Respuesta del servidor - Status: ${res.status}`);
-    
-    if (!res.ok) {
-      const errorData = await res.json();
-      console.error(`Error del servidor:`, errorData);
-      throw new Error(`Error al eliminar imagen: ${errorData.error || res.statusText}`);
-    }
-    
-    const data = await res.json();
-    console.log(`✓ Imagen eliminada exitosamente:`, data);
-    return data;
+    console.log(`✓ Imagen eliminada exitosamente:`, result);
+    return result;
   } catch (error) {
     console.error('Error eliminando imagen de S3:', error);
     // No es crítico si falla la eliminación, continuamos con la subida

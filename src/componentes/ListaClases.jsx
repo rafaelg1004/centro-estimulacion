@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { apiRequest } from "../config/api";
 
 export default function ListaClases() {
   const [clases, setClases] = useState([]);
@@ -10,14 +11,13 @@ export default function ListaClases() {
 
   useEffect(() => {
     setCargando(true);
-    fetch("/api/clases")
-      .then(res => res.json())
+    apiRequest("/clases")
       .then(setClases)
       .finally(() => setCargando(false));
   }, []);
 
   const eliminarClase = async (id) => {
-    await fetch(`/api/clases/${id}`, {
+    await apiRequest(`/clases/${id}`, {
       method: "DELETE",
     });
     setClases(clases.filter(c => c._id !== id));

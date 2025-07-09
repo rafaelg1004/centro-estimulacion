@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import SignatureCanvas from "react-signature-canvas";
+import { API_CONFIG } from "../../config/api";
 
 const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) => {
   const sigRef = useRef();
@@ -22,7 +23,7 @@ const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) 
     const formData = new FormData();
     formData.append('imagen', file);
 
-    const res = await fetch('/api/upload', {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
     });
@@ -35,7 +36,7 @@ const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) 
     try {
       console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
       
-      const res = await fetch('/api/delete-image', {
+      const res = await fetch(`${API_CONFIG.BASE_URL}/api/delete-image`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

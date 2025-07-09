@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleIcon } from "@heroicons/react/24/solid";
+import { apiRequest } from "../config/api";
 
 export default function CrearClase() {
   const [nombre, setNombre] = useState("");
@@ -10,12 +11,10 @@ export default function CrearClase() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("/api/clases", {
+    const data = await apiRequest("/clases", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, fecha, descripcion }),
     });
-    const data = await res.json();
     navigate(`/clases/${data._id}`);
   };
 

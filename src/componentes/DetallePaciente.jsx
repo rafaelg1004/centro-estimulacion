@@ -1,6 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { apiRequest } from "../config/api";
 
 export default function DetallePaciente() {
   const { id } = useParams();
@@ -12,23 +13,20 @@ export default function DetallePaciente() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/pacientes/${id}`)
-      .then(res => res.json())
+    apiRequest(`/pacientes/${id}`)
       .then(data => setPaciente(data))
       .catch(() => setError("No se pudo cargar el paciente"));
 
-    fetch(`/api/pagoPaquete/por-nino/${id}`)
-      .then(res => res.json())
+    apiRequest(`/pagoPaquete/por-nino/${id}`)
       .then(setPaquetes);
 
-    fetch(`/api/clases/paciente/${id}`)
-      .then(res => res.json())
+    apiRequest(`/clases/paciente/${id}`)
       .then(setClases);
   }, [id]);
 
   const eliminarFactura = async (facturaId) => {
     if (window.confirm("¿Seguro que deseas eliminar esta factura?")) {
-      await fetch(`/api/pagoPaquete/${facturaId}`, {
+      await apiRequest(`/pagoPaquete/${facturaId}`, {
         method: "DELETE",
       });
       setPaquetes(paquetes.filter(p => p._id !== facturaId));

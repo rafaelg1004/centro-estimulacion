@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { apiRequest, API_CONFIG } from "../../config/api";
+
 import { useParams, useNavigate } from "react-router-dom";
 import Paso1DatosPersonales from "./Paso1DatosPersonales.jsx";
 import Paso2Antecedentes from "./Paso2Antecedentes.jsx";
@@ -130,7 +132,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`)
+    apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
@@ -204,7 +206,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
 
       // Obtener la valoración original para comparar imágenes
       console.log('Obteniendo valoración original de la BD...');
-      const valoracionOriginal = await fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`)
+      const valoracionOriginal = await apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`)
         .then(res => res.json());
 
       // Lista de campos de firma
@@ -244,7 +246,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
       }
 
       console.log('Enviando datos actualizados al backend...');
-      const res = await fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`, {
+      const res = await apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -393,7 +395,7 @@ async function subirFirmaAS3(firmaBase64) {
   const formData = new FormData();
   formData.append('imagen', file);
 
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   });
@@ -405,7 +407,7 @@ async function eliminarImagenDeS3(imageUrl) {
   try {
     console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
     
-    const res = await fetch('/api/delete-image', {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/api/delete-image`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

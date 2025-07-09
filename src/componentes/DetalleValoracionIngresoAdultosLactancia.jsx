@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { apiRequest } from "../config/api";
 
 const Card = ({ title, children }) => (
   <div className="bg-indigo-50 rounded-2xl shadow p-6 mb-8 border border-indigo-100">
@@ -33,8 +34,7 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/valoracion-ingreso-adultos-lactancia/${id}`)
-      .then(res => res.json())
+    apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(data => {
         setValoracion(data);
         setCargando(false);

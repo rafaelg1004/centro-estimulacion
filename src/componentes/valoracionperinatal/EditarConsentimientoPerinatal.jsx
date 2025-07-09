@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiRequest, API_CONFIG } from "../../config/api";
 import Paso1 from "./Paso1DatosPersonalesPerinatal";
 import Paso2 from "./Paso2AntecedentesPerinatal";
 import Paso3 from "./Paso3EstadoSaludPerinatal";
@@ -9,7 +10,32 @@ import Paso6 from "./Paso6ConsentimientoFisicoPerinatal";
 import Paso7 from "./Paso7ConsentimientoEducacionNacimientoPerinatal";
 import Paso8 from "./Paso8ConsentimientoEducacionIntensivoPerinatal";
 import Swal from "sweetalert2";
-import Spinner from "../ui/Spinner"; // Asegúrate de que la ruta sea correcta
+import Spinner from "../ui/Spinner";
+
+// Función para subir firmas a S3
+async function subirFirmaAS3(firmaBase64) {
+  function dataURLtoFile(dataurl, filename) {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  }
+  const file = dataURLtoFile(firmaBase64, 'firma.png');
+  const formData = new FormData();
+  formData.append('imagen', file);
+
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  return data.url; // URL pública de S3
+}
 
 export default function EditarConsentimientoPerinatal() {
   console.log("EditarConsentimientoPerinatal montado");
@@ -19,8 +45,7 @@ export default function EditarConsentimientoPerinatal() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`/api/consentimiento-perinatal/${id}`)
-      .then(res => res.json())
+    apiRequest(`/consentimiento-perinatal/${id}`)
       .then(data => {
         console.log("Respuesta API:", data); // <-- Agrega esto
         if (Array.isArray(data.sesiones)) {
@@ -87,11 +112,51 @@ export default function EditarConsentimientoPerinatal() {
     };
 
     try {
-      await fetch(`/api/consentimiento-perinatal/${id}`, {
+      console.log('=== PROCESANDO FIRMAS ANTES DE ENVIAR ===');
+      
+      // Lista de campos que pueden contener firmas en valoraciones perinatales
+      const camposFirmas = [
+        'firmaPaciente',
+        'firmaFisioterapeuta',
+        'firmaAutorizacion',
+        'firmaPacienteConsentimiento',
+        'firmaFisioterapeutaConsentimiento',
+        'firmaPacienteGeneral',
+        'firmaFisioterapeutaGeneral',
+        'firmaPacienteGeneralIntensivo',
+        'firmaFisioterapeutaGeneralIntensivo',
+        // Firmas dinámicas de sesiones (Paso 7)
+        'firmaPacienteSesion1',
+        'firmaPacienteSesion2',
+        'firmaPacienteSesion3',
+        'firmaPacienteSesion4',
+        'firmaPacienteSesion5',
+        'firmaPacienteSesion6',
+        'firmaPacienteSesion7',
+        'firmaPacienteSesion8',
+        'firmaPacienteSesion9',
+        'firmaPacienteSesion10',
+        // Firmas dinámicas de sesiones intensivo (Paso 8)
+        'firmaPacienteSesionIntensivo1',
+        'firmaPacienteSesionIntensivo2',
+        'firmaPacienteSesionIntensivo3'
+      ];
+
+      // Procesar cada campo de firma
+      for (const campo of camposFirmas) {
+        if (dataToSend[campo] && typeof dataToSend[campo] === 'string' && dataToSend[campo].startsWith('data:image')) {
+          console.log(`🔄 Subiendo ${campo} a S3...`);
+          dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
+          console.log(`✅ ${campo} subida a S3: ${dataToSend[campo]}`);
+        }
+      }
+
+      console.log('🚀 Enviando datos procesados al backend...');
+      await apiRequest(`/consentimiento-perinatal/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
       });
+
       await Swal.fire({
         icon: "success",
         title: "¡Actualizado!",
@@ -100,7 +165,8 @@ export default function EditarConsentimientoPerinatal() {
       });
       navigate(`/consentimientos-perinatales/${id}`);
     } catch (error) {
-      Swal.fire({
+      console.error('Error al guardar el consentimiento:', error);
+      await Swal.fire({
         icon: "error",
         title: "Error",
         text: "Error de conexión con el servidor.",

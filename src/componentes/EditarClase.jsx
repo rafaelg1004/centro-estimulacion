@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
+import { apiRequest } from "../config/api";
 
 export default function EditarClase() {
   const { id } = useParams();
@@ -12,8 +13,7 @@ export default function EditarClase() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/clases/${id}`)
-      .then(res => res.json())
+    apiRequest(`/clases/${id}`)
       .then(data => {
         setNombre(data.nombre || "");
         setFecha(data.fecha || "");
@@ -34,7 +34,7 @@ export default function EditarClase() {
       cancelButtonColor: "#d1d5db", // gris pastel
     });
     if (!result.isConfirmed) return;
-    await fetch(`/api/clases/${id}`, {
+    await apiRequest(`/clases/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre, fecha, descripcion }),

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiRequest } from "../config/api";
 
 export default function ListaPacientes({ tipo }) {
   const [pacientes, setPacientes] = useState([]);
@@ -16,10 +17,9 @@ export default function ListaPacientes({ tipo }) {
   useEffect(() => {
     setCargando(true);
     let url = "";
-    if (tipoBusqueda === "nino") url = "/api/pacientes";
-    else if (tipoBusqueda === "adulto") url = "/api/pacientes-adultos";
-    fetch(url)
-      .then((res) => res.json())
+    if (tipoBusqueda === "nino") url = "/pacientes";
+    else if (tipoBusqueda === "adulto") url = "/pacientes-adultos";
+    apiRequest(url)
       .then((data) => setPacientes(Array.isArray(data) ? data : []))
       .catch(() => setError("No se pudo cargar la lista de pacientes"))
       .finally(() => setCargando(false));
@@ -28,8 +28,7 @@ export default function ListaPacientes({ tipo }) {
   const eliminarPaciente = async (id) => {
     try {
       if (tipoBusqueda === "nino") {
-        const res = await fetch(`/api/clases/paciente/${id}`);
-        const clases = await res.json();
+        const clases = await apiRequest(`/clases/paciente/${id}`);
         if (clases.length > 0) {
           setError("No puedes eliminar este paciente porque está inscrito en una o más clases.");
           return;
@@ -37,11 +36,11 @@ export default function ListaPacientes({ tipo }) {
       }
       let url = "";
       if (tipoBusqueda === "nino") {
-        url = `/api/pacientes/${id}`;
+        url = `/pacientes/${id}`;
       } else if (tipoBusqueda === "adulto") {
-        url = `/api/pacientes-adultos/${id}`;
+        url = `/pacientes-adultos/${id}`;
       }
-      await fetch(url, { method: "DELETE" });
+      await apiRequest(url, { method: "DELETE" });
       setPacientes(pacientes.filter(p => p._id !== id));
       setMensaje("Paciente eliminado correctamente");
     } catch {
@@ -54,17 +53,15 @@ export default function ListaPacientes({ tipo }) {
     try {
       let url = "";
       if (!valor) {
-        if (tipoBusqueda === "nino") url = "/api/pacientes";
-        else if (tipoBusqueda === "adulto") url = "/api/pacientes-adultos";
-        const res = await fetch(url);
-        const data = await res.json();
+        if (tipoBusqueda === "nino") url = "/pacientes";
+        else if (tipoBusqueda === "adulto") url = "/pacientes-adultos";
+        const data = await apiRequest(url);
         setPacientes(data);
         return;
       }
-      if (tipoBusqueda === "nino") url = `/api/pacientes/buscar?q=${encodeURIComponent(valor)}`;
-      else if (tipoBusqueda === "adulto") url = `/api/pacientes-adultos/buscar?q=${encodeURIComponent(valor)}`;
-      const res = await fetch(url);
-      const data = await res.json();
+      if (tipoBusqueda === "nino") url = `/pacientes/buscar?q=${encodeURIComponent(valor)}`;
+      else if (tipoBusqueda === "adulto") url = `/pacientes-adultos/buscar?q=${encodeURIComponent(valor)}`;
+      const data = await apiRequest(url);
       setPacientes(data);
     } catch {
       setError("No se pudo buscar pacientes");

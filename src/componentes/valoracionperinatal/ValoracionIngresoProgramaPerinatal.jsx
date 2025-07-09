@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiRequest, API_CONFIG } from "../../config/api";
 import Paso1DatosPersonalesPerinatal from "./Paso1DatosPersonalesPerinatal";
 import Paso2AntecedentesPerinatal from "./Paso2AntecedentesPerinatal";
 import Paso3EstadoSaludPerinatal from "./Paso3EstadoSaludPerinatal";
@@ -27,7 +28,7 @@ async function subirFirmaAS3(firmaBase64) {
   const formData = new FormData();
   formData.append('imagen', file);
 
-  const res = await fetch('/api/upload', {
+  const res = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
     method: 'POST',
     body: formData,
   });
@@ -40,7 +41,35 @@ const FORMULARIO_INICIAL = {
   hora: "",
   motivoConsulta: "",
   firmaPacienteGeneral: "",
-  // ...todos los campos de todos los pasos...
+  // Campos de sesiones del Paso 7
+  fechaSesion1: "",
+  firmaPacienteSesion1: "",
+  fechaSesion2: "",
+  firmaPacienteSesion2: "",
+  fechaSesion3: "",
+  firmaPacienteSesion3: "",
+  fechaSesion4: "",
+  firmaPacienteSesion4: "",
+  fechaSesion5: "",
+  firmaPacienteSesion5: "",
+  fechaSesion6: "",
+  firmaPacienteSesion6: "",
+  fechaSesion7: "",
+  firmaPacienteSesion7: "",
+  fechaSesion8: "",
+  firmaPacienteSesion8: "",
+  fechaSesion9: "",
+  firmaPacienteSesion9: "",
+  fechaSesion10: "",
+  firmaPacienteSesion10: "",
+  // Campos de sesiones intensivo del Paso 8
+  fechaSesionIntensivo1: "",
+  firmaPacienteSesionIntensivo1: "",
+  fechaSesionIntensivo2: "",
+  firmaPacienteSesionIntensivo2: "",
+  fechaSesionIntensivo3: "",
+  firmaPacienteSesionIntensivo3: "",
+  // ...todos los otros campos de todos los pasos...
 };
 
 export default function ValoracionIngresoProgramaPerinatal() {
@@ -51,7 +80,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
   const [paso, setPaso] = useState(1);
 
   useEffect(() => {
-    fetch(`/api/pacientes-adultos/${id}`)
+    apiRequest(`/pacientes-adultos/${id}`)
       .then(res => res.json())
       .then(data => setPaciente(data));
   }, [id]);
@@ -60,13 +89,16 @@ export default function ValoracionIngresoProgramaPerinatal() {
     // Si es evento de input
     if (e && e.target) {
       const { name, value, type, checked } = e.target;
+      const newValue = type === "checkbox" ? checked : value;
+      console.log(`Campo actualizado: ${name} = ${newValue}`);
       setFormulario((prev) => ({
         ...prev,
-        [name]: type === "checkbox" ? checked : value,
+        [name]: newValue,
       }));
     }
     // Si es objeto directo { campo: valor }
     else if (typeof e === "object" && e !== null) {
+      console.log(`Campos actualizados:`, e);
       setFormulario((prev) => ({
         ...prev,
         ...e,
@@ -75,6 +107,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
   };
 
   const setFirma = (name, value) => {
+    console.log(`Firma actualizada: ${name} = ${value ? 'imagen capturada' : 'vacía'}`);
     setFormulario(prev => ({
       ...prev,
       [name]: value,
@@ -87,11 +120,36 @@ export default function ValoracionIngresoProgramaPerinatal() {
   const siguiente = () => setPaso((prev) => prev + 1);
   const anterior = () => setPaso((prev) => prev - 1);
 
+  // Función de debugging temporal
+  const debugFormulario = () => {
+    console.log('=== DEBUG FORMULARIO ===');
+    console.log('Estado completo del formulario:', formulario);
+    
+    const camposSesiones = {};
+    for (let i = 1; i <= 10; i++) {
+      if (formulario[`fechaSesion${i}`] || formulario[`firmaPacienteSesion${i}`]) {
+        camposSesiones[`fechaSesion${i}`] = formulario[`fechaSesion${i}`];
+        camposSesiones[`firmaPacienteSesion${i}`] = formulario[`firmaPacienteSesion${i}`] ? 'TIENE FIRMA' : 'SIN FIRMA';
+      }
+    }
+    console.log('Campos de sesiones encontrados:', camposSesiones);
+    
+    // Guardar en localStorage para fácil inspección
+    const debugData = {
+      timestamp: new Date().toISOString(),
+      formulario: formulario,
+      camposSesiones: camposSesiones,
+      totalCamposSesiones: Object.keys(camposSesiones).length
+    };
+    localStorage.setItem('debug_formulario_estado', JSON.stringify(debugData, null, 2));
+    
+    alert(`Campos de sesiones: ${Object.keys(camposSesiones).length}\nDatos guardados en localStorage.\nAbre DevTools > Application > Local Storage > debug_formulario_estado`);
+  };
+
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
     try {
-      console.log('=== PROCESANDO FIRMAS PERINATAL ===');
       const datosAEnviar = { ...formulario };
       
       // Lista de campos que pueden contener firmas en valoraciones perinatales
@@ -99,30 +157,68 @@ export default function ValoracionIngresoProgramaPerinatal() {
         'firmaPaciente',
         'firmaFisioterapeuta',
         'firmaAutorizacion',
+        'firmaPacienteConsentimiento',
+        'firmaFisioterapeutaConsentimiento',
         'firmaPacienteGeneral',
-        'firmaConsentimientoFisico',
-        'firmaProfesionalConsentimientoFisico',
-        'firmaConsentimientoEducacion',
-        'firmaProfesionalConsentimientoEducacion',
-        'firmaConsentimientoIntensivo',
-        'firmaProfesionalConsentimientoIntensivo'
+        'firmaFisioterapeutaGeneral',
+        'firmaPacienteGeneralIntensivo',
+        'firmaFisioterapeutaGeneralIntensivo',
+        // Firmas dinámicas de sesiones (Paso 7)
+        'firmaPacienteSesion1',
+        'firmaPacienteSesion2',
+        'firmaPacienteSesion3',
+        'firmaPacienteSesion4',
+        'firmaPacienteSesion5',
+        'firmaPacienteSesion6',
+        'firmaPacienteSesion7',
+        'firmaPacienteSesion8',
+        'firmaPacienteSesion9',
+        'firmaPacienteSesion10',
+        // Firmas dinámicas de sesiones intensivo (Paso 8)
+        'firmaPacienteSesionIntensivo1',
+        'firmaPacienteSesionIntensivo2',
+        'firmaPacienteSesionIntensivo3'
       ];
 
       // Procesar cada campo de firma
       for (const campo of camposFirmas) {
         if (datosAEnviar[campo] && typeof datosAEnviar[campo] === 'string' && datosAEnviar[campo].startsWith('data:image')) {
-          console.log(`Subiendo ${campo} a S3...`);
           datosAEnviar[campo] = await subirFirmaAS3(datosAEnviar[campo]);
-          console.log(`✓ ${campo} subida a S3: ${datosAEnviar[campo]}`);
         }
       }
 
+      // Reconstruir arrays de sesiones antes de enviar
+      const sesiones = [];
+      for (let i = 1; i <= 10; i++) {
+        if (datosAEnviar[`fechaSesion${i}`] || datosAEnviar[`firmaPacienteSesion${i}`]) {
+          const sesion = {
+            nombre: `Sesión ${i}`,
+            fecha: datosAEnviar[`fechaSesion${i}`] || "",
+            firmaPaciente: datosAEnviar[`firmaPacienteSesion${i}`] || "",
+          };
+          sesiones.push(sesion);
+        }
+      }
+
+      const sesionesIntensivo = [];
+      for (let i = 1; i <= 10; i++) {
+        if (datosAEnviar[`fechaSesionIntensivo${i}`] || datosAEnviar[`firmaPacienteSesionIntensivo${i}`]) {
+          sesionesIntensivo.push({
+            nombre: `Sesión Intensivo ${i}`,
+            fecha: datosAEnviar[`fechaSesionIntensivo${i}`] || "",
+            firmaPaciente: datosAEnviar[`firmaPacienteSesionIntensivo${i}`] || "",
+          });
+        }
+      }
+
+      // Agregar los arrays reconstruidos
+      datosAEnviar.sesiones = sesiones;
+      datosAEnviar.sesionesIntensivo = sesionesIntensivo;
+
       // Agregar referencia al paciente
       datosAEnviar.paciente = paciente._id;
-      
-      console.log("Datos que se envían al backend:", datosAEnviar);
 
-      const response = await fetch("/api/consentimiento-perinatal", {
+      const response = await apiRequest("/consentimiento-perinatal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosAEnviar),
@@ -174,6 +270,19 @@ export default function ValoracionIngresoProgramaPerinatal() {
         <p className="text-center text-base text-gray-500 mb-6">
           Paso {paso} de 8
         </p>
+        
+        {/* Botón de debug temporal - QUITAR EN PRODUCCIÓN */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-center mb-4">
+            <button
+              type="button"
+              onClick={debugFormulario}
+              className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded"
+            >
+              🐛 Debug Formulario
+            </button>
+          </div>
+        )}
         {paso === 1 && (
           <Paso1DatosPersonalesPerinatal
             formulario={formulario}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { apiRequest } from "../config/api";
 
 function calcularEdadEnMeses(fechaNacimiento) {
   if (!fechaNacimiento) return "";
@@ -77,15 +78,14 @@ export default function RegistroPaciente() {
       }
     }
     try {
-      const res = await fetch(
-        "/api/pacientes",
+      await apiRequest(
+        "/pacientes",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formulario),
         }
       );
-      if (!res.ok) throw new Error("Error al registrar paciente niño");
       await Swal.fire({
         icon: "success",
         title: "¡Guardado!",
