@@ -57,15 +57,16 @@ const FORMULARIO_INICIAL = {
   nivelEducativo: "",
   medicoTratante: "",
   aseguradora: "",
+  fecha: "",
+  hora: "",
+  motivoConsulta: "",
+  // Campos adicionales solicitados
   acompanante: "",
   telefonoAcompanante: "",
   nombreBebe: "",
   semanasGestacion: "",
   fum: "",
   fechaProbableParto: "",
-  fecha: "",
-  hora: "",
-  motivoConsulta: "",
 
   // Paso 2: Estado de Salud
   temperatura: "",
@@ -494,19 +495,36 @@ export default function ValoracionPisoPelvico() {
   useEffect(() => {
     // Solo buscar si hay id
     if (id) {
-      fetch(
-        `/api/pacientes-adultos/${id}`
-      )
-        .then((res) => res.json())
+      console.log('Cargando datos del paciente adulto con ID:', id);
+      apiRequest(`/pacientes-adultos/${id}`)
         .then((data) => {
-          // Llena el formulario solo con los campos que existen en FORMULARIO_INICIAL
+          console.log('Datos del paciente cargados:', data);
+          
+          // Función para extraer solo valores primitivos y evitar objetos
+          const extractPrimitiveValues = (obj, targetFields) => {
+            const result = {};
+            for (const key of targetFields) {
+              const value = obj[key];
+              // Solo incluir valores primitivos (string, number, boolean)
+              if (value !== undefined && value !== null && 
+                  (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
+                result[key] = value;
+              }
+            }
+            return result;
+          };
+          
+          // Extraer solo los campos que existen en FORMULARIO_INICIAL y que son primitivos
+          const primitiveData = extractPrimitiveValues(data, Object.keys(FORMULARIO_INICIAL));
+          
           setFormulario((prev) => ({
             ...prev,
-            ...Object.keys(FORMULARIO_INICIAL).reduce((acc, key) => {
-              if (data[key] !== undefined) acc[key] = data[key];
-              return acc;
-            }, {}),
+            ...primitiveData
           }));
+        })
+        .catch((error) => {
+          console.error('Error cargando datos del paciente:', error);
+          Swal.fire("Error", "No se pudieron cargar los datos del paciente.", "error");
         });
     }
   }, [id]);
@@ -542,13 +560,30 @@ export default function ValoracionPisoPelvico() {
       }
 
       console.log('Enviando datos al backend...');
+      
+      // Excluir campos que ya están en el modelo PacienteAdulto
+      const camposPaciente = [
+        'nombres', 'cedula', 'genero', 'lugarNacimiento', 'fechaNacimiento', 
+        'edad', 'estadoCivil', 'direccion', 'telefono', 'celular', 
+        'ocupacion', 'nivelEducativo', 'medicoTratante', 'aseguradora',
+        'acompanante', 'telefonoAcompanante', 'nombreBebe', 'semanasGestacion', 'fum', 'fechaProbableParto'
+      ];
+      
+      // Crear datos limpios sin los campos del paciente
+      const datosValoracion = {};
+      Object.keys(dataToSend).forEach(key => {
+        if (!camposPaciente.includes(key)) {
+          datosValoracion[key] = dataToSend[key];
+        }
+      });
+      
       await apiRequest(
         "/valoracion-piso-pelvico",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ...dataToSend,
+            ...datosValoracion,
             paciente: id, // referencia al paciente adulto
           }),
         }

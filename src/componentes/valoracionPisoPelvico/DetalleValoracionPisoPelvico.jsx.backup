@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { apiRequest } from "../../config/api";
-import { exportarValoracionPisoPelvicoAWord } from "../../utils/exportarValoracionWord";
+
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
 import { PencilSquareIcon, ArrowLeftIcon, DocumentArrowDownIcon } from "@heroicons/react/24/solid";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle, ImageRun } from "docx";
+import { saveAs } from "file-saver";
 
 const Card = ({ title, children }) => (
   <div className="bg-indigo-50 rounded-2xl shadow p-6 mb-8 border border-indigo-100">
@@ -141,9 +143,672 @@ export default function DetalleValoracionPisoPelvico() {
     loadData();
   }, [id]);
 
-  // Función para exportar a Word usando la utilidad
-  const exportarAWord = () => {
-    exportarValoracionPisoPelvicoAWord(valoracion, paciente, setExportando);
+  const exportarAWord = async () => {
+    try {
+      setExportando(true);
+      
+      // Función para descargar imagen desde URL y convertir a ArrayBuffer
+      const urlToArrayBuffer = async (url) => {
+        if (!url) return null;
+        
+        try {
+          const response = await fetch(url, {
+            mode: 'cors',
+            headers: {
+              'Accept': 'image/*'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Error al descargar imagen: ${response.status}`);
+          }
+          
+          return await response.arrayBuffer();
+        } catch (error) {
+          console.error('Error descargando imagen desde URL:', url, error);
+          return null;
+        }
+      };
+
+      // Función para crear imagen de firma desde URL
+      const crearImagenFirma = async (firmaUrl, ancho = 150, alto = 75) => {
+        if (!firmaUrl) return null;
+        
+        try {
+          const arrayBuffer = await urlToArrayBuffer(firmaUrl);
+          if (!arrayBuffer) return null;
+          
+          return new ImageRun({
+            data: arrayBuffer,
+            transformation: {
+              width: ancho,
+              height: alto,
+            },
+          });
+        } catch (error) {
+          console.error('Error procesando firma:', error);
+          return null;
+        }
+      };
+
+      // Procesar las firmas (ahora desde URLs)
+      console.log('Procesando firmas desde URLs...');
+      const imagenFirmaPaciente = await crearImagenFirma(valoracion.firmaPaciente);
+      const imagenFirmaFisioterapeuta = await crearImagenFirma(valoracion.firmaFisioterapeuta);
+      const imagenFirmaAutorizacion = await crearImagenFirma(valoracion.firmaAutorizacion);
+      const imagenConsentimientoFirma = await crearImagenFirma(valoracion.consentimientoFirma);
+      
+      // Función auxiliar para crear campos de formulario (inline)
+      const crearCampoFormulario = (label, value, ancho = 40) => {
+        const valorFormateado = value === "" || value === undefined || value === null 
+          ? "____________________" 
+          : typeof value === 'boolean' 
+            ? (value ? "SÍ" : "NO")
+            : String(value);
+            
+        return [
+          new TextRun({ text: label + ": ", bold: true, size: 22 }),
+          new TextRun({ text: valorFormateado, underline: { type: 'single' }, size: 22 })
+        ];
+      };
+
+      // Función para crear línea con múltiples campos
+      const crearLineaCampos = (campos) => {
+        const children = [];
+        campos.forEach((campo, index) => {
+          children.push(...crearCampoFormulario(campo.label, campo.value));
+          if (index < campos.length - 1) {
+            children.push(new TextRun({ text: "     ", size: 22 })); // Espaciado entre campos
+          }
+        });
+        
+        return new Paragraph({
+          children,
+          spacing: { after: 150 },
+        });
+      };
+
+      // Función para crear título de sección
+      const crearTituloSeccion = (titulo) => {
+        return new Paragraph({
+          children: [
+            new TextRun({ 
+              text: titulo, 
+              bold: true, 
+              size: 26,
+              color: "1F4E79"
+            })
+          ],
+          alignment: AlignmentType.LEFT,
+          spacing: { before: 300, after: 200 },
+          border: {
+            bottom: {
+              color: "1F4E79",
+              space: 1,
+              style: BorderStyle.SINGLE,
+              size: 6,
+            },
+          },
+        });
+      };
+
+      // Función para crear tabla de checkbox/opciones
+      const crearTablaOpciones = (titulo, opciones) => {
+        return [
+          new Paragraph({
+            children: [new TextRun({ text: titulo + ":", bold: true, size: 22 })],
+            spacing: { after: 100 },
+          }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({
+                children: opciones.map(opcion => 
+                  new TableCell({
+                    children: [new Paragraph({
+                      children: [
+                        new TextRun({ text: "☐ " + opcion.label, size: 20 }),
+                        opcion.checked ? new TextRun({ text: " ✓", bold: true, color: "1F4E79" }) : new TextRun({ text: "" })
+                      ],
+                    })],
+                    width: { size: 100/opciones.length, type: WidthType.PERCENTAGE },
+                    borders: {
+                      top: { style: BorderStyle.NONE },
+                      bottom: { style: BorderStyle.NONE },
+                      left: { style: BorderStyle.NONE },
+                      right: { style: BorderStyle.NONE },
+                    },
+                  })
+                ),
+              }),
+            ],
+          })
+        ];
+      };
+
+      // Crear el documento con el nuevo formato
+      const doc = new Document({
+        sections: [{
+          children: [
+            // Header profesional
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: "D'MAMITAS & BABIES", 
+                  bold: true, 
+                  size: 36,
+                  color: "1F4E79"
+                })
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 100 },
+            }),
+            
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: "Centro de Estimulación Temprana y Fisioterapia", 
+                  size: 24,
+                  color: "4472C4"
+                })
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: "FORMATO DE VALORACIÓN PISO PÉLVICO", 
+                  bold: true, 
+                  size: 28,
+                  color: "1F4E79"
+                })
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 300 },
+              border: {
+                top: { color: "1F4E79", space: 1, style: BorderStyle.SINGLE, size: 6 },
+                bottom: { color: "1F4E79", space: 1, style: BorderStyle.SINGLE, size: 6 },
+              },
+            }),
+
+            // Información básica en formato formulario
+            crearTituloSeccion("DATOS GENERALES"),
+            
+            crearLineaCampos([
+              { label: "Nombres", value: paciente?.nombres || valoracion.nombres },
+              { label: "Cédula", value: paciente?.cedula || valoracion.cedula }
+            ]),
+            
+            crearLineaCampos([
+              { label: "Fecha de nacimiento", value: paciente?.fechaNacimiento || valoracion.fechaNacimiento },
+              { label: "Edad", value: paciente?.edad || valoracion.edad },
+              { label: "Género", value: paciente?.genero || valoracion.genero }
+            ]),
+            
+            crearLineaCampos([
+              { label: "Estado civil", value: paciente?.estadoCivil || valoracion.estadoCivil },
+              { label: "Ocupación", value: paciente?.ocupacion || valoracion.ocupacion }
+            ]),
+            
+            crearLineaCampos([
+              { label: "Teléfono", value: paciente?.telefono || valoracion.telefono },
+              { label: "Celular", value: paciente?.celular || valoracion.celular }
+            ]),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Dirección", paciente?.direccion || valoracion.direccion),
+              spacing: { after: 150 },
+            }),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Aseguradora", paciente?.aseguradora || valoracion.aseguradora),
+              spacing: { after: 150 },
+            }),
+            
+            crearLineaCampos([
+              { label: "Fecha valoración", value: valoracion.fecha },
+              { label: "Hora", value: valoracion.hora }
+            ]),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Motivo de consulta", valoracion.motivoConsulta),
+              spacing: { after: 300 },
+            }),
+
+            // Signos vitales
+            crearTituloSeccion("SIGNOS VITALES Y MEDIDAS ANTROPOMÉTRICAS"),
+            
+            crearLineaCampos([
+              { label: "T°", value: valoracion.temperatura },
+              { label: "TA", value: valoracion.ta },
+              { label: "FR", value: valoracion.fr },
+              { label: "FC", value: valoracion.fc }
+            ]),
+            
+            crearLineaCampos([
+              { label: "Peso previo", value: valoracion.pesoPrevio },
+              { label: "Peso actual", value: valoracion.pesoActual },
+              { label: "Talla", value: valoracion.talla },
+              { label: "IMC", value: valoracion.imc }
+            ]),
+
+            // Antecedentes obstétricos
+            crearTituloSeccion("ANTECEDENTES OBSTÉTRICOS"),
+            
+            crearLineaCampos([
+              { label: "Embarazos", value: valoracion.numEmbarazos },
+              { label: "Abortos", value: valoracion.numAbortos },
+              { label: "Partos Vaginales", value: valoracion.numPartosVaginales },
+              { label: "Cesáreas", value: valoracion.numCesareas }
+            ]),
+
+            // Sección de checkboxes para síntomas
+            ...crearTablaOpciones("SÍNTOMAS PRINCIPALES", [
+              { label: "Incontinencia urinaria", checked: valoracion.incontinenciaUrinaria },
+              { label: "Incontinencia fecal", checked: valoracion.incontinenciaFecal },
+              { label: "Gases vaginales", checked: valoracion.gasesVaginales },
+              { label: "Bulto vaginal", checked: valoracion.bultoVaginal }
+            ]),
+
+            // Dinámica menstrual
+            crearTituloSeccion("DINÁMICA MENSTRUAL"),
+            
+            crearLineaCampos([
+              { label: "Edad Menarquia", value: valoracion.edadMenarquia },
+              { label: "Edad Menopausia", value: valoracion.edadMenopausia },
+              { label: "Días menstruación", value: valoracion.diasMenstruacion }
+            ]),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Características del sangrado", valoracion.caracSangrado),
+              spacing: { after: 150 },
+            }),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Métodos anticonceptivos", valoracion.anticonceptivo),
+              spacing: { after: 300 },
+            }),
+
+            // Dinámica miccional
+            crearTituloSeccion("DINÁMICA MICCIONAL"),
+            
+            crearLineaCampos([
+              { label: "Micciones día", value: valoracion.numMiccionesDia },
+              { label: "Micciones noche", value: valoracion.numMiccionesNoche },
+              { label: "Cada cuántas horas", value: valoracion.cadaCuantasHoras }
+            ]),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Características de la micción", valoracion.caracMiccion),
+              spacing: { after: 150 },
+            }),
+
+            ...crearTablaOpciones("CARACTERÍSTICAS MICCIONALES", [
+              { label: "Vaciado completo", checked: valoracion.vaciadoCompleto },
+              { label: "Vaciado incompleto", checked: valoracion.vaciadoIncompleto },
+              { label: "Empujar para comenzar", checked: valoracion.empujarComenzar },
+              { label: "Empujar para terminar", checked: valoracion.empujarTerminar }
+            ]),
+
+            // Evaluación fisioterapéutica
+            crearTituloSeccion("EVALUACIÓN FISIOTERAPÉUTICA"),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Marcha", valoracion.marcha),
+              spacing: { after: 150 },
+            }),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Postura", valoracion.postura),
+              spacing: { after: 150 },
+            }),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Tipo de Pelvis", valoracion.tipoPelvis),
+              spacing: { after: 150 },
+            }),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Vulva", valoracion.vulva),
+              spacing: { after: 150 },
+            }),
+
+            // Palpación interna
+            crearTituloSeccion("PALPACIÓN INTERNA"),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Tono General", valoracion.tonoGeneral),
+              spacing: { after: 150 },
+            }),
+            
+            crearLineaCampos([
+              { label: "Oxford Global", value: valoracion.oxfordGlobal },
+              { label: "Oxford Derecha", value: valoracion.oxfordDerecha },
+              { label: "Oxford Izquierda", value: valoracion.oxfordIzquierda }
+            ]),
+            
+            crearLineaCampos([
+              { label: "PERFECT Power", value: valoracion.perfectPower },
+              { label: "PERFECT Endurance", value: valoracion.perfectEndurance },
+              { label: "PERFECT Repetitions", value: valoracion.perfectRepetitions }
+            ]),
+
+            // Diagnóstico y plan
+            crearTituloSeccion("DIAGNÓSTICO Y PLAN DE TRATAMIENTO"),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Diagnóstico fisioterapéutico", valoracion.diagnosticoFisio),
+              spacing: { after: 200 },
+            }),
+            
+            new Paragraph({
+              children: crearCampoFormulario("Plan de intervención", valoracion.planIntervencion),
+              spacing: { after: 400 },
+            }),
+
+            // Sección de firmas con espacios apropiados
+            crearTituloSeccion("FIRMAS Y CONSENTIMIENTOS"),
+            
+            new Paragraph({
+              children: [new TextRun({ text: "", size: 22 })],
+              spacing: { after: 600 },
+            }),
+            
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [new TextRun({ text: "FIRMA PACIENTE", bold: true, size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ text: "", size: 22 })],
+                          spacing: { after: 200 },
+                        }),
+                        // Incluir imagen de firma del paciente si existe
+                        imagenFirmaPaciente ? new Paragraph({
+                          children: [imagenFirmaPaciente],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }) : new Paragraph({
+                          children: [new TextRun({ text: "_".repeat(30), size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ 
+                            text: (paciente?.nombres || valoracion.nombres || "NOMBRE DEL PACIENTE"), 
+                            size: 18,
+                            allCaps: true
+                          })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ 
+                            text: "C.C. " + (paciente?.cedula || valoracion.cedula || "_______________"), 
+                            size: 18
+                          })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: BorderStyle.NONE },
+                        bottom: { style: BorderStyle.NONE },
+                        left: { style: BorderStyle.NONE },
+                        right: { style: BorderStyle.NONE },
+                      },
+                    }),
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [new TextRun({ text: "FIRMA FISIOTERAPEUTA", bold: true, size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ text: "", size: 22 })],
+                          spacing: { after: 200 },
+                        }),
+                        // Incluir imagen de firma del fisioterapeuta si existe
+                        imagenFirmaFisioterapeuta ? new Paragraph({
+                          children: [imagenFirmaFisioterapeuta],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }) : new Paragraph({
+                          children: [new TextRun({ text: "_".repeat(30), size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ text: "FISIOTERAPEUTA", size: 18, allCaps: true })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ text: "REG. PROF. _______________", size: 18 })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: BorderStyle.NONE },
+                        bottom: { style: BorderStyle.NONE },
+                        left: { style: BorderStyle.NONE },
+                        right: { style: BorderStyle.NONE },
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }),
+
+            // Firma de autorización de imágenes
+            new Paragraph({
+              children: [new TextRun({ text: "", size: 22 })],
+              spacing: { after: 300 },
+            }),
+
+            new Paragraph({
+              children: [new TextRun({ text: "AUTORIZACIÓN USO DE IMÁGENES", bold: true, size: 24, color: "1F4E79" })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: "Autorizo a D'Mamitas & Babies para reproducir fotografías e imágenes de las actividades en las que participe, para ser utilizadas en sus publicaciones, proyectos, redes sociales y página web.", 
+                  size: 20 
+                })
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 300 },
+            }),
+
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [new TextRun({ text: "FIRMA AUTORIZACIÓN", bold: true, size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ text: "", size: 22 })],
+                          spacing: { after: 200 },
+                        }),
+                        // Incluir imagen de firma de autorización si existe
+                        imagenFirmaAutorizacion ? new Paragraph({
+                          children: [imagenFirmaAutorizacion],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }) : new Paragraph({
+                          children: [new TextRun({ text: "_".repeat(40), size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ 
+                            text: (paciente?.nombres || valoracion.nombres || "NOMBRE DEL PACIENTE"), 
+                            size: 18,
+                            allCaps: true
+                          })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 100, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: BorderStyle.NONE },
+                        bottom: { style: BorderStyle.NONE },
+                        left: { style: BorderStyle.NONE },
+                        right: { style: BorderStyle.NONE },
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }),
+
+            // Consentimiento informado
+            new Paragraph({
+              children: [new TextRun({ text: "", size: 22 })],
+              spacing: { after: 400 },
+            }),
+
+            new Paragraph({
+              children: [new TextRun({ text: "CONSENTIMIENTO INFORMADO", bold: true, size: 24, color: "1F4E79" })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 300 },
+            }),
+
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: "El paciente declara haber leído y entendido el consentimiento informado para evaluación y tratamiento de fisioterapia pélvica, y da su consentimiento para la evaluación y tratamiento de su piso pélvico.", 
+                  size: 20 
+                })
+              ],
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 200 },
+            }),
+
+            // Datos del consentimiento
+            crearLineaCampos([
+              { label: "Fecha", value: valoracion.consentimientoFecha },
+              { label: "Ciudad", value: valoracion.consentimientoCiudad }
+            ]),
+
+            crearLineaCampos([
+              { label: "Nombre completo", value: valoracion.consentimientoNombre },
+              { label: "C.C. No.", value: valoracion.consentimientoCC }
+            ]),
+
+            new Paragraph({
+              children: [new TextRun({ text: "", size: 22 })],
+              spacing: { after: 200 },
+            }),
+
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [
+                        new Paragraph({
+                          children: [new TextRun({ text: "FIRMA CONSENTIMIENTO", bold: true, size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ text: "", size: 22 })],
+                          spacing: { after: 200 },
+                        }),
+                        // Incluir imagen de firma del consentimiento si existe
+                        imagenConsentimientoFirma ? new Paragraph({
+                          children: [imagenConsentimientoFirma],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }) : new Paragraph({
+                          children: [new TextRun({ text: "_".repeat(40), size: 20 })],
+                          alignment: AlignmentType.CENTER,
+                          spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                          children: [new TextRun({ 
+                            text: (valoracion.consentimientoNombre || paciente?.nombres || valoracion.nombres || "NOMBRE DEL PACIENTE"), 
+                            size: 18,
+                            allCaps: true
+                          })],
+                          alignment: AlignmentType.CENTER,
+                        }),
+                      ],
+                      width: { size: 100, type: WidthType.PERCENTAGE },
+                      borders: {
+                        top: { style: BorderStyle.NONE },
+                        bottom: { style: BorderStyle.NONE },
+                        left: { style: BorderStyle.NONE },
+                        right: { style: BorderStyle.NONE },
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }),
+
+            // Pie de página
+            new Paragraph({
+              children: [new TextRun({ text: "", size: 22 })],
+              spacing: { after: 300 },
+            }),
+            
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: `Fecha: ${valoracion.fecha || new Date().toLocaleDateString('es-ES')} | Ciudad: ${valoracion.consentimientoCiudad || "_____________"}`,
+                  size: 20,
+                  color: "666666"
+                })
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+            
+            new Paragraph({
+              children: [
+                new TextRun({ 
+                  text: "Este documento ha sido generado por el sistema de D'Mamitas & Babies",
+                  italics: true,
+                  size: 18,
+                  color: "999999"
+                })
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200 },
+            }),
+          ],
+        }],
+      });
+
+      // Generar y descargar el archivo
+      const blob = await Packer.toBlob(doc);
+      const nombrePaciente = (paciente?.nombres || valoracion.nombres || 'Sin_nombre').replace(/\s+/g, '_');
+      const fecha = new Date().toISOString().split('T')[0];
+      saveAs(blob, `Valoracion_PisoPelvico_${nombrePaciente}_${fecha}.docx`);
+      
+      console.log('Valoración exportada exitosamente');
+    } catch (error) {
+      console.error('Error al exportar la valoración:', error);
+      alert('Error al exportar la valoración. Por favor, inténtelo de nuevo.');
+    } finally {
+      setExportando(false);
+    }
   };
 
   if (loading || !valoracion) return (
@@ -597,7 +1262,7 @@ export default function DetalleValoracionPisoPelvico() {
               Dentro de los malestares físicos temporales, pueden presentarse los siguientes: Dolor, ardor, sensación de calambre, sangrado de la mucosa, ganas de orinar o defecar, escape de gases anales o vaginales, mareo, taquicardia, bradicardia o hipotensión momentánea.<br /><br />
               Dentro de las incomodidades psicológicas o emocionales pueden presentarse: Vergüenza, nerviosismo, ansiedad o temor principalmente en la sesión de evaluación por ser la primera vez en fisioterapia pélvica.<br /><br />
               <b>Posibles beneficios:</b> una evaluación completa del piso pélvico y/o un tratamiento de fisioterapia pélvica pueden aliviar mis síntomas, mejorando mi calidad de vida y aumentando mi capacidad para realizar mis actividades diarias. Es posible que experimente un aumento de la fuerza, la conciencia, la flexibilidad y la resistencia de los músculos de mi piso pélvico e igualmente, puede que note una disminución del dolor o los malestares asociados a la disfunción que tengo. También podré adquirir un mayor conocimiento sobre mi disfunción y seré más consciente de los recursos disponibles para manejar mis síntomas y mejorar mi condición.<br /><br />
-              <b>No garantía:</b> comprendo que la/el fisioterapeuta no puede hacer promesas ni garantías con respecto a la cura o la completa mejoría de mi disfunción. Entiendo que mi fisioterapeuta compartirá su opinión profesional conmigo sobre los posibles resultados de la fisioterapia y analizará todas las opciones de tratamiento antes de que yo dé mi consentimiento para el tratamiento, basado en los resultados subjetivos y objetivos de la evaluación.<br /><br />
+              <b>No garantía:</b> comprendo que la/el fisioterapeuta no puede hacer promesas ni garantías con respecto a la cura o la completa mejora de mi disfunción. Entiendo que mi fisioterapeuta compartirá su opinión profesional conmigo sobre los posibles resultados de la fisioterapia y analizará todas las opciones de tratamiento antes de que yo dé mi consentimiento para el tratamiento, basado en los resultados subjetivos y objetivos de la evaluación.<br /><br />
               Entiendo que tengo el derecho a revocar mi consentimiento en cualquier momento y que mi consentimiento verbal será obtenido continuamente a lo largo de las sesiones. Yo estaré siempre en control de mi propio cuerpo y de las actividades que me sean solicitadas realizar en la consulta con la/el fisioterapeuta.<br /><br />
               Al firmar este documento, acepto que he leído y entendido el CONSENTIMIENTO INFORMADO PARA EVALUACIÓN Y TRATAMIENTO DE FISIOTERAPIA PÉLVICA y que doy mi consentimiento para la evaluación y tratamiento de mi piso pélvico.
             </p>

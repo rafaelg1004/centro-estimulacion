@@ -1,5 +1,53 @@
 import React from "react";
 
+// Mover CheckboxGroup fuera del componente principal para evitar re-creaciones
+const CheckboxGroup = ({ label, fieldPrefix, ageRange, formulario, handleChange, handleRadioChange }) => (
+  <div className="border rounded-lg p-4 mb-4">
+    <div className="grid grid-cols-4 gap-2 items-center">
+      <div className="font-medium text-sm">
+        {label} <br />
+        <span className="text-xs text-gray-500">({ageRange})</span>
+      </div>
+      <div className="text-center">
+        <label className="flex flex-col items-center">
+          <input
+            type="radio"
+            name={fieldPrefix}
+            value="si"
+            checked={formulario[`${fieldPrefix}_si`]}
+            onChange={() => handleRadioChange(fieldPrefix, 'si')}
+            className="mb-1"
+          />
+          <span className="text-xs">Sí</span>
+        </label>
+      </div>
+      <div className="text-center">
+        <label className="flex flex-col items-center">
+          <input
+            type="radio"
+            name={fieldPrefix}
+            value="no"
+            checked={formulario[`${fieldPrefix}_no`]}
+            onChange={() => handleRadioChange(fieldPrefix, 'no')}
+            className="mb-1"
+          />
+          <span className="text-xs">No</span>
+        </label>
+      </div>
+      <div>
+        <textarea
+          name={`${fieldPrefix}_observaciones`}
+          value={formulario[`${fieldPrefix}_observaciones`] || ""}
+          onChange={handleChange}
+          placeholder="Observaciones..."
+          rows={2}
+          className="w-full border rounded px-2 py-1 text-xs"
+        />
+      </div>
+    </div>
+  </div>
+);
+
 const Paso4Ontologico = ({
   formulario,
   handleChange,
@@ -14,53 +62,6 @@ const Paso4Ontologico = ({
       [`${fieldPrefix}_no`]: value === 'no'
     }));
   };
-
-  const CheckboxGroup = ({ label, fieldPrefix, ageRange }) => (
-    <div className="border rounded-lg p-4 mb-4">
-      <div className="grid grid-cols-4 gap-2 items-center">
-        <div className="font-medium text-sm">
-          {label} <br />
-          <span className="text-xs text-gray-500">({ageRange})</span>
-        </div>
-        <div className="text-center">
-          <label className="flex flex-col items-center">
-            <input
-              type="radio"
-              name={fieldPrefix}
-              value="si"
-              checked={formulario[`${fieldPrefix}_si`]}
-              onChange={() => handleRadioChange(fieldPrefix, 'si')}
-              className="mb-1"
-            />
-            <span className="text-xs">Sí</span>
-          </label>
-        </div>
-        <div className="text-center">
-          <label className="flex flex-col items-center">
-            <input
-              type="radio"
-              name={fieldPrefix}
-              value="no"
-              checked={formulario[`${fieldPrefix}_no`]}
-              onChange={() => handleRadioChange(fieldPrefix, 'no')}
-              className="mb-1"
-            />
-            <span className="text-xs">No</span>
-          </label>
-        </div>
-        <div>
-          <textarea
-            name={`${fieldPrefix}_observaciones`}
-            value={formulario[`${fieldPrefix}_observaciones`] || ""}
-            onChange={handleChange}
-            placeholder="Observaciones..."
-            rows={2}
-            className="w-full border rounded px-2 py-1 text-xs"
-          />
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -82,36 +83,57 @@ const Paso4Ontologico = ({
           label="Sostiene la cabeza" 
           fieldPrefix="sostieneCabeza" 
           ageRange="2-4 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Se voltea" 
           fieldPrefix="seVoltea" 
           ageRange="4-6 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Se sienta sin apoyo" 
           fieldPrefix="seSientaSinApoyo" 
           ageRange="6-8 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Gatea o se arrastra" 
           fieldPrefix="gatea" 
           ageRange="7-10 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Se pone de pie con apoyo" 
           fieldPrefix="sePoneDePerApoyado" 
           ageRange="9-12 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Camina solo" 
           fieldPrefix="caminaSolo" 
           ageRange="12-15 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Corre o salta" 
           fieldPrefix="correSalta" 
           ageRange="18-24 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
       </div>
 
@@ -129,31 +151,49 @@ const Paso4Ontologico = ({
           label="Sigue objetos con la mirada" 
           fieldPrefix="sigueObjetosMirada" 
           ageRange="2-3 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Lleva objetos a la boca" 
           fieldPrefix="llevaObjetosBoca" 
           ageRange="4-6 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Pasa objetos entre manos" 
           fieldPrefix="pasaObjetosEntreManos" 
           ageRange="6-7 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Pinza superior (índice-pulgar)" 
           fieldPrefix="pinzaSuperior" 
           ageRange="9-12 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Encaja piezas grandes" 
           fieldPrefix="encajaPiezasGrandes" 
           ageRange="12-18 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Dibuja garabatos" 
           fieldPrefix="dibujaGarabatos" 
           ageRange="18-24 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
       </div>
 
@@ -171,31 +211,49 @@ const Paso4Ontologico = ({
           label="Balbucea o emite sonidos" 
           fieldPrefix="balbucea" 
           ageRange="3-6 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Dice mamá/papá con sentido" 
           fieldPrefix="diceMamaPapa" 
           ageRange="9-12 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Señala lo que quiere" 
           fieldPrefix="senalaQueQuiere" 
           ageRange="10-14 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Dice 5-10 palabras" 
           fieldPrefix="dice5a10Palabras" 
           ageRange="12-18 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Entiende órdenes simples" 
           fieldPrefix="entiendeOrdenesSimples" 
           ageRange="12-18 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Usa frases de 2 palabras" 
           fieldPrefix="usaFrases2Palabras" 
           ageRange="18-24 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
       </div>
 
@@ -213,26 +271,41 @@ const Paso4Ontologico = ({
           label="Sonríe socialmente" 
           fieldPrefix="sonrieSocialmente" 
           ageRange="2-3 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Responde a su nombre" 
           fieldPrefix="respondeNombre" 
           ageRange="6-8 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Se interesa por otros niños" 
           fieldPrefix="interesaOtrosNinos" 
           ageRange="10-12 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Juego simbólico" 
           fieldPrefix="juegoSimbolico" 
           ageRange="18-24 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
         <CheckboxGroup 
           label="Se despide / lanza besos" 
           fieldPrefix="seDespideLanzaBesos" 
           ageRange="12-18 meses" 
+          formulario={formulario}
+          handleChange={handleChange}
+          handleRadioChange={handleRadioChange}
         />
       </div>
 

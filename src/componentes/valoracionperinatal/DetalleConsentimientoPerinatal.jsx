@@ -25,7 +25,6 @@ export default function DetalleConsentimientoPerinatal() {
 
   useEffect(() => {
     apiRequest(`/consentimiento-perinatal/${id}`)
-      .then(res => res.json())
       .then(data => {
         if (Array.isArray(data.sesionesIntensivo)) {
           data.sesionesIntensivo.forEach((sesion, idx) => {
@@ -33,6 +32,7 @@ export default function DetalleConsentimientoPerinatal() {
             data[`firmaPacienteSesionIntensivo${idx + 1}`] = sesion.firmaPaciente || "";
           });
         }
+        console.log("Consentimiento cargado:", data); // <-- Log agregado
         setConsentimiento(data);
       });
   }, [id]);
@@ -203,6 +203,40 @@ export default function DetalleConsentimientoPerinatal() {
               )}
             </div>
           </div>
+          {/* Mostrar firmas de sesiones */}
+          {Array.isArray(consentimiento.sesiones) && consentimiento.sesiones.length > 0 && (
+            <div className="mt-6">
+              <h4 className="font-bold text-indigo-700 mb-2">Firmas de Sesiones</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {consentimiento.sesiones.map((sesion, idx) => (
+                  <div key={idx} className="border rounded-xl p-3 bg-indigo-50">
+                    <div className="font-semibold mb-1">{sesion.nombre || `Sesión ${idx + 1}`}</div>
+                    <div>Fecha: {sesion.fecha || "-"}</div>
+                    {sesion.firmaPaciente && (
+                      <img src={sesion.firmaPaciente} alt={`Firma sesión ${idx + 1}`} className="h-12 mt-1 border" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Mostrar firmas de sesiones intensivo */}
+          {Array.isArray(consentimiento.sesionesIntensivo) && consentimiento.sesionesIntensivo.length > 0 && (
+            <div className="mt-6">
+              <h4 className="font-bold text-indigo-700 mb-2">Firmas de Sesiones Intensivo</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {consentimiento.sesionesIntensivo.map((sesion, idx) => (
+                  <div key={idx} className="border rounded-xl p-3 bg-indigo-50">
+                    <div className="font-semibold mb-1">{sesion.nombre || `Sesión Intensivo ${idx + 1}`}</div>
+                    <div>Fecha: {sesion.fecha || "-"}</div>
+                    {sesion.firmaPaciente && (
+                      <img src={sesion.firmaPaciente} alt={`Firma sesión intensivo ${idx + 1}`} className="h-12 mt-1 border" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Autorización imágenes */}

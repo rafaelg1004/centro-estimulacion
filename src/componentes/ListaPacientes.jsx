@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../config/api";
 
-export default function ListaPacientes({ tipo }) {
+export default function ListaPacientes({ tipo = "nino" }) {
   const [pacientes, setPacientes] = useState([]);
   const [error, setError] = useState("");
   const [confirmarId, setConfirmarId] = useState(null);
@@ -114,6 +114,7 @@ export default function ListaPacientes({ tipo }) {
                     <th className="px-4 py-3 text-left text-white">Doc</th>
                     <th className="px-4 py-3 text-left text-white">Edad</th>
                     <th className="px-4 py-3 text-left text-white">Género</th>
+                    {tipoBusqueda === "adulto" && <th className="px-4 py-3 text-left text-white">Estado</th>}
                     <th className="px-4 py-3 text-left text-white">Celular</th>
                     <th className="px-4 py-3 text-left text-white">Acción</th>
                   </tr>
@@ -137,6 +138,17 @@ export default function ListaPacientes({ tipo }) {
                       </td>
                       <td className="px-4 py-3">{paciente.edad}</td>
                       <td className="px-4 py-3">{paciente.genero}</td>
+                      {tipoBusqueda === "adulto" && (
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            (paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) 
+                              ? 'bg-pink-100 text-pink-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {(paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) ? '🤰 Gestación' : '👶 Posparto'}
+                          </span>
+                        </td>
+                      )}
                       <td className="px-4 py-3">{paciente.celular}</td>
                       <td className="px-4 py-3">
                         <button
@@ -169,6 +181,17 @@ export default function ListaPacientes({ tipo }) {
                       <div className="text-gray-600 text-sm">
                         {tipoBusqueda === "nino" ? paciente.registroCivil : paciente.cedula}
                       </div>
+                      {tipoBusqueda === "adulto" && (
+                        <div className="mt-1">
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            (paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) 
+                              ? 'bg-pink-100 text-pink-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {(paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) ? '🤰 Gestación' : '👶 Posparto'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={e => {

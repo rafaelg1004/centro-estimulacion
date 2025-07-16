@@ -30,7 +30,7 @@ const Paso7Autorizacion = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label htmlFor="autorizacionNombre" className="block text-sm font-medium mb-1">
+          <label htmlFor="nombres" className="block text-sm font-medium mb-1">
             Nombre del menor
           </label>
           <input
@@ -38,13 +38,13 @@ const Paso7Autorizacion = ({
             type="text"
             name="autorizacionNombre"
             value={formulario.nombres || ""}
-            readOnly
+            onChange={handleChange}
             className="w-full border rounded-md p-2 bg-gray-100"
             placeholder="Nombre del menor"
           />
         </div>
         <div>
-          <label htmlFor="autorizacionRegistro" className="block text-sm font-medium mb-1">
+          <label htmlFor="registroCivil" className="block text-sm font-medium mb-1">
             Número de Registro Civil
           </label>
           <input
@@ -52,7 +52,7 @@ const Paso7Autorizacion = ({
             type="text"
             name="autorizacionRegistro"
             value={formulario.registroCivil || ""}
-            readOnly
+            onChange={handleChange}
             className="w-full border rounded-md p-2 bg-gray-100"
             placeholder="Número de registro civil"
           />

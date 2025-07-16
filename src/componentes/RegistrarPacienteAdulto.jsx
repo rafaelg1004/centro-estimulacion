@@ -32,6 +32,7 @@ const FORMULARIO_INICIAL = {
   acompanante: "",
   telefonoAcompanante: "",
   nombreBebe: "",
+  estadoEmbarazo: "", // "gestacion" o "posparto"
   semanasGestacion: "",
   fum: "",
   fechaProbableParto: "",
@@ -61,12 +62,32 @@ export default function RegistrarPacienteAdulto() {
   const guardarPaciente = async () => {
     setMensaje("");
     setError("");
-    for (const key in FORMULARIO_INICIAL) {
-      if (!formulario[key]) {
-        setError("Por favor, complete todos los campos.");
+    
+    // Validar campos básicos
+    const camposBasicos = [
+      "nombres", "cedula", "genero", "lugarNacimiento", "fechaNacimiento", 
+      "edad", "estadoCivil", "direccion", "telefono", "celular", "ocupacion",
+      "nivelEducativo", "medicoTratante", "aseguradora", "acompanante", 
+      "telefonoAcompanante", "nombreBebe", "estadoEmbarazo"
+    ];
+    
+    for (const campo of camposBasicos) {
+      if (!formulario[campo]) {
+        setError("Por favor, complete todos los campos obligatorios.");
         return;
       }
     }
+    
+    // Los campos de gestación son opcionales. Si no existen, se guardan como "No disponible".
+    if (formulario.estadoEmbarazo === "gestacion") {
+      const camposGestacion = ["semanasGestacion", "fum", "fechaProbableParto"];
+      camposGestacion.forEach(campo => {
+        if (!formulario[campo]) {
+          formulario[campo] = "No disponible";
+        }
+      });
+    }
+    
     try {
       await apiRequest(
         "/pacientes-adultos",
@@ -340,47 +361,70 @@ export default function RegistrarPacienteAdulto() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1" htmlFor="semanasGestacion">
-              Semanas de gestación
+            <label className="block text-sm font-semibold mb-1" htmlFor="estadoEmbarazo">
+              Estado del embarazo
             </label>
-            <input
-              id="semanasGestacion"
-              name="semanasGestacion"
-              value={formulario.semanasGestacion}
+            <select
+              id="estadoEmbarazo"
+              name="estadoEmbarazo"
+              value={formulario.estadoEmbarazo}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-              placeholder="Semanas de gestación"
-            />
+            >
+              <option value="">Seleccione...</option>
+              <option value="gestacion">En gestación</option>
+              <option value="posparto">Posparto</option>
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1" htmlFor="fum">
-              FUM (Fecha de Última Menstruación)
-            </label>
-            <input
-              id="fum"
-              name="fum"
-              type="date"
-              value={formulario.fum}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 rounded-xl border-2 border-indigo-400 focus:ring-2 focus:ring-indigo-600 outline-none text-base bg-indigo-50 shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1" htmlFor="fechaProbableParto">
-              Fecha probable de parto
-            </label>
-            <input
-              id="fechaProbableParto"
-              name="fechaProbableParto"
-              type="date"
-              value={formulario.fechaProbableParto}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 rounded-xl border-2 border-indigo-400 focus:ring-2 focus:ring-indigo-600 outline-none text-base bg-indigo-50 shadow-sm"
-            />
-          </div>
+          
+          {/* Campos que solo aparecen si está en gestación */}
+          {formulario.estadoEmbarazo === "gestacion" && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold mb-1" htmlFor="semanasGestacion">
+                  Semanas de gestación
+                </label>
+                <input
+                  id="semanasGestacion"
+                  name="semanasGestacion"
+                  value={formulario.semanasGestacion}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-pink-200 focus:ring-2 focus:ring-pink-400 outline-none text-base bg-pink-50 shadow-sm"
+                  placeholder="Semanas de gestación"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1" htmlFor="fum">
+                  FUM (Fecha de Última Menstruación)
+                </label>
+                <input
+                  id="fum"
+                  name="fum"
+                  type="date"
+                  value={formulario.fum}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-pink-400 focus:ring-2 focus:ring-pink-600 outline-none text-base bg-pink-50 shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1" htmlFor="fechaProbableParto">
+                  Fecha probable de parto
+                </label>
+                <input
+                  id="fechaProbableParto"
+                  name="fechaProbableParto"
+                  type="date"
+                  value={formulario.fechaProbableParto}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border-2 border-pink-400 focus:ring-2 focus:ring-pink-600 outline-none text-base bg-pink-50 shadow-sm"
+                />
+              </div>
+            </>
+          )}
         </div>
         <div className="flex justify-center gap-4 mt-8">
           <button

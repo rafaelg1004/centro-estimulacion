@@ -19,11 +19,14 @@ const InputField = ({
   required,
   type = "text",
   options = [],
+  readOnly = false,
+  className = "",
   ...rest
 }) => (
   <div>
     <label className="block text-sm font-semibold mb-1" htmlFor={name}>
       {label}
+      {readOnly && <span className="text-xs text-gray-500 ml-2">(Solo lectura)</span>}
     </label>
     {type === "select" ? (
       <select
@@ -32,7 +35,8 @@ const InputField = ({
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        disabled={readOnly}
+        className={`w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${className}`}
         {...rest}
       >
         {options.map((opt) => (
@@ -49,7 +53,8 @@ const InputField = ({
         onChange={onChange}
         required={required}
         type={type}
-        className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        readOnly={readOnly}
+        className={`w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${className}`}
         {...rest}
       />
     )}
@@ -83,11 +88,12 @@ const ValoracionIngreso = () => {
   });
 
   const FORMULARIO_INICIAL = {
-    fecha: "",
-    hora: "",
+    fecha: new Date().toISOString().split('T')[0], // Fecha actual en formato YYYY-MM-DD
+    hora: new Date().toTimeString().slice(0, 5), // Hora actual en formato HH:MM
     nombres: "",
     registroCivil: "",
     genero: "",
+    lugarNacimiento: "",
     nacimiento: "",
     edad: "",
     peso: "",
@@ -97,12 +103,13 @@ const ValoracionIngreso = () => {
     celular: "",
     pediatra: "",
     aseguradora: "",
-    madreNombre: "",
-    madreEdad: "",
-    madreOcupacion: "",
-    padreNombre: "",
-    padreEdad: "",
-    padreOcupacion: "",
+    nombreMadre: "",
+    edadMadre: "",
+    ocupacionMadre: "",
+    nombrePadre: "",
+    edadPadre: "",
+    ocupacionPadre: "",
+    documentoRepresentante: "",
     motivoDeConsulta: "",
     antecedentesPrenatales: [],
     tipoParto: "",
@@ -239,9 +246,8 @@ const ValoracionIngreso = () => {
             nombres: data.nombres || "",
             registroCivil: data.registroCivil || "",
             genero: data.genero || "",
-            nacimiento:
-              (data.lugarNacimiento ? data.lugarNacimiento + " " : "") +
-              (data.fechaNacimiento || ""),
+            lugarNacimiento: data.lugarNacimiento || "",
+            nacimiento: data.fechaNacimiento || "",
             edad: data.edad || "",
             peso: data.peso || "",
             talla: data.talla || "",
@@ -250,12 +256,16 @@ const ValoracionIngreso = () => {
             celular: data.celular || "",
             pediatra: data.pediatra || "",
             aseguradora: data.aseguradora || "",
-            madreNombre: data.nombreMadre || "",
-            madreEdad: data.edadMadre || "",
-            madreOcupacion: data.ocupacionMadre || "",
-            padreNombre: data.nombrePadre || "",
-            padreEdad: data.edadPadre || "",
-            padreOcupacion: data.ocupacionPadre || "",
+            nombreMadre: data.nombreMadre || "",
+            edadMadre: data.edadMadre || "",
+            ocupacionMadre: data.ocupacionMadre || "",
+            nombrePadre: data.nombrePadre || "",
+            edadPadre: data.edadPadre || "",
+            ocupacionPadre: data.ocupacionPadre || "",
+            nombreAcudiente: data.nombreAcudiente || data.nombreMadre || data.nombrePadre || "",
+            cedulaAcudiente: data.cedulaAcudiente || data.documentoRepresentante || "",
+            autorizacionNombre: data.nombres || "",
+            autorizacionRegistro: data.registroCivil || "",
           }));
           setFormularioCargado(true);
         });
@@ -264,10 +274,22 @@ const ValoracionIngreso = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormulario((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormulario((prev) => {
+      const newFormulario = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+      
+      // Sincronizar campos de autorización automáticamente
+      if (name === 'nombres') {
+        newFormulario.autorizacionNombre = value;
+      }
+      if (name === 'registroCivil') {
+        newFormulario.autorizacionRegistro = value;
+      }
+      
+      return newFormulario;
+    });
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
@@ -297,6 +319,7 @@ const ValoracionIngreso = () => {
       "nombres",
       "registroCivil",
       "genero",
+      "lugarNacimiento",
       "nacimiento",
       "edad",
       "peso",
@@ -306,12 +329,12 @@ const ValoracionIngreso = () => {
       "celular",
       "pediatra",
       "aseguradora",
-      "madreNombre",
-      "madreEdad",
-      "madreOcupacion",
-      "padreNombre",
-      "padreEdad",
-      "padreOcupacion",
+      "nombreMadre",
+      "edadMadre",
+      "ocupacionMadre",
+      "nombrePadre",
+      "edadPadre",
+      "ocupacionPadre",
       "motivoDeConsulta",
     ],
     2: [
@@ -355,7 +378,16 @@ const ValoracionIngreso = () => {
       "relacionDesconocidos",
       "rutinaDiaria",
     ],
-    // Agrega los campos requeridos para los pasos 4, 5, 6, 7 si los necesitas
+    7: [
+      "nombreAcudiente",
+      "cedulaAcudiente",
+      "autorizacionNombre",
+      "autorizacionRegistro",
+      "diaFirma",
+      "mesFirma",
+      "anioFirma"
+    ],
+    // Agrega los campos requeridos para los pasos 4, 5, 6, 8 si los necesitas
   };
 
   const camposObligatoriosSubpaso2 = {
@@ -442,7 +474,7 @@ const ValoracionIngreso = () => {
         consentimiento_ccFisioterapeuta: formulario.cedulaFisioterapeuta || "",
       }));
     }
-  }, [paso, formulario]);
+  }, [paso, formulario.nombreAcudiente, formulario.cedulaAcudiente, formulario.nombres, formulario.registroCivil, formulario.cedulaFisioterapeuta]);
 
   useEffect(() => {
     if (paso === 8) {
@@ -593,6 +625,7 @@ const ValoracionIngreso = () => {
           pasoCompleto={pasoCompleto}
           siguiente={siguiente}
           InputField={InputField}
+          pacienteCargado={formularioCargado && !!pacienteId}
         />
       )}
 

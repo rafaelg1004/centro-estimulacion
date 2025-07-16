@@ -139,10 +139,9 @@ export default function ValoracionIngresoAdultosLactancia() {
   // Traer datos del paciente adulto
   useEffect(() => {
     apiRequest(`/pacientes-adultos/${id}`)
-      .then(res => res.json())
       .then(data => setFormulario(prev => ({
         ...prev,
-        ...data, // Esto copia todos los campos del paciente adulto
+        ...data,
       })));
   }, [id]);
 

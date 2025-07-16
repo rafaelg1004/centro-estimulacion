@@ -32,6 +32,7 @@ const FORMULARIO_INICIAL = {
   acompanante: "",
   telefonoAcompanante: "",
   nombreBebe: "",
+  estadoEmbarazo: "", // "gestacion" o "posparto"
   semanasGestacion: "",
   fum: "",
   fechaProbableParto: "",
@@ -49,6 +50,10 @@ export default function EditarPacienteAdulto() {
   useEffect(() => {
     apiRequest(`/pacientes-adultos/${id}`)
       .then(data => {
+        // Para retrocompatibilidad: si no tiene estadoEmbarazo, asignar "gestacion"
+        if (!data.estadoEmbarazo) {
+          data.estadoEmbarazo = "gestacion";
+        }
         setFormulario({
           ...FORMULARIO_INICIAL,
           ...data,
@@ -83,15 +88,14 @@ export default function EditarPacienteAdulto() {
       }
     }
     try {
-      const res = await fetch(
-        `/api/pacientes-adultos/${id}`,
+      await apiRequest(
+        `/pacientes-adultos/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formulario),
         }
       );
-      if (!res.ok) throw new Error("Error al actualizar paciente adulto");
       setMensaje("Paciente adulto actualizado correctamente");
       setTimeout(() => navigate(`/pacientes-adultos/${id}`), 1500);
     } catch (err) {
@@ -142,11 +146,11 @@ export default function EditarPacienteAdulto() {
                 </div>
               );
             }
-            if (key === "genero") {
+            if (key === "genero" || key === "estadoEmbarazo") {
               return (
                 <div key={key}>
                   <label className="block text-sm font-semibold mb-1" htmlFor={key}>
-                    Género
+                    {key === "genero" ? "Género" : "Estado del embarazo"}
                   </label>
                   <select
                     id={key}
@@ -157,14 +161,29 @@ export default function EditarPacienteAdulto() {
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-white"
                   >
                     <option value="">Seleccione...</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Otro">Otro</option>
+                    {key === "genero" ? (
+                      <>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Otro">Otro</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="gestacion">En gestación</option>
+                        <option value="posparto">Posparto</option>
+                      </>
+                    )}
                   </select>
                 </div>
               );
             }
             if (key === "fechaNacimiento" || key === "fum" || key === "fechaProbableParto") {
+              // Solo mostrar campos de gestación si está en gestación o es un paciente existente sin estado definido
+              if ((key === "fum" || key === "fechaProbableParto") && 
+                  formulario.estadoEmbarazo !== "gestacion" && 
+                  formulario.estadoEmbarazo !== "") {
+                return null;
+              }
               return (
                 <div key={key}>
                   <label className="block text-sm font-semibold mb-1" htmlFor={key}>
@@ -181,10 +200,19 @@ export default function EditarPacienteAdulto() {
                     value={formulario[key]}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 rounded-lg border-2 border-indigo-400 focus:ring-2 focus:ring-indigo-600 outline-none text-base"
+                    className={`w-full px-4 py-3 rounded-lg border-2 outline-none text-base ${
+                      key === "fechaNacimiento" 
+                        ? "border-indigo-400 focus:ring-2 focus:ring-indigo-600" 
+                        : "border-pink-400 focus:ring-2 focus:ring-pink-600 bg-pink-50"
+                    }`}
                   />
                 </div>
               );
+            }
+            
+            // Solo mostrar semanas de gestación si está en gestación
+            if (key === "semanasGestacion" && formulario.estadoEmbarazo !== "gestacion") {
+              return null;
             }
             return (
               <div key={key}>
@@ -202,7 +230,11 @@ export default function EditarPacienteAdulto() {
                   value={formulario[key]}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none text-base"
+                  className={`w-full px-4 py-3 rounded-lg border outline-none text-base ${
+                    key === "semanasGestacion" 
+                      ? "border-pink-200 focus:ring-2 focus:ring-pink-400 bg-pink-50" 
+                      : "border-gray-300 focus:ring-2 focus:ring-indigo-400"
+                  }`}
                   placeholder={key
                     .replace(/([A-Z])/g, " $1")
                     .replace(/^./, str => str.toUpperCase())}

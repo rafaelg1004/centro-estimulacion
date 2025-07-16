@@ -222,14 +222,14 @@ const Paso2Antecedentes = ({
               </div>
             </div>
             <InputField
-              label="Tiempo de lactancia (semanas)"
+              label="Tiempo de lactancia"
               name="tiempoLactancia"
-              type="number"
+              type="text"
               value={formulario.tiempoLactancia || ""}
               onChange={handleChange}
               touched={touched.tiempoLactancia}
               disabled={formulario.lactancia !== "SI"}
-              placeholder="Ej: 12"
+              placeholder="Escriba el tiempo (ej: 6 meses, 3 semanas, aún recibe)"
             />
 
             <div className="md:col-span-2 mt-4">

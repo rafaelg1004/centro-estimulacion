@@ -1,5 +1,25 @@
-import React from "react";
+import React, { useCallback } from "react";
 import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
+import { 
+  ClipboardDocumentCheckIcon,
+  MagnifyingGlassIcon,
+  DocumentTextIcon,
+  PencilSquareIcon,
+  ExclamationCircleIcon
+} from "@heroicons/react/24/outline";
+
+// Componente para secciones (fuera del componente principal para evitar re-creación)
+const Section = ({ title, icon: Icon, children, bgColor = "bg-indigo-50", iconColor = "text-indigo-600" }) => (
+  <div className={`${bgColor} border border-indigo-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300`}>
+    <div className="flex items-center gap-3 mb-4">
+      <div className={`p-2 ${iconColor} bg-white rounded-xl shadow-sm`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+    </div>
+    {children}
+  </div>
+);
 
 const ligamentosMusculos = [
   "LIGAMENTO ILIO LUMBAR LIL",
@@ -61,17 +81,28 @@ const ligEndopelvicos = [
 ];
 
 export default function Paso11EvaluacionTRP({ formulario, setFormulario, siguientePaso, pasoAnterior }) {
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
     setFormulario((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
+  }, [setFormulario]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-green-100">
-      <div className="bg-white bg-opacity-90 p-2 md:p-6 rounded-3xl shadow-2xl flex flex-col gap-8 w-full max-w-3xl border border-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        {/* Título principal */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Valoración Piso Pélvico
+          </h1>
+          <h2 className="text-2xl font-semibold text-gray-700">
+            Paso 11: Evaluación TRP
+          </h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mt-4 rounded-full"></div>
+        </div>
+
         <form
           onSubmit={e => {
             e.preventDefault();
@@ -79,190 +110,248 @@ export default function Paso11EvaluacionTRP({ formulario, setFormulario, siguien
           }}
           className="space-y-8"
         >
-          <h3 className="text-xl font-bold text-indigo-700 mb-4">Evaluación TRP Exopélvicos</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-xs border mb-4">
-              <thead>
-                <tr>
-                  <th className="border px-2 py-1">Ligamento/Músculo</th>
-                  <th className="border px-2 py-1">Izq. Activo</th>
-                  <th className="border px-2 py-1">Izq. Latente</th>
-                  <th className="border px-2 py-1">Der. Activo</th>
-                  <th className="border px-2 py-1">Der. Latente</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ligamentosMusculos.map((nombre) => (
-                  <tr key={nombre}>
-                    <td className="border px-2 py-1">{nombre}</td>
-                    <td className="border px-2 py-1 text-center">
-                      <input
-                        type="checkbox"
-                        name={`exo_${nombre}_izq_activo`}
-                        checked={formulario[`exo_${nombre}_izq_activo`] || false}
-                        onChange={handleChange}
-                      />
-                    </td>
-                    <td className="border px-2 py-1 text-center">
-                      <input
-                        type="checkbox"
-                        name={`exo_${nombre}_izq_latente`}
-                        checked={formulario[`exo_${nombre}_izq_latente`] || false}
-                        onChange={handleChange}
-                      />
-                    </td>
-                    <td className="border px-2 py-1 text-center">
-                      <input
-                        type="checkbox"
-                        name={`exo_${nombre}_der_activo`}
-                        checked={formulario[`exo_${nombre}_der_activo`] || false}
-                        onChange={handleChange}
-                      />
-                    </td>
-                    <td className="border px-2 py-1 text-center">
-                      <input
-                        type="checkbox"
-                        name={`exo_${nombre}_der_latente`}
-                        checked={formulario[`exo_${nombre}_der_latente`] || false}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Evaluación TRP Exopélvicos */}
+          <Section 
+            title="Evaluación TRP Exopélvicos" 
+            icon={ClipboardDocumentCheckIcon}
+            bgColor="bg-blue-50"
+            iconColor="text-blue-600"
+          >
+            <div className="overflow-x-auto">
+              <div className="bg-white rounded-xl shadow-sm border border-blue-100">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="bg-blue-100 border-b border-blue-200">
+                      <th className="px-4 py-3 text-left font-semibold text-blue-900">Ligamento/Músculo</th>
+                      <th className="px-4 py-3 text-center font-semibold text-blue-900">Izq. Activo</th>
+                      <th className="px-4 py-3 text-center font-semibold text-blue-900">Izq. Latente</th>
+                      <th className="px-4 py-3 text-center font-semibold text-blue-900">Der. Activo</th>
+                      <th className="px-4 py-3 text-center font-semibold text-blue-900">Der. Latente</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ligamentosMusculos.map((nombre, index) => (
+                      <tr key={nombre} className={`border-b border-blue-100 hover:bg-blue-25 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-blue-25'}`}>
+                        <td className="px-4 py-3 text-gray-800 font-medium">{nombre}</td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            name={`exo_${nombre}_izq_activo`}
+                            checked={formulario[`exo_${nombre}_izq_activo`] || false}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            name={`exo_${nombre}_izq_latente`}
+                            checked={formulario[`exo_${nombre}_izq_latente`] || false}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            name={`exo_${nombre}_der_activo`}
+                            checked={formulario[`exo_${nombre}_der_activo`] || false}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            name={`exo_${nombre}_der_latente`}
+                            checked={formulario[`exo_${nombre}_der_latente`] || false}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Section>
 
-          <h4 className="text-lg font-bold text-indigo-600 mb-2">Evaluación Prolapso Organopélvico</h4>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-xs border mb-4">
-              <thead>
-                <tr>
-                  <th className="border px-2 py-1">Órgano</th>
-                  <th className="border px-2 py-1">Grado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prolapsos.map((nombre) => (
-                  <tr key={nombre}>
-                    <td className="border px-2 py-1">{nombre}</td>
-                    <td className="border px-2 py-1">
-                      <input
-                        type="text"
-                        name={`prolapso_${nombre}_grado`}
-                        value={formulario[`prolapso_${nombre}_grado`] || ""}
-                        onChange={handleChange}
-                        className="w-16 px-1 py-1 border rounded"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Evaluación Prolapso Organopélvico */}
+          <Section 
+            title="Evaluación Prolapso Organopélvico" 
+            icon={MagnifyingGlassIcon}
+            bgColor="bg-purple-50"
+            iconColor="text-purple-600"
+          >
+            <div className="overflow-x-auto">
+              <div className="bg-white rounded-xl shadow-sm border border-purple-100">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="bg-purple-100 border-b border-purple-200">
+                      <th className="px-4 py-3 text-left font-semibold text-purple-900">Órgano</th>
+                      <th className="px-4 py-3 text-center font-semibold text-purple-900">Grado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {prolapsos.map((nombre, index) => (
+                      <tr key={nombre} className={`border-b border-purple-100 hover:bg-purple-25 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-purple-25'}`}>
+                        <td className="px-4 py-3 text-gray-800 font-medium">{nombre}</td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="text"
+                            name={`prolapso_${nombre}_grado`}
+                            value={formulario[`prolapso_${nombre}_grado`] || ""}
+                            onChange={handleChange}
+                            className="w-20 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 text-center"
+                            placeholder="0-4"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Section>
 
-          <h4 className="text-lg font-bold text-indigo-600 mb-2">Evaluación TRP Endopélvicos</h4>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-xs border mb-4">
-              <thead>
-                <tr>
-                  <th className="border px-2 py-1">Ligamento/Músculo</th>
-                  <th className="border px-2 py-1">Presente</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ligEndopelvicos.map((nombre) => (
-                  <tr key={nombre}>
-                    <td className="border px-2 py-1">{nombre}</td>
-                    <td className="border px-2 py-1 text-center">
-                      <input
-                        type="checkbox"
-                        name={`endo_${nombre}_presente`}
-                        checked={formulario[`endo_${nombre}_presente`] || false}
-                        onChange={handleChange}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Evaluación TRP Endopélvicos */}
+          <Section 
+            title="Evaluación TRP Endopélvicos" 
+            icon={DocumentTextIcon}
+            bgColor="bg-green-50"
+            iconColor="text-green-600"
+          >
+            <div className="overflow-x-auto">
+              <div className="bg-white rounded-xl shadow-sm border border-green-100">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="bg-green-100 border-b border-green-200">
+                      <th className="px-4 py-3 text-left font-semibold text-green-900">Ligamento/Músculo</th>
+                      <th className="px-4 py-3 text-center font-semibold text-green-900">Presente</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ligEndopelvicos.map((nombre, index) => (
+                      <tr key={nombre} className={`border-b border-green-100 hover:bg-green-25 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-green-25'}`}>
+                        <td className="px-4 py-3 text-gray-800 font-medium">{nombre}</td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            name={`endo_${nombre}_presente`}
+                            checked={formulario[`endo_${nombre}_presente`] || false}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Section>
 
-          {/* Sección de Diagnóstico y Plan */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-1 mt-8">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="flex-1 flex flex-col gap-6">
-                <div>
-                  <label className="font-semibold mb-1">Dolor:</label>
-                  <textarea
-                    name="dolorTRP"
-                    value={formulario.dolorTRP || ""}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-indigo-200 rounded resize-none"
-                    rows={3}
+          {/* Diagnóstico y Plan */}
+          <Section 
+            title="Diagnóstico y Plan de Intervención" 
+            icon={ExclamationCircleIcon}
+            bgColor="bg-red-50"
+            iconColor="text-red-600"
+          >
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Dolor</label>
+                <textarea
+                  name="dolorTRP"
+                  value={formulario.dolorTRP || ""}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
+                  placeholder="Descripción del dolor y localización..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Diagnóstico Fisioterapéutico</label>
+                <textarea
+                  name="diagnosticoFisio"
+                  value={formulario.diagnosticoFisio || ""}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
+                  placeholder="Diagnóstico fisioterapéutico del paciente..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Plan de Intervención</label>
+                <textarea
+                  name="planIntervencion"
+                  value={formulario.planIntervencion || ""}
+                  onChange={handleChange}
+                  rows={5}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
+                  placeholder="Detalle del plan de intervención y tratamiento propuesto..."
+                />
+              </div>
+            </div>
+          </Section>
+
+          {/* Firmas */}
+          <Section 
+            title="Firmas y Autorizaciones" 
+            icon={PencilSquareIcon}
+            bgColor="bg-amber-50"
+            iconColor="text-amber-600"
+          >
+            <div className="space-y-8">
+              {/* Firma del Paciente */}
+              <div className="bg-white p-6 rounded-xl border border-amber-200 shadow-sm">
+                <h4 className="text-md font-semibold text-gray-800 mb-4 text-center">Firma del Paciente</h4>
+                <div className="flex justify-center">
+                  <FirmaCanvas
+                    label="Firma de Paciente"
+                    name="firmaPaciente"
+                    formulario={formulario}
+                    setFormulario={(campo, valor) => setFormulario(f => ({ ...f, [campo]: valor }))}
                   />
                 </div>
-                <div>
-                  <label className="font-semibold mb-1">Diagnóstico Fisioterapéutico:</label>
-                  <textarea
-                    name="diagnosticoFisio"
-                    value={formulario.diagnosticoFisio || ""}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-indigo-200 rounded resize-none"
-                    rows={3}
+              </div>
+
+              {/* Firma del Fisioterapeuta */}
+              <div className="bg-white p-6 rounded-xl border border-amber-200 shadow-sm">
+                <h4 className="text-md font-semibold text-gray-800 mb-4 text-center">Firma del Fisioterapeuta</h4>
+                <div className="flex justify-center">
+                  <FirmaCanvas
+                    label="Firma del Fisioterapeuta"
+                    name="firmaFisioterapeuta"
+                    formulario={formulario}
+                    setFormulario={(campo, valor) => setFormulario(f => ({ ...f, [campo]: valor }))}
                   />
                 </div>
-                <div>
-                  <label className="font-semibold mb-1">Plan de Intervención:</label>
-                  <textarea
-                    name="planIntervencion"
-                    value={formulario.planIntervencion || ""}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-indigo-200 rounded resize-none"
-                    rows={5}
+              </div>
+
+              {/* Autorización */}
+              <div className="bg-white p-6 rounded-xl border border-amber-200 shadow-sm">
+                <div className="mb-6">
+                  <h4 className="text-md font-semibold text-gray-800 mb-3">Autorización para Uso de Imagen</h4>
+                  <p className="text-sm text-gray-600 text-justify leading-relaxed">
+                    Autorizo a D'Mamitas & Babies para reproducir fotografías e imágenes de las actividades en las que participe, para ser utilizadas en sus publicaciones, proyectos, redes sociales y página Web.
+                  </p>
+                </div>
+                <h4 className="text-md font-semibold text-gray-800 mb-4 text-center">Firma autorización (cc.)</h4>
+                <div className="flex justify-center">
+                  <FirmaCanvas
+                    label="Firma autorización (cc.)"
+                    name="firmaAutorizacion"
+                    formulario={formulario}
+                    setFormulario={(campo, valor) => setFormulario(f => ({ ...f, [campo]: valor }))}
                   />
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Sección de Firmas */}
-          <div className="flex flex-col gap-8 mt-8">
-            <div className="flex flex-col items-center">
-              <label className="font-semibold mb-2">Firma de Paciente:</label>
-              <FirmaCanvas
-                label="Firma de Paciente"
-                name="firmaPaciente"
-                formulario={formulario}
-                setFormulario={(campo, valor) => setFormulario(f => ({ ...f, [campo]: valor }))}
-              />
-            </div>
-            <div className="flex flex-col items-center">
-              <label className="font-semibold mb-2">Firma del Fisioterapeuta:</label>
-              <FirmaCanvas
-                label="Firma del Fisioterapeuta"
-                name="firmaFisioterapeuta"
-                formulario={formulario}
-                setFormulario={(campo, valor) => setFormulario(f => ({ ...f, [campo]: valor }))}
-              />
-            </div>
-          </div>
-
-          {/* Sección de Autorización */}
-          <div className="border-t pt-6 mt-8">
-            <p className="mb-4 text-justify">
-              Autorizo a D'Mamitas & Babies para reproducir fotografías e imágenes de las actividades en las que participe, para ser utilizadas en sus publicaciones, proyectos, redes sociales y página Web.
-            </p>
-            <div className="flex flex-col items-center">
-              <label className="font-semibold mb-2">Firma autorización (cc.):</label>
-              <FirmaCanvas
-                label="Firma autorización (cc.)"
-                name="firmaAutorizacion"
-                formulario={formulario}
-                setFormulario={(campo, valor) => setFormulario(f => ({ ...f, [campo]: valor }))}
-              />
-            </div>
-          </div>
+          </Section>
 
           {/* Botones */}
           <div className="flex justify-between mt-8">

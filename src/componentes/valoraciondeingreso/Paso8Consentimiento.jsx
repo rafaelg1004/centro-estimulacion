@@ -23,18 +23,18 @@ console.log("Datos de consentimiento:", datos);
         <input
           type="text"
           className="border-b border-indigo-400 bg-gray-100 outline-none min-w-[180px] mx-1"
-          name="consentimiento_nombreAcudiente"
-          value={datos.consentimiento_nombreAcudiente || ""}
+          name="nombreAcudiente"
+          value={datos.nombreAcudiente || ""}
           readOnly
           placeholder="Nombre acudiente"
         />{" "}
         mayor de edad e Identificado con c.c.{" "}
         <input
-         id="consentimiento_ccAcudiente"
+         id="cedulaAcudiente"
           type="text"
           className="border-b border-indigo-400 bg-transparent outline-none min-w-[100px] mx-1"
-          name="consentimiento_ccAcudiente"
-          value={datos.consentimiento_ccAcudiente ||""}
+          name="cedulaAcudiente"
+          value={datos.cedulaAcudiente ||""}
           onChange={onChange}
           readOnly
           placeholder="C.C. acudiente"
@@ -53,8 +53,8 @@ console.log("Datos de consentimiento:", datos);
         <input
           type="text"
           className="border-b border-indigo-400 bg-transparent outline-none min-w-[180px] mx-1"
-          name="consentimiento_nombreNino"
-          value={datos.consentimiento_nombreNino || ""}
+          name="nombres"
+          value={datos.nombres || ""}
           onChange={onChange}
           readOnly
           placeholder="Nombre niño/a"
@@ -63,8 +63,8 @@ console.log("Datos de consentimiento:", datos);
         <input
           type="text"
           className="border-b border-indigo-400 bg-transparent outline-none min-w-[120px] mx-1"
-          name="consentimiento_registroCivil"
-          value={datos.consentimiento_registroCivil || ""}
+          name="registroCivil"
+          value={datos.registroCivil || ""}
           onChange={onChange}
           readOnly
           placeholder="Registro Civil"

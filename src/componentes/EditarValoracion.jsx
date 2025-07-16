@@ -181,6 +181,24 @@ export default function EditarValoracion() {
   const [cargando, setCargando] = useState(true);
   const [mostrarConfirmarFinalizar, setMostrarConfirmarFinalizar] = useState(false);
 
+  // Función helper para obtener datos del paciente (modelo nuevo o antiguo)
+  const obtenerDatoPaciente = (valoracion, campo) => {
+    if (!valoracion) return null;
+    
+    // Primero intentar con el modelo nuevo (valoracion.paciente)
+    if (valoracion.paciente && valoracion.paciente[campo] !== undefined) {
+      return valoracion.paciente[campo];
+    }
+    
+    // Si no existe, intentar con el modelo antiguo (directamente en valoracion)
+    if (valoracion[campo] !== undefined) {
+      return valoracion[campo];
+    }
+    
+    // Si no existe en ninguno, devolver null
+    return null;
+  };
+
   // Definir los arrays de firmas al inicio
   const firmasFormulario = [
     "firmaProfesional",
@@ -224,7 +242,49 @@ export default function EditarValoracion() {
         console.log(`✅ Valoración cargada en ${loadTime.toFixed(0)}ms`);
         console.log('📊 Tamaño de la valoración:', JSON.stringify(data).length, 'caracteres');
         
-        setValoracion(data);
+        // Crear una versión unificada con datos del paciente accesibles directamente
+        const valoracionUnificada = {
+          ...data,
+          // Asegurar que los datos del paciente estén disponibles directamente en la valoración
+          nombres: obtenerDatoPaciente(data, 'nombres'),
+          cedula: obtenerDatoPaciente(data, 'cedula'),
+          genero: obtenerDatoPaciente(data, 'genero'),
+          edad: obtenerDatoPaciente(data, 'edad'),
+          lugarNacimiento: obtenerDatoPaciente(data, 'lugarNacimiento'),
+          fechaNacimiento: obtenerDatoPaciente(data, 'fechaNacimiento') || obtenerDatoPaciente(data, 'nacimiento'),
+          registroCivil: obtenerDatoPaciente(data, 'registroCivil'),
+          peso: obtenerDatoPaciente(data, 'peso'),
+          talla: obtenerDatoPaciente(data, 'talla'),
+          direccion: obtenerDatoPaciente(data, 'direccion'),
+          telefono: obtenerDatoPaciente(data, 'telefono'),
+          celular: obtenerDatoPaciente(data, 'celular'),
+          pediatra: obtenerDatoPaciente(data, 'pediatra'),
+          aseguradora: obtenerDatoPaciente(data, 'aseguradora'),
+          estadoCivil: obtenerDatoPaciente(data, 'estadoCivil'),
+          ocupacion: obtenerDatoPaciente(data, 'ocupacion'),
+          // Datos familiares con ambos formatos
+          nombreMadre: obtenerDatoPaciente(data, 'nombreMadre') || obtenerDatoPaciente(data, 'madreNombre'),
+          madreNombre: obtenerDatoPaciente(data, 'madreNombre') || obtenerDatoPaciente(data, 'nombreMadre'),
+          edadMadre: obtenerDatoPaciente(data, 'edadMadre') || obtenerDatoPaciente(data, 'madreEdad'),
+          madreEdad: obtenerDatoPaciente(data, 'madreEdad') || obtenerDatoPaciente(data, 'edadMadre'),
+          ocupacionMadre: obtenerDatoPaciente(data, 'ocupacionMadre') || obtenerDatoPaciente(data, 'madreOcupacion'),
+          madreOcupacion: obtenerDatoPaciente(data, 'madreOcupacion') || obtenerDatoPaciente(data, 'ocupacionMadre'),
+          escolaridadMadre: obtenerDatoPaciente(data, 'escolaridadMadre') || obtenerDatoPaciente(data, 'madreEscolaridad'),
+          madreEscolaridad: obtenerDatoPaciente(data, 'madreEscolaridad') || obtenerDatoPaciente(data, 'escolaridadMadre'),
+          nombrePadre: obtenerDatoPaciente(data, 'nombrePadre') || obtenerDatoPaciente(data, 'padreNombre'),
+          padreNombre: obtenerDatoPaciente(data, 'padreNombre') || obtenerDatoPaciente(data, 'nombrePadre'),
+          edadPadre: obtenerDatoPaciente(data, 'edadPadre') || obtenerDatoPaciente(data, 'padreEdad'),
+          padreEdad: obtenerDatoPaciente(data, 'padreEdad') || obtenerDatoPaciente(data, 'edadPadre'),
+          ocupacionPadre: obtenerDatoPaciente(data, 'ocupacionPadre') || obtenerDatoPaciente(data, 'padreOcupacion'),
+          padreOcupacion: obtenerDatoPaciente(data, 'padreOcupacion') || obtenerDatoPaciente(data, 'ocupacionPadre'),
+          escolaridadPadre: obtenerDatoPaciente(data, 'escolaridadPadre') || obtenerDatoPaciente(data, 'padreEscolaridad'),
+          padreEscolaridad: obtenerDatoPaciente(data, 'padreEscolaridad') || obtenerDatoPaciente(data, 'escolaridadPadre'),
+          numeroHermanos: obtenerDatoPaciente(data, 'numeroHermanos'),
+          lugarQueOcupa: obtenerDatoPaciente(data, 'lugarQueOcupa')
+        };
+        
+        console.log('🔄 Datos unificados del paciente aplicados');
+        setValoracion(valoracionUnificada);
         setCargando(false);
       })
       .catch(error => {
@@ -272,11 +332,7 @@ export default function EditarValoracion() {
 
       // Obtener la valoración original una sola vez para comparar
       console.log('Obteniendo valoración original de la BD...');
-      const valoracionOriginal = await sendToBackendMobileOptimized(
-        `/api/valoraciones/${id}`,
-        {},
-        { method: 'GET' }
-      );
+      const valoracionOriginal = await apiRequest(`/valoraciones/${id}`);
       
       console.log('Valoración original de la BD:', valoracionOriginal);
 
@@ -351,15 +407,17 @@ export default function EditarValoracion() {
       console.log('\n=== DATOS FINALES A ENVIAR ===');
       console.log('dataToSend final:', dataToSend);
 
-      // Limpiar datos y usar envío optimizado para Chrome móvil
+      // Limpiar datos y usar la función apiRequest estándar
       const dataToSendCleaned = cleanFormDataForMobile(dataToSend);
       console.log('📱 Datos limpiados para móvil:', dataToSendCleaned);
 
-      const response = await sendToBackendMobileOptimized(
-        `/api/valoraciones/${id}`, 
-        dataToSendCleaned,
-        { method: 'PUT' }
-      );
+      const response = await apiRequest(`/valoraciones/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSendCleaned)
+      });
+
+      console.log('✅ Respuesta del servidor:', response);
 
       if (!response) {
         throw new Error('Error al actualizar la valoración - respuesta vacía');

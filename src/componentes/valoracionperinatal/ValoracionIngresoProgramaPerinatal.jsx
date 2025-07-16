@@ -81,7 +81,6 @@ export default function ValoracionIngresoProgramaPerinatal() {
 
   useEffect(() => {
     apiRequest(`/pacientes-adultos/${id}`)
-      .then(res => res.json())
       .then(data => setPaciente(data));
   }, [id]);
 
@@ -223,7 +222,8 @@ export default function ValoracionIngresoProgramaPerinatal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosAEnviar),
       });
-      if (response.ok) {
+      console.log("Respuesta del backend al guardar:", response); // <-- Log agregado
+      if (response && response._id) {
         await Swal.fire({
           icon: "success",
           title: "¡Guardado!",

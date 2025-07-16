@@ -2,7 +2,29 @@ import React, { useCallback } from "react";
 import { HeartIcon, ScaleIcon, UserIcon, ExclamationTriangleIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 
 // Componente para secciones (fuera del componente principal para evitar re-creación)
-const Section = ({ title, icon: Icon, children, bgColor = "bg-indigo-50", iconColor = "text-indigo-600" }) => (
+const Sectio              <div className="space-y-4">
+                <InputField
+                  label="Otros Fármacos"
+                  name="farmacoOtros"
+                  placeholder="Otros medicamentos"
+                  formulario={formulario}
+                  handleChange={handleChange}
+                />
+                <InputField
+                  label="Alergias"
+                  name="alergias"
+                  placeholder="Alergias conocidas"
+                  formulario={formulario}
+                  handleChange={handleChange}
+                />
+                <InputField
+                  label="Última Analítica"
+                  name="ultimaAnalitica"
+                  placeholder="Fecha de última analítica"
+                  formulario={formulario}
+                  handleChange={handleChange}
+                />
+              </div>n: Icon, children, bgColor = "bg-indigo-50", iconColor = "text-indigo-600" }) => (
   <div className={`${bgColor} border border-indigo-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300`}>
     <div className="flex items-center gap-3 mb-4">
       <div className={`p-2 ${iconColor} bg-white rounded-xl shadow-sm`}>
@@ -190,10 +212,12 @@ export default function Paso2EstadoSalud({ formulario, setFormulario, siguienteP
                 handleChange={handleChange}
               />
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Observaciones</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Observaciones AVD/Trabajo
+                </label>
                 <textarea
-                  name="observacionesActividad"
-                  value={formulario.observacionesActividad || ""}
+                  name="observacionesAvd"
+                  value={formulario.observacionesAvd || ""}
                   onChange={handleChange}
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
@@ -251,25 +275,26 @@ export default function Paso2EstadoSalud({ formulario, setFormulario, siguienteP
             </div>
           </Section>
 
-          {/* Farmacología */}
+          {/* Información Médica */}
           <Section 
-            title="Farmacología" 
+            title="Información Médica" 
             icon={ClipboardDocumentListIcon}
-            bgColor="bg-yellow-50"
-            iconColor="text-yellow-600"
+            bgColor="bg-purple-50"
+            iconColor="text-purple-600"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h4 className="text-md font-medium text-gray-800">Medicamentos Actuales</h4>
-                <div className="grid grid-cols-1 gap-2">
-                  <CheckboxField label="Antihipertensivo" name="farmaco_antihipertensivo" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Antidepresivo" name="farmaco_antidepresivo" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Ansiolítico" name="farmaco_ansiolítico" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Antibiótico" name="farmaco_antibiótico" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Vitaminas" name="farmaco_vitaminas" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Antioxidantes" name="farmaco_antioxidantes" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Complementación Natural" name="farmaco_complementación_natural" formulario={formulario} handleChange={handleChange} />
-                </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Información sobre Medicación
+                </label>
+                <textarea
+                  name="infoMedicacion"
+                  value={formulario.infoMedicacion || ""}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
+                  placeholder="Medicamentos actuales..."
+                />
               </div>
               
               <div className="space-y-4">
@@ -277,85 +302,102 @@ export default function Paso2EstadoSalud({ formulario, setFormulario, siguienteP
                   label="Otros Fármacos"
                   name="farmacoOtros"
                   placeholder="Otros medicamentos"
-                  formulario={formulario}
-                  handleChange={handleChange}
                 />
                 <InputField
                   label="Alergias"
                   name="alergias"
                   placeholder="Alergias conocidas"
-                  formulario={formulario}
-                  handleChange={handleChange}
                 />
                 <InputField
                   label="Última Analítica"
                   name="ultimaAnalitica"
-                  placeholder="Fecha de última analítica"
-                  formulario={formulario}
-                  handleChange={handleChange}
+                  placeholder="Fecha y resultados"
                 />
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-md font-medium text-gray-800 mb-4">Medicación Actual</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <CheckboxField label="Antihipertensivo" name="farmaco_antihipertensivo" />
+                <CheckboxField label="Antidepresivo" name="farmaco_antidepresivo" />
+                <CheckboxField label="Ansiolítico" name="farmaco_ansiolítico" />
+                <CheckboxField label="Antibiótico" name="farmaco_antibiótico" />
+                <CheckboxField label="Vitaminas" name="farmaco_vitaminas" />
+                <CheckboxField label="Antioxidantes" name="farmaco_antioxidantes" />
+                <CheckboxField label="Complementación Natural" name="farmaco_complementación_natural" />
               </div>
             </div>
           </Section>
 
-          {/* Traumatología */}
+          {/* Patologías y Traumatismos */}
           <Section 
-            title="Traumatología" 
+            title="Patologías y Traumatismos" 
             icon={ExclamationTriangleIcon}
-            bgColor="bg-orange-50"
-            iconColor="text-orange-600"
+            bgColor="bg-amber-50"
+            iconColor="text-amber-600"
           >
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="text-md font-medium text-gray-800">Antecedentes Traumáticos</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  <CheckboxField label="Accidente de Tráfico" name="trauma_accidente_de_tráfico" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Caída sobre Coxis" name="trauma_caída_sobre_coxis" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Caída sobre Espalda" name="trauma_caída_sobre_espalda" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Golpe Abdominal" name="trauma_golpe_abdominal" formulario={formulario} handleChange={handleChange} />
-                  <CheckboxField label="Golpe en la Cabeza" name="trauma_golpe_en_la_cabeza" formulario={formulario} handleChange={handleChange} />
+                <InputField
+                  label="Patología Cardiaca"
+                  name="patologiaCardio"
+                  placeholder="Enfermedades cardíacas"
+                />
+                <InputField
+                  label="Patología Neurológica"
+                  name="patologiaNeuro"
+                  placeholder="Enfermedades neurológicas"
+                />
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Observaciones Traumáticas
+                  </label>
+                  <textarea
+                    name="observacionesTrauma"
+                    value={formulario.observacionesTrauma || ""}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
+                    placeholder="Detalles sobre traumatismos..."
+                  />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Observaciones Traumatológicas</label>
-                <textarea
-                  name="observacionesTrauma"
-                  value={formulario.observacionesTrauma || ""}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm hover:border-gray-300 resize-none"
-                  placeholder="Detalles sobre traumas o lesiones..."
-                />
+              <div>
+                <h4 className="text-md font-medium text-gray-800 mb-4">Antecedentes Traumáticos</h4>
+                <div className="space-y-2">
+                  <CheckboxField label="Accidente de Tráfico" name="trauma_accidente_de_tráfico" />
+                  <CheckboxField label="Caída sobre Coxis" name="trauma_caída_sobre_coxis" />
+                  <CheckboxField label="Caída sobre Espalda" name="trauma_caída_sobre_espalda" />
+                  <CheckboxField label="Golpe Abdominal" name="trauma_golpe_abdominal" />
+                  <CheckboxField label="Golpe en la Cabeza" name="trauma_golpe_en_la_cabeza" />
+                </div>
               </div>
             </div>
           </Section>
 
           {/* Botones de navegación */}
-          <div className="flex justify-between items-center pt-8">
-            <button
+          <div className="flex justify-between pt-8">
+            <button 
               type="button"
               onClick={pasoAnterior}
-              className="group relative px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
             >
-              <span className="flex items-center gap-2">
-                <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Anterior
-              </span>
+              <svg className="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              <span>Anterior</span>
             </button>
             
-            <button
-              type="submit"
-              className="group relative px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            <button 
+              type="submit" 
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3"
             >
-              <span className="flex items-center gap-2">
-                Siguiente
-                <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
+              <span>Continuar</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           </div>
         </form>

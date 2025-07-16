@@ -44,22 +44,24 @@ export default function ListaConsentimientosPerinatales() {
       const res = await apiRequest(`/consentimiento-perinatal/${id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("No se pudo eliminar en el backend");
-      
-      const resultado = await res.json();
-      
-      setConsentimientos(consentimientos.filter(c => c._id !== id));
-      
-      // Mostrar mensaje con información de imágenes eliminadas
-      const mensajeCompleto = resultado.imagenesEliminadas && resultado.imagenesEliminadas > 0
-        ? `Consentimiento eliminado correctamente. ${resultado.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
-        : "Consentimiento eliminado correctamente";
-        
-      setMensaje(mensajeCompleto);
-      setTimeout(() => setMensaje(""), 4000);
+      console.log("Respuesta al eliminar:", res); // <-- Log de la respuesta
+      // Si el backend retorna un campo 'error', lanzar el error
+      if (res && res.error) throw new Error(res.error);
+      // Si el backend retorna un mensaje de éxito
+      if (res && res.mensaje) {
+        setConsentimientos(consentimientos.filter(c => c._id !== id));
+        const mensajeCompleto = res.imagenesEliminadas && res.imagenesEliminadas > 0
+          ? `Consentimiento eliminado correctamente. ${res.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
+          : "Consentimiento eliminado correctamente";
+        setMensaje(mensajeCompleto);
+        setTimeout(() => setMensaje(""), 4000);
+        return;
+      }
+      // Si no hay mensaje ni error, mostrar mensaje genérico
+      throw new Error("No se pudo eliminar en el backend");
     } catch (error) {
       console.error('Error al eliminar consentimiento:', error);
-      setMensaje("No se pudo eliminar el consentimiento");
+      setMensaje(error.message || "No se pudo eliminar el consentimiento");
       setTimeout(() => setMensaje(""), 4000);
     }
   };

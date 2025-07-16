@@ -9,7 +9,7 @@
 export const API_CONFIG = {
   // URLs según entorno - En producción usa rutas relativas (mismo servidor)
   BASE_URL: process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:4000' // Backend local con puerto
+    ? 'http://localhost:5000' // Backend local con puerto 5000
     : '', // Producción: mismo servidor EC2, sin URL base
 
   // Timeouts por entorno
@@ -160,5 +160,3 @@ export const testAPIConnection = async () => {
     return false;
   }
 };
-
-export default API_CONFIG;

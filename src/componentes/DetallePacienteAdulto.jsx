@@ -56,7 +56,7 @@ export default function DetallePacienteAdulto() {
               <div className="mb-1"><span className="font-bold">Aseguradora:</span> {paciente.aseguradora}</div>
             </div>
             <div className="bg-indigo-50 rounded-2xl p-4 shadow-sm md:col-span-2">
-              <h3 className="font-semibold text-indigo-600 mb-2">Datos Familiares y Gestación</h3>
+              <h3 className="font-semibold text-indigo-600 mb-2">Datos Familiares y Embarazo</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="mb-1"><span className="font-bold">Acompañante:</span> {paciente.acompanante}</div>
@@ -64,9 +64,40 @@ export default function DetallePacienteAdulto() {
                   <div className="mb-1"><span className="font-bold">Nombre del bebé:</span> {paciente.nombreBebe}</div>
                 </div>
                 <div>
-                  <div className="mb-1"><span className="font-bold">Semanas de gestación:</span> {paciente.semanasGestacion}</div>
-                  <div className="mb-1"><span className="font-bold">FUM:</span> {paciente.fum}</div>
-                  <div className="mb-1"><span className="font-bold">Fecha probable de parto:</span> {paciente.fechaProbableParto}</div>
+                  {/* Indicador visual del estado - para retrocompatibilidad */}
+                  <div className="mb-3">
+                    <span className="font-bold">Estado del embarazo:</span> 
+                    <span className={`ml-2 px-3 py-1 rounded-full text-sm font-bold ${
+                      (paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) 
+                        ? 'bg-pink-100 text-pink-800 border border-pink-300' 
+                        : 'bg-blue-100 text-blue-800 border border-blue-300'
+                    }`}>
+                      {(paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) ? '🤰 En gestación' : '👶 Posparto'}
+                    </span>
+                  </div>
+                  
+                  {/* Campos condicionales para gestación - mostrar si hay datos o si es gestación */}
+                  {((paciente.estadoEmbarazo === 'gestacion' || !paciente.estadoEmbarazo) || 
+                    paciente.semanasGestacion || paciente.fum || paciente.fechaProbableParto) && (
+                    <div className="bg-pink-50 rounded-xl p-3 border border-pink-200">
+                      {paciente.semanasGestacion && (
+                        <div className="mb-1"><span className="font-bold text-pink-700">Semanas de gestación:</span> {paciente.semanasGestacion}</div>
+                      )}
+                      {paciente.fum && (
+                        <div className="mb-1"><span className="font-bold text-pink-700">FUM:</span> {paciente.fum}</div>
+                      )}
+                      {paciente.fechaProbableParto && (
+                        <div className="mb-1"><span className="font-bold text-pink-700">Fecha probable de parto:</span> {paciente.fechaProbableParto}</div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Mensaje para posparto */}
+                  {paciente.estadoEmbarazo === 'posparto' && (
+                    <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                      <div className="text-blue-700 font-medium">Paciente en etapa posparto</div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

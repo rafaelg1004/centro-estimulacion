@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { apiRequest, API_CONFIG } from "../../config/api";
 
 import { useParams, useNavigate } from "react-router-dom";
@@ -520,12 +520,14 @@ export default function EditarValoracionPisoPelvico() {
 
   useEffect(() => {
     apiRequest(`/valoracion-piso-pelvico/${id}`)
-      .then(res => res.json())
       .then(async data => {
+        console.log('Datos de valoración cargados:', data);
+        
         // Si data.paciente es un ID, trae los datos completos del paciente adulto
         if (data.paciente && typeof data.paciente === "string") {
-          const resPaciente = await apiRequest(`/pacientes-adultos/${data.paciente}`);
-          const datosPaciente = await resPaciente.json();
+          console.log('Cargando datos del paciente con ID:', data.paciente);
+          const datosPaciente = await apiRequest(`/pacientes-adultos/${data.paciente}`);
+          console.log('Datos del paciente cargados:', datosPaciente);
           setPaciente(datosPaciente);
           // Mezcla SOLO los campos que existen en FORMULARIO_INICIAL
           setFormulario(prev => ({
@@ -537,6 +539,7 @@ export default function EditarValoracionPisoPelvico() {
             ...data // Sobrescribe con los datos de la valoración
           }));
         } else if (data.paciente && typeof data.paciente === "object") {
+          console.log('Datos del paciente ya cargados en populate:', data.paciente);
           setPaciente(data.paciente);
           setFormulario(prev => ({
             ...prev,
@@ -547,13 +550,22 @@ export default function EditarValoracionPisoPelvico() {
             ...data
           }));
         } else {
+          console.log('No se encontraron datos del paciente');
           setFormulario({ ...FORMULARIO_INICIAL, ...data });
         }
+      })
+      .catch(error => {
+        console.error('Error cargando valoración:', error);
+        Swal.fire("Error", "No se pudieron cargar los datos de la valoración.", "error");
       });
   }, [id]);
 
-  const siguientePaso = () => setPaso((p) => p + 1);
-  const pasoAnterior = () => setPaso((p) => p - 1);
+  // Funciones memoizadas para evitar re-renders innecesarios
+  const siguientePaso = useCallback(() => setPaso((p) => p + 1), []);
+  const pasoAnterior = useCallback(() => setPaso((p) => p - 1), []);
+  const memoizedSetFormulario = useCallback((update) => {
+    setFormulario(update);
+  }, []);
 
   const actualizarValoracion = async () => {
     try {
@@ -571,10 +583,8 @@ export default function EditarValoracionPisoPelvico() {
       // Obtener valoración actual para comparar firmas existentes
       let valoracionActual = {};
       try {
-        const resActual = await apiRequest(`/valoracion-piso-pelvico/${id}`);
-        if (resActual.ok) {
-          valoracionActual = await resActual.json();
-        }
+        valoracionActual = await apiRequest(`/valoracion-piso-pelvico/${id}`);
+        console.log('Valoración actual obtenida para comparar firmas:', valoracionActual);
       } catch (error) {
         console.log('No se pudo obtener valoración actual:', error);
       }
@@ -603,20 +613,19 @@ export default function EditarValoracionPisoPelvico() {
         }
       }
 
-      const response = await fetch(
-        `/api/valoracion-piso-pelvico/${id}`,
+      console.log('🔄 Enviando petición PUT a:', `/valoracion-piso-pelvico/${id}`);
+      const data = await apiRequest(
+        `/valoracion-piso-pelvico/${id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(dataToSend),
         }
       );
-      if (response.ok) {
-        await Swal.fire("¡Actualizado!", "La valoración fue actualizada exitosamente.", "success");
-        navigate(`/valoraciones-piso-pelvico/${id}`);
-      } else {
-        await Swal.fire("Error", "No se pudo actualizar la valoración.", "error");
-      }
+      
+      // Si llega aquí sin error, la petición fue exitosa
+      console.log('✅ Valoración actualizada exitosamente:', data);
+      await Swal.fire("¡Actualizado!", "La valoración fue actualizada exitosamente.", "success");
+      navigate(`/valoraciones-piso-pelvico/${id}`);
     } catch (error) {
       console.error('Error al actualizar valoración:', error);
       await Swal.fire("Error", "Ocurrió un error al actualizar.", "error");
@@ -631,7 +640,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 1 && (
         <Paso1DatosGenerales
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           paciente={paciente}
           siguientePaso={siguientePaso}
         />
@@ -639,7 +648,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 2 && (
         <Paso2EstadoSalud
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -647,7 +656,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 3 && (
         <Paso3EnfermedadCronica
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -655,7 +664,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 4 && (
         <Paso4DinamicaObstetrica
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -663,7 +672,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 5 && (
         <Paso5DinamicaMenstrual
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -671,7 +680,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 6 && (
         <Paso6DinamicaMiccional
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -679,7 +688,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 7 && (
         <Paso7ICIQSF
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -687,7 +696,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 8 && (
         <Paso8DinamicaDefecatoria
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -695,7 +704,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 9 && (
         <Paso9EvaluacionFisioterapeutica
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -703,7 +712,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 10 && (
         <Paso10PalpacionInterna
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -711,7 +720,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 11 && (
         <Paso11EvaluacionTRP
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={siguientePaso}
           pasoAnterior={pasoAnterior}
         />
@@ -719,7 +728,7 @@ export default function EditarValoracionPisoPelvico() {
       {paso === 12 && (
         <Paso12Consentimiento
           formulario={formulario}
-          setFormulario={setFormulario}
+          setFormulario={memoizedSetFormulario}
           siguientePaso={actualizarValoracion}
           pasoAnterior={pasoAnterior}
         />
