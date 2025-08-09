@@ -157,6 +157,46 @@ const Paso3Habitos = ({
           touched={touched.relacionHermanos}
           disabled={formulario.tieneHermanos !== "SI"}
         />
+        {/* Menú desplegable de sugerencias de emociones */}
+        <div className="md:col-span-2 mt-2">
+          <label className="block text-sm font-semibold mb-1">Sugerencias de emociones</label>
+          <select
+            className="w-full border rounded-md p-2 mb-2"
+            onChange={e => {
+              const value = e.target.value;
+              if (value && !formulario.emociones?.includes(value)) {
+                const nuevaEmocion = formulario.emociones ? formulario.emociones + ', ' + value : value;
+                setFormulario(prev => ({ ...prev, emociones: nuevaEmocion }));
+              }
+              e.target.selectedIndex = 0; // Reset select
+            }}
+          >
+            <option value="">Selecciona una emoción para agregar...</option>
+            <optgroup label="Emociones Positivas">
+              <option value="Alegría 😊">Alegría 😊</option>
+              <option value="Entusiasmo 🤩">Entusiasmo 🤩</option>
+              <option value="Diversión 😄">Diversión 😄</option>
+              <option value="Tranquilidad 😌">Tranquilidad 😌</option>
+              <option value="Confianza 💪">Confianza 💪</option>
+              <option value="Cariño 🥰">Cariño 🥰</option>
+              <option value="Curiosidad 😃">Curiosidad 😃</option>
+              <option value="Comodidad 🧸">Comodidad 🧸</option>
+              <option value="Conexión 🫶">Conexión 🫶</option>
+            </optgroup>
+            <optgroup label="Emociones Desafiantes">
+              <option value="Inseguridad 😟">Inseguridad 😟</option>
+              <option value="Tímidez 😳">Tímidez 😳</option>
+              <option value="Frustración 😞">Frustración 😞</option>
+              <option value="Enojo 😠">Enojo 😠</option>
+              <option value="Tristeza 😢">Tristeza 😢</option>
+              <option value="Ansiedad 😖">Ansiedad 😖</option>
+              <option value="Cansancio 😫">Cansancio 😫</option>
+              <option value="Vergüenza 😬">Vergüenza 😬</option>
+              <option value="Celos 😤">Celos 😤</option>
+              <option value="Confusión 😶‍🌫">Confusión 😶‍🌫</option>
+            </optgroup>
+          </select>
+        </div>
         <InputField
           label="Emociones"
           name="emociones"
@@ -181,9 +221,16 @@ const Paso3Habitos = ({
         <InputField
           label="Relación con desconocidos (EVENTOS)"
           name="relacionDesconocidos"
+          type="select"
           value={formulario.relacionDesconocidos || ""}
           onChange={handleChange}
           touched={touched.relacionDesconocidos}
+          options={[
+            { value: "", label: "Seleccione" },
+            { value: "Adecuada y positiva", label: "1. Adecuada y positiva" },
+            { value: "Necesita apoyo", label: "2. Necesita apoyo" },
+            { value: "Hay señales de alerta", label: "3. Hay señales de alerta" },
+          ]}
         />
         <div className="md:col-span-2">
           <label className="block text-sm font-semibold mb-1" htmlFor="rutinaDiaria">

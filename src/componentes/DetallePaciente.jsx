@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
+import Swal from "sweetalert2";
 
 export default function DetallePaciente() {
   const { id } = useParams();
@@ -25,11 +26,47 @@ export default function DetallePaciente() {
   }, [id]);
 
   const eliminarFactura = async (facturaId) => {
-    if (window.confirm("¿Seguro que deseas eliminar esta factura?")) {
-      await apiRequest(`/pagoPaquete/${facturaId}`, {
-        method: "DELETE",
-      });
-      setPaquetes(paquetes.filter(p => p._id !== facturaId));
+    const result = await Swal.fire({
+      title: '¿Eliminar factura?',
+      text: '¿Estás seguro de que deseas eliminar esta factura?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await apiRequest(`/pagoPaquete/${facturaId}`, {
+          method: "DELETE",
+        });
+        setPaquetes(paquetes.filter(p => p._id !== facturaId));
+        
+        Swal.fire({
+          title: '¡Eliminada!',
+          text: 'La factura ha sido eliminada correctamente.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6'
+        });
+      } catch (error) {
+        if (error.message && error.message.includes("siendo usada en sesiones")) {
+          Swal.fire({
+            title: 'No se puede eliminar',
+            text: 'Esta factura está siendo usada en sesiones activas. Primero debe eliminar al paciente de las sesiones donde está inscrito.',
+            icon: 'warning',
+            confirmButtonColor: '#3085d6'
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'Error al eliminar la factura: ' + error.message,
+            icon: 'error',
+            confirmButtonColor: '#3085d6'
+          });
+        }
+      }
     }
   };
 
@@ -93,35 +130,54 @@ export default function DetallePaciente() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-center gap-4 mb-8">
-          <button
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
-            onClick={() => navigate(`/valoracion?paciente=${paciente._id}`)}
-          >
-            <ClipboardDocumentListIcon className="h-6 w-6" />
-            Nueva Valoración
-          </button>
-          <button
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
-            onClick={() => navigate("/pacientes")}
-          >
-            <ArrowLeftIcon className="h-6 w-6" />
-            Volver a la lista
-          </button>
-          <Link
-            to={`/paquetes/nuevo/${paciente._id}`}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
-          >
-            <CreditCardIcon className="h-6 w-6" />
-            Comprar paquete 
-          </Link>
-          <button
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
-            onClick={() => navigate(`/pacientes/editar/${paciente._id}`)}
-          >
-            <PencilSquareIcon className="h-6 w-6" />
-            Editar Paciente
-          </button>
+        {/* Botones de acciones organizados en grupos */}
+        <div className="space-y-4 mb-8">
+          {/* Grupo 1: Acciones principales de valoraciones */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
+              onClick={() => navigate(`/valoracion?paciente=${paciente._id}`)}
+            >
+              <ClipboardDocumentListIcon className="h-5 w-5" />
+              Nueva Valoración
+            </button>
+            <button
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
+              onClick={() => navigate(`/pacientes/${paciente._id}/valoraciones`)}
+            >
+              <ClipboardDocumentListIcon className="h-5 w-5" />
+              Ver Valoraciones
+            </button>
+          </div>
+          
+          {/* Grupo 2: Gestión del paciente */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
+              onClick={() => navigate(`/pacientes/editar/${paciente._id}`)}
+            >
+              <PencilSquareIcon className="h-5 w-5" />
+              Editar Paciente
+            </button>
+            <Link
+              to={`/paquetes/nuevo/${paciente._id}`}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
+            >
+              <CreditCardIcon className="h-5 w-5" />
+              Comprar Paquete
+            </Link>
+          </div>
+          
+          {/* Grupo 3: Navegación */}
+          <div className="flex justify-center">
+            <button
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
+              onClick={() => navigate("/pacientes")}
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+              Volver a la Lista
+            </button>
+          </div>
         </div>
 
         {/* Mostrar paquetes del paciente */}

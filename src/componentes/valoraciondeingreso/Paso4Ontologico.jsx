@@ -348,8 +348,7 @@ const Paso4Ontologico = ({
               name="areasRequierenAcompanamiento"
               value={formulario.areasRequierenAcompanamiento || ""}
               onChange={handleChange}
-              placeholder="- 
-- "
+              placeholder="- \n- "
               rows={3}
               className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
@@ -361,33 +360,20 @@ const Paso4Ontologico = ({
               name="actividadesSugeridasCasa"
               value={formulario.actividadesSugeridasCasa || ""}
               onChange={handleChange}
-              placeholder="- 
-- "
+              placeholder="- \n- "
               rows={3}
               className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
           <div>
-            <label className="block font-semibold mb-1">Estimulación en el entorno diario:</label>
+            <label className="block font-semibold mb-1">Seguimiento sugerido (¿En cuánto tiempo recomienda la próxima visita?):</label>
             <textarea
-              name="estimulacionEntornoDiario"
-              value={formulario.estimulacionEntornoDiario || ""}
+              name="seguimientoSugeridoTexto"
+              value={formulario.seguimientoSugeridoTexto || ""}
               onChange={handleChange}
-              placeholder="- 
-- "
-              rows={3}
-              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div>
-            <label className="block font-semibold mb-1">Seguimiento sugerido (fecha próxima visita):</label>
-            <input
-              type="date"
-              name="seguimientoSugeridoFecha"
-              value={formulario.seguimientoSugeridoFecha || ""}
-              onChange={handleChange}
+              placeholder="Ejemplo: En 1 mes, en 15 días, según evolución, etc."
+              rows={2}
               className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
@@ -410,7 +396,6 @@ const Paso4Ontologico = ({
                 value={formulario.frecuenciaCardiaca || ""}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="___"
               />
             </div>
             <div>
@@ -421,7 +406,6 @@ const Paso4Ontologico = ({
                 value={formulario.frecuenciaRespiratoria || ""}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="___"
               />
             </div>
             <div>
@@ -432,7 +416,6 @@ const Paso4Ontologico = ({
                 value={formulario.temperatura || ""}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="___"
               />
             </div>
           </div>
@@ -541,7 +524,7 @@ const Paso4Ontologico = ({
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Deformidades o Contracturas:</label>
+            <label className="block font-medium mb-1">Deformidades:</label>
             <textarea
               name="deformidades"
               value={formulario.deformidades || ""}
@@ -563,7 +546,7 @@ const Paso4Ontologico = ({
           </div>
 
           <div>
-            <label className="block font-medium mb-1">Sistema Pulmonar: (Simetría Toráxica - Patrón Respiratorio - Expansión Toráxica - Signos Dificultad Respiratoria - Auscultación)</label>
+            <label className="block font-medium mb-1">Sistema Pulmonar:</label>
             <textarea
               name="sistemaPulmonar"
               value={formulario.sistemaPulmonar || ""}
@@ -607,3 +590,4 @@ const Paso4Ontologico = ({
 };
 
 export default Paso4Ontologico;
+

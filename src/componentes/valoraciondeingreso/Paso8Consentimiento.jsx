@@ -14,6 +14,12 @@ export default function Paso8Consentimiento({
 }) {
   // Usar datos de edición si existen, si no, los de nuevo consentimiento
   const datos = valoracion && Object.keys(valoracion).length > 0 ? valoracion : consentimiento || {};
+
+  // Fallback a formulario si no hay en consentimiento
+  const nombreAcudiente = datos.nombreAcudiente || formulario.nombreAcudiente || "";
+  const cedulaAcudiente = datos.cedulaAcudiente || formulario.cedulaAcudiente || "";
+  const nombresNino = datos.nombres || formulario.nombres || "";
+  const registroCivil = datos.registroCivil || formulario.registroCivil || "";
 console.log("Datos de consentimiento:", datos);
   return (
     <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-6 my-8 shadow">
@@ -24,7 +30,7 @@ console.log("Datos de consentimiento:", datos);
           type="text"
           className="border-b border-indigo-400 bg-gray-100 outline-none min-w-[180px] mx-1"
           name="nombreAcudiente"
-          value={datos.nombreAcudiente || ""}
+          value={nombreAcudiente}
           readOnly
           placeholder="Nombre acudiente"
         />{" "}
@@ -34,7 +40,7 @@ console.log("Datos de consentimiento:", datos);
           type="text"
           className="border-b border-indigo-400 bg-transparent outline-none min-w-[100px] mx-1"
           name="cedulaAcudiente"
-          value={datos.cedulaAcudiente ||""}
+          value={cedulaAcudiente}
           onChange={onChange}
           readOnly
           placeholder="C.C. acudiente"
@@ -54,7 +60,7 @@ console.log("Datos de consentimiento:", datos);
           type="text"
           className="border-b border-indigo-400 bg-transparent outline-none min-w-[180px] mx-1"
           name="nombres"
-          value={datos.nombres || ""}
+          value={nombresNino}
           onChange={onChange}
           readOnly
           placeholder="Nombre niño/a"
@@ -64,7 +70,7 @@ console.log("Datos de consentimiento:", datos);
           type="text"
           className="border-b border-indigo-400 bg-transparent outline-none min-w-[120px] mx-1"
           name="registroCivil"
-          value={datos.registroCivil || ""}
+          value={registroCivil}
           onChange={onChange}
           readOnly
           placeholder="Registro Civil"

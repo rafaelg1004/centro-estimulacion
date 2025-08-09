@@ -1,10 +1,41 @@
-import React from "react";
+import React, { useRef } from "react";
 import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
 
 export default function Paso5DiagnosticoIntervencionPerinatal({ formulario, setFirma, handleChange, anterior, siguiente }) {
+  // Opciones de programa
+  const opcionesPrograma = [
+    { value: "fisico", label: "Solo Acondicionamiento Físico" },
+    { value: "educacion", label: "Solo Programa de Educación para el Nacimiento" },
+    { value: "ambos", label: "Ambos programas (Físico y Educación)" },
+    { value: "intensivo", label: "Programa de Educación para el Nacimiento Intensivo" },
+  ];
+
+  // Determinar qué firmas mostrar
+  const mostrarFirmaAutorizacion = formulario.tipoPrograma === "fisico" || formulario.tipoPrograma === "ambos";
+
+  const selectRef = useRef();
+
   return (
     <div>
       <h3 className="text-lg font-bold text-indigo-700 mb-4">5. Diagnóstico y Plan de Intervención</h3>
+
+      {/* Selector de tipo de programa */}
+      <div className="mb-6">
+        <label className="font-semibold block mb-2">Selecciona el tipo de programa:</label>
+        <select
+          ref={selectRef}
+          name="tipoPrograma"
+          value={formulario.tipoPrograma || ""}
+          onChange={e => handleChange({ tipoPrograma: e.target.value })}
+          className="w-full border rounded p-2"
+        >
+          <option value="">Seleccione una opción</option>
+          {opcionesPrograma.map(op => (
+            <option key={op.value} value={op.value}>{op.label}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="mb-6">
         <label className="font-semibold">Diagnóstico Fisioterapéutico:</label>
         <textarea
@@ -57,19 +88,24 @@ export default function Paso5DiagnosticoIntervencionPerinatal({ formulario, setF
         </div>
       </div>
 
-      <div className="mb-6 bg-indigo-50 rounded p-4 text-gray-700">
-        <p>
-          <span className="font-semibold">Autorización:</span> Autorizo a D&#39;Mamitas &amp; Babies para reproducir fotografías e imágenes de las actividades en las que participe, para ser utilizadas en sus publicaciones, proyectos, redes sociales y página web.
-        </p>
-      </div>
-      <div className="mb-8">
-        <FirmaCanvas
-          label="Firma de Paciente para Autorización"
-          name="firmaAutorizacion"
-          setFormulario={setFirma}
-          formulario={formulario}
-        />
-      </div>
+      {/* Solo mostrar la autorización si corresponde */}
+      {mostrarFirmaAutorizacion && (
+        <>
+          <div className="mb-6 bg-indigo-50 rounded p-4 text-gray-700">
+            <p>
+              <span className="font-semibold">Autorización:</span> Autorizo a D&#39;Mamitas &amp; Babies para reproducir fotografías e imágenes de las actividades en las que participe, para ser utilizadas en sus publicaciones, proyectos, redes sociales y página web.
+            </p>
+          </div>
+          <div className="mb-8">
+            <FirmaCanvas
+              label="Firma de Paciente para Autorización"
+              name="firmaAutorizacion"
+              setFormulario={setFirma}
+              formulario={formulario}
+            />
+          </div>
+        </>
+      )}
 
       <div className="flex justify-between mt-8">
         <button
@@ -81,15 +117,16 @@ export default function Paso5DiagnosticoIntervencionPerinatal({ formulario, setF
         </button>
         <button
           type="button"
-          onClick={() => {
-            console.log("Click en Siguiente Paso 5");
+          disabled={!formulario.tipoPrograma}
+          onClick={e => {
+            // Lee el valor directamente del select
+            const tipoProgramaActual = document.querySelector('select[name="tipoPrograma"]').value;
+            console.log("Click en Siguiente Paso 5 (directo del DOM)", tipoProgramaActual);
             if (typeof siguiente === "function") {
-              siguiente();
-            } else {
-              console.log("El prop 'siguiente' no es una función:", siguiente);
+              siguiente(tipoProgramaActual);
             }
           }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded transition"
+          className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded transition ${!formulario.tipoPrograma ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Siguiente
         </button>

@@ -1,6 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function Paso3EstadoSaludPerinatal({ formulario, handleChange, siguiente, anterior }) {
+  // Calcular IMC automáticamente cuando cambian pesoActual o talla
+  useEffect(() => {
+    const peso = parseFloat(formulario.pesoActual);
+    const talla = parseFloat(formulario.talla);
+    if (peso > 0 && talla > 0) {
+      // Si la talla parece estar en centímetros, convertir a metros
+      const tallaMetros = talla > 3 ? talla / 100 : talla;
+      const imc = peso / (tallaMetros * tallaMetros);
+      // Solo actualizar si el IMC cambió realmente
+      if (
+        (!formulario.imc && imc) ||
+        (formulario.imc && Math.abs(imc - parseFloat(formulario.imc)) > 0.01)
+      ) {
+        handleChange({ imc: imc.toFixed(2) });
+      }
+    } else if (formulario.imc) {
+      // Si no hay datos suficientes, limpiar el IMC
+      handleChange({ imc: "" });
+    }
+  }, [formulario.pesoActual, formulario.talla]);
+
   return (
     <div>
       <h3 className="text-lg font-bold text-indigo-700 mb-4">3. Estado de Salud</h3>
@@ -35,7 +56,7 @@ export default function Paso3EstadoSaludPerinatal({ formulario, handleChange, si
         </div>
         <div>
           <label className="font-semibold">IMC:</label>
-          <input type="text" name="imc" value={formulario.imc || ""} onChange={e => handleChange({ imc: e.target.value })} className="w-full border rounded p-2" />
+          <input type="text" name="imc" value={formulario.imc || ""} readOnly className="w-full border rounded p-2 bg-gray-100" />
         </div>
         <div className="sm:col-span-2">
           <label className="font-semibold block mb-1">PARMED-X FOR PREGNANCY</label>

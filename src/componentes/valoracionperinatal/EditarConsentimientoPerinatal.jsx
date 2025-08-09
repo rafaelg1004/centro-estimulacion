@@ -43,6 +43,7 @@ export default function EditarConsentimientoPerinatal() {
   const navigate = useNavigate();
   const [formulario, setFormulario] = useState(null);
   const [paso, setPaso] = useState(1);
+  const [prevPaso, setPrevPaso] = useState(null);
 
   useEffect(() => {
     apiRequest(`/consentimiento-perinatal/${id}`)
@@ -60,6 +61,67 @@ export default function EditarConsentimientoPerinatal() {
             data[`firmaPacienteSesionIntensivo${idx + 1}`] = sesion.firmaPaciente || "";
           });
         }
+        // Asegurarse de que tipoPrograma tenga un valor válido
+        if (!data.tipoPrograma) {
+          console.warn("tipoPrograma no está definido en los datos recibidos");
+          // Intentar determinar el tipo de programa basado en las sesiones
+          console.log("Intentando determinar tipo de programa...");
+          console.log("Sesiones intensivo:", data.sesionesIntensivo);
+          console.log("Sesiones regulares:", data.sesiones);
+          
+          // Verificar si hay sesiones intensivas
+          if (data.sesionesIntensivo && data.sesionesIntensivo.length > 0) {
+            console.log("Detectado programa intensivo por sesiones intensivas");
+            data.tipoPrograma = "intensivo";
+          } 
+          // Verificar si hay sesiones regulares
+          else if (data.sesiones && data.sesiones.length > 0) {
+            // Mostrar todas las sesiones para depurar
+            data.sesiones.forEach((s, i) => {
+              console.log(`Sesión ${i+1}: ${s.nombreSesion}, tipo: ${s.tipoPrograma}`);
+            });
+            
+            // Verificar directamente por el campo tipoPrograma en las sesiones
+            if (data.sesiones[0] && data.sesiones[0].tipoPrograma) {
+              console.log(`Usando tipoPrograma de la primera sesión: ${data.sesiones[0].tipoPrograma}`);
+              data.tipoPrograma = data.sesiones[0].tipoPrograma;
+            } 
+            // Si no tiene tipoPrograma, intentar determinar por el nombre
+            else {
+              // Verificar si hay sesiones de educación y físico
+              const tieneEducacion = data.sesiones.some(s => s.nombreSesion && s.nombreSesion.includes("Educación"));
+              const tieneFisico = data.sesiones.some(s => s.nombreSesion && s.nombreSesion.includes("Físico"));
+              
+              console.log(`Detección por nombre: tieneEducacion=${tieneEducacion}, tieneFisico=${tieneFisico}`);
+              
+              if (tieneEducacion && tieneFisico) {
+                data.tipoPrograma = "ambos";
+              } else if (tieneEducacion) {
+                data.tipoPrograma = "educacion";
+              } else if (tieneFisico) {
+                data.tipoPrograma = "fisico";
+              } else {
+                // Si no se puede determinar, dejar undefined para que el usuario lo seleccione
+                console.log("No se pudo determinar el tipo de programa automáticamente");
+                data.tipoPrograma = undefined;
+              }
+            }
+          } else {
+            // Si no hay sesiones, dejar undefined para que el usuario lo seleccione
+            console.log("No hay sesiones, el usuario debe seleccionar el tipo de programa");
+            data.tipoPrograma = undefined;
+          }
+          console.log(`Tipo de programa determinado automáticamente: ${data.tipoPrograma}`);
+        }
+        
+        // Guardar el tipo de programa original para comparar después
+        data._tipoPrograma_original = data.tipoPrograma;
+        
+        // Si no se pudo determinar el tipo de programa, mostrar un mensaje
+        if (!data.tipoPrograma) {
+          console.warn("No se pudo determinar el tipo de programa. El usuario deberá seleccionarlo.");
+        }
+        
         setFormulario(data);
       });
   }, [id]);
@@ -70,7 +132,35 @@ export default function EditarConsentimientoPerinatal() {
     </div>
   );
 
-  const handleChange = (nuevo) => setFormulario(prev => ({ ...prev, ...nuevo }));
+  const handleChange = (nuevo) => {
+    // Si está cambiando el tipo de programa, limpiar las sesiones anteriores
+    if (nuevo && nuevo.tipoPrograma && nuevo.tipoPrograma !== formulario.tipoPrograma) {
+      const nuevoFormulario = { ...formulario, ...nuevo };
+      
+      // Limpiar todas las sesiones primero
+      for (let i = 1; i <= 10; i++) {
+        nuevoFormulario[`fechaSesion${i}`] = "";
+        nuevoFormulario[`firmaPacienteSesion${i}`] = "";
+        nuevoFormulario[`fechaSesionIntensivo${i}`] = "";
+        nuevoFormulario[`firmaPacienteSesionIntensivo${i}`] = "";
+      }
+      nuevoFormulario.sesiones = [];
+      nuevoFormulario.sesionesIntensivo = [];
+      
+      // Mantener el tipo de programa original para comparar al guardar
+      nuevoFormulario._tipoPrograma_original = formulario._tipoPrograma_original;
+      
+      // Indicar que se deben actualizar las sesiones en el backend
+      nuevoFormulario._actualizarSesiones = true;
+      
+      // Las sesiones se crearán nuevamente en los componentes específicos
+      // según el tipo de programa seleccionado
+      
+      setFormulario(nuevoFormulario);
+    } else {
+      setFormulario(prev => ({ ...prev, ...nuevo }));
+    }
+  };
 
   const setFirma = (name, value) => {
     setFormulario(prev => ({
@@ -81,6 +171,35 @@ export default function EditarConsentimientoPerinatal() {
 
   const handleSubmit = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
+
+    // Verificar si hay firmas en el formulario
+    const tieneFirmas = [
+      'firmaPaciente',
+      'firmaFisioterapeuta',
+      'firmaPacienteConsentimiento',
+      'firmaFisioterapeutaConsentimiento',
+      'firmaPacienteGeneral',
+      'firmaFisioterapeutaGeneral',
+      'firmaPacienteGeneralIntensivo',
+      'firmaFisioterapeutaGeneralIntensivo'
+    ].some(campo => formulario[campo] && formulario[campo].length > 0);
+
+    // Si hay firmas y se está cambiando el tipo de programa, mostrar advertencia
+    if (tieneFirmas && formulario.tipoPrograma !== formulario._tipoPrograma_original) {
+      const confirmar = await Swal.fire({
+        icon: "warning",
+        title: "Consentimiento ya firmado",
+        text: "El consentimiento ya tiene firmas. Cambiar el tipo de programa eliminará todas las sesiones anteriores y requerirá nuevas firmas.",
+        showCancelButton: true,
+        confirmButtonText: "Continuar y eliminar sesiones anteriores",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#6366f1"
+      });
+      
+      if (!confirmar.isConfirmed) {
+        return;
+      }
+    }
 
     // Reconstruir arrays de sesiones
     const sesiones = [];
@@ -109,6 +228,8 @@ export default function EditarConsentimientoPerinatal() {
       ...formulario,
       sesiones,
       sesionesIntensivo,
+      // Asegurarse de que se envía el parámetro para actualizar sesiones si cambió el tipo de programa
+      _actualizarSesiones: formulario._actualizarSesiones === true || formulario.tipoPrograma !== formulario._tipoPrograma_original
     };
 
     try {
@@ -175,6 +296,31 @@ export default function EditarConsentimientoPerinatal() {
     }
   };
 
+  // Función para navegar al siguiente paso, similar a ValoracionIngresoProgramaPerinatal
+  const siguiente = (tipoProgramaArg) => {
+    setPrevPaso(paso);
+    const tipoPrograma = tipoProgramaArg || formulario.tipoPrograma;
+    
+    if (paso === 5) {
+      if (tipoPrograma === "fisico") setPaso(6);
+      else if (tipoPrograma === "educacion") setPaso(7);
+      else if (tipoPrograma === "intensivo") setPaso(8);
+      else if (tipoPrograma === "ambos") setPaso(6);
+      else setPaso(paso + 1); // fallback
+    } else if (paso === 6 && tipoPrograma === "ambos") {
+      setPaso(7);
+    } else {
+      setPaso(paso + 1);
+    }
+  };
+  
+  // Función para navegar al paso anterior
+  const anterior = (nuevoPaso) => {
+    setPrevPaso(paso);
+    if (nuevoPaso) setPaso(nuevoPaso);
+    else setPaso((prev) => prev - 1);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100 py-10 px-2">
       <form onSubmit={handleSubmit} className="max-w-4xl w-full mx-auto bg-white bg-opacity-90 p-8 rounded-3xl shadow-2xl border border-indigo-100">
@@ -186,7 +332,7 @@ export default function EditarConsentimientoPerinatal() {
             <Paso1
               formulario={formulario}
               handleChange={handleChange}
-              siguiente={() => setPaso(2)}
+              siguiente={() => siguiente()}
               paciente={formulario.paciente}
             />
           )}
@@ -194,67 +340,92 @@ export default function EditarConsentimientoPerinatal() {
             <Paso2
               formulario={formulario}
               handleChange={handleChange}
-              anterior={() => setPaso(1)}
-              siguiente={() => setPaso(3)}
+              anterior={anterior}
+              siguiente={() => siguiente()}
             />
           )}
           {paso === 3 && (
             <Paso3
               formulario={formulario}
               handleChange={handleChange}
-              anterior={() => setPaso(2)}
-              siguiente={() => setPaso(4)}
+              anterior={anterior}
+              siguiente={() => siguiente()}
             />
           )}
           {paso === 4 && (
             <Paso4
               formulario={formulario}
               handleChange={handleChange}
-              anterior={() => setPaso(3)}
-              siguiente={() => setPaso(5)}
+              anterior={anterior}
+              siguiente={() => siguiente()}
             />
           )}
           {paso === 5 && (
             <Paso5
               formulario={formulario}
               setFirma={setFirma}
-              handleChange={handleChange}
+              handleChange={async (nuevo) => {
+                // Si el usuario intenta avanzar sin tipoPrograma, mostrar alerta
+                if (nuevo && nuevo.tipoPrograma === undefined && !formulario.tipoPrograma) {
+                  await Swal.fire({
+                    icon: 'warning',
+                    title: 'Selecciona el tipo de programa',
+                    text: 'Debes seleccionar el tipo de programa para continuar.',
+                  });
+                  return;
+                }
+                handleChange(nuevo);
+              }}
               anterior={() => setPaso(4)}
-              siguiente={() => setPaso(6)}
+              siguiente={async () => {
+                if (!formulario.tipoPrograma) {
+                  await Swal.fire({
+                    icon: 'warning',
+                    title: 'Selecciona el tipo de programa',
+                    text: 'Debes seleccionar el tipo de programa para continuar.',
+                  });
+                  return;
+                }
+                siguiente();
+              }}
             />
           )}
-          {paso === 6 && (
+          {paso === 6 && (formulario.tipoPrograma === "fisico" || formulario.tipoPrograma === "ambos") && (
             <Paso6
               formulario={formulario}
               setFirma={setFirma}
               handleChange={handleChange}
-              anterior={() => setPaso(5)}
-              onSubmit={() => setPaso(7)}
+              anterior={anterior}
+              siguiente={siguiente}
               paciente={formulario.paciente}
+              tipoPrograma={formulario.tipoPrograma}
+              onSubmit={formulario.tipoPrograma === "fisico" ? handleSubmit : undefined}
             />
           )}
-          {paso === 7 && (
+          {paso === 7 && (formulario.tipoPrograma === "educacion" || formulario.tipoPrograma === "ambos") && (
             <Paso7
               formulario={formulario}
               setFirma={setFirma}
               handleChange={handleChange}
-              anterior={() => setPaso(6)}
-              onSubmit={() => setPaso(8)}
+              anterior={anterior}
+              siguiente={formulario.tipoPrograma === "ambos" ? undefined : undefined} // Forzar a undefined para que muestre el botón de guardar
+              onSubmit={handleSubmit} // Siempre pasar handleSubmit
               paciente={formulario.paciente}
+              tipoPrograma={formulario.tipoPrograma}
             />
           )}
-          {paso === 8 && (
+          {paso === 8 && formulario.tipoPrograma === "intensivo" && (
             <Paso8
               formulario={formulario}
               setFirma={setFirma}
               handleChange={handleChange}
-              anterior={() => setPaso(7)}
+              anterior={anterior}
               onSubmit={handleSubmit}
               paciente={formulario.paciente}
+              tipoPrograma={formulario.tipoPrograma}
             />
           )}
         </div>
-      
       </form>
     </div>
   );
