@@ -47,10 +47,11 @@ export const apiRequest = async (endpoint, options = {}) => {
     if (!response.ok) {
       // Si la respuesta no es ok, intentar obtener el error
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      let errorData = null;
       
       if (contentType && contentType.includes('application/json')) {
         try {
-          const errorData = await response.json();
+          errorData = await response.json();
           errorMessage = errorData.error || errorData.message || errorMessage;
         } catch (jsonError) {
           console.warn('❌ No se pudo parsear el error como JSON');
@@ -65,7 +66,10 @@ export const apiRequest = async (endpoint, options = {}) => {
         }
       }
       
-      throw new Error(errorMessage);
+      // Crear un error que incluya los datos del backend
+      const error = new Error(errorMessage);
+      error.response = { data: errorData, status: response.status };
+      throw error;
     }
     
     // Verificar que la respuesta exitosa sea JSON

@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
+import Swal from 'sweetalert2';
 
 export default function DetallePaciente() {
   const { id } = useParams();
@@ -24,12 +25,94 @@ export default function DetallePaciente() {
       .then(setClases);
   }, [id]);
 
-  const eliminarFactura = async (facturaId) => {
-    if (window.confirm("¿Seguro que deseas eliminar esta factura?")) {
-      await apiRequest(`/pagoPaquete/${facturaId}`, {
-        method: "DELETE",
-      });
-      setPaquetes(paquetes.filter(p => p._id !== facturaId));
+  const eliminarFactura = async (paquete) => {
+    const result = await Swal.fire({
+      title: '¿Eliminar paquete?',
+      text: `¿Estás seguro de eliminar el paquete ${paquete.numeroFactura}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await apiRequest(`/pagoPaquete/${paquete._id}`, { method: 'DELETE' });
+        
+        Swal.fire({
+          title: '¡Eliminado!',
+          text: 'El paquete ha sido eliminado correctamente.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        
+        setPaquetes(paquetes.filter(p => p._id !== paquete._id));
+      } catch (error) {
+        console.error('Error al eliminar paquete:', error);
+        
+        // Intentar parsear el mensaje de error del backend
+        let errorMessage = 'No se pudo eliminar el paquete. Inténtalo de nuevo.';
+        let errorData = null;
+        
+        // Verificar diferentes formatos de error
+        if (error.response && error.response.data) {
+          errorData = error.response.data;
+        } else if (error.message && error.message.includes('{')) {
+          try {
+            errorData = JSON.parse(error.message.substring(error.message.indexOf('{')));
+          } catch (e) {
+            // Si no se puede parsear, usar el mensaje original
+          }
+        }
+        
+        if (errorData && errorData.clasesAfectadas) {
+          Swal.fire({
+            title: 'No se puede eliminar',
+            html: `
+              <div style="text-align: left;">
+                <p><strong>Motivo:</strong> Esta factura está siendo usada en ${errorData.clasesAfectadas} sesión(es):</p>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  ${errorData.nombresClases.split(', ').map(clase => `<li>${clase}</li>`).join('')}
+                </ul>
+                <p><strong>Qué hacer:</strong></p>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                  <li>Ve a la sección "Lista de Sesiones"</li>
+                  <li>Busca cada sesión mencionada arriba</li>
+                  <li>Elimina al paciente de la lista de inscritos</li>
+                  <li>Luego podrás eliminar esta factura</li>
+                </ol>
+              </div>
+            `,
+            icon: 'warning',
+            confirmButtonText: 'Entendido',
+            width: '500px'
+          });
+        } else if (errorData && errorData.mensaje) {
+          Swal.fire({
+            title: 'No se puede eliminar',
+            text: errorData.mensaje,
+            icon: 'error',
+            confirmButtonText: 'Entendido'
+          });
+        } else if (error.message && error.message.includes('siendo usada en sesiones')) {
+          Swal.fire({
+            title: 'No se puede eliminar',
+            text: 'Esta factura está siendo usada en clases activas. Primero debe eliminar al paciente de las sesiones donde está inscrito.',
+            icon: 'error',
+            confirmButtonText: 'Entendido'
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonText: 'Cerrar'
+          });
+        }
+      }
     }
   };
 
@@ -139,7 +222,7 @@ export default function DetallePaciente() {
                   <span className="flex items-center gap-2">
                     <span className="text-xs text-gray-500">{p.fechaPago?.slice(0,10)}</span>
                     <button
-                      onClick={() => eliminarFactura(p._id)}
+                      onClick={() => eliminarFactura(p)}
                       className="bg-red-500 hover:bg-red-700 text-white text-xs px-2 py-1 rounded font-bold flex items-center gap-1"
                       title="Eliminar factura"
                     >

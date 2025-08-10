@@ -39,6 +39,7 @@ import ListaValoracionesPisoPelvico from "./componentes/valoracionPisoPelvico/Li
 import DetalleValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/DetalleValoracionPisoPelvico";
 import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/EditarValoracionPisoPelvico";
 import APIStatusIndicator from "./componentes/APIStatusIndicator";
+import ReportePaquetes from "./componentes/ReportePaquetes";
 
 import {
   HomeIcon,
@@ -52,6 +53,7 @@ import {
   ClipboardDocumentCheckIcon,
   ClipboardIcon,
   DocumentTextIcon,
+  ChartBarIcon,
   
   
 } from "@heroicons/react/24/solid";
@@ -153,6 +155,14 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               >
                 <AcademicCapIcon className="h-5 w-5" />
                 Lista de Sesiones
+              </Link>
+              <Link
+                to="/reporte-paquetes"
+                className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <ChartBarIcon className="h-5 w-5" />
+                Reporte de Paquetes
               </Link>
               <div>
                 <button
@@ -299,6 +309,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/valoraciones-piso-pelvico" element={<ListaValoracionesPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id" element={<DetalleValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />
+            <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
           </Routes>
         </div>
       </main>
