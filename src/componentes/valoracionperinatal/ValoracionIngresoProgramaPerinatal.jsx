@@ -78,6 +78,8 @@ export default function ValoracionIngresoProgramaPerinatal() {
   const [formulario, setFormulario] = useState(FORMULARIO_INICIAL);
   const [paciente, setPaciente] = useState(null);
   const [paso, setPaso] = useState(1);
+  const [desdePaso6, setDesdePaso6] = useState(false);
+  const [prevPaso, setPrevPaso] = useState(null);
 
   useEffect(() => {
     apiRequest(`/pacientes-adultos/${id}`)
@@ -116,8 +118,26 @@ export default function ValoracionIngresoProgramaPerinatal() {
   //console.log("Avanzando al paso 6");
   //setPaso(6);
 //};
-  const siguiente = () => setPaso((prev) => prev + 1);
-  const anterior = () => setPaso((prev) => prev - 1);
+  const siguiente = (tipoProgramaArg) => {
+    setPrevPaso(paso);
+    const tipoPrograma = tipoProgramaArg || formulario.tipoPrograma;
+    if (paso === 5) {
+      if (tipoPrograma === "fisico") setPaso(6);
+      else if (tipoPrograma === "educacion") setPaso(7);
+      else if (tipoPrograma === "intensivo") setPaso(8);
+      else if (tipoPrograma === "ambos") setPaso(6);
+      else setPaso(paso + 1); // fallback
+    } else if (paso === 6 && tipoPrograma === "ambos") {
+      setPaso(7);
+    } else {
+      setPaso(paso + 1);
+    }
+  };
+  const anterior = (nuevoPaso) => {
+    setPrevPaso(paso);
+    if (nuevoPaso) setPaso(nuevoPaso);
+    else setPaso((prev) => prev - 1);
+  };
 
   // Función de debugging temporal
   const debugFormulario = () => {
@@ -146,6 +166,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
   };
 
   const handleSubmit = async (e) => {
+    setDesdePaso6(false);
     if (e && e.preventDefault) e.preventDefault();
 
     try {
@@ -217,6 +238,16 @@ export default function ValoracionIngresoProgramaPerinatal() {
       // Agregar referencia al paciente
       datosAEnviar.paciente = paciente._id;
 
+      // Si el tipo de programa es intensivo, copiar las firmas intensivo a los campos generales requeridos
+      if (formulario.tipoPrograma === "intensivo") {
+        console.log("Firmas intensivo:", {
+          firmaPacienteGeneralIntensivo: datosAEnviar.firmaPacienteGeneralIntensivo,
+          firmaFisioterapeutaGeneralIntensivo: datosAEnviar.firmaFisioterapeutaGeneralIntensivo,
+        });
+        datosAEnviar.firmaPacienteGeneral = datosAEnviar.firmaPacienteGeneralIntensivo;
+        datosAEnviar.firmaFisioterapeutaGeneral = datosAEnviar.firmaFisioterapeutaGeneralIntensivo;
+      }
+
       const response = await apiRequest("/consentimiento-perinatal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -230,7 +261,8 @@ export default function ValoracionIngresoProgramaPerinatal() {
           text: "El formulario se guardó correctamente.",
           confirmButtonColor: "#6366f1"
         });
-        navigate("/consentimientos-perinatales");
+        // Redirigir a la vista de sesiones del paciente
+        navigate(`/pacientes/${paciente._id}/sesiones-perinatal`);
       } else {
         Swal.fire({
           icon: "error",
@@ -249,6 +281,10 @@ export default function ValoracionIngresoProgramaPerinatal() {
       });
     }
   };
+
+  // Depuración de flujo
+  console.log("Paso actual:", paso, "Tipo programa:", formulario.tipoPrograma);
+  // (Eliminado el bloque de prueba que mostraba un mensaje en paso 7)
 
   if (!paciente) {
     return (
@@ -321,36 +357,41 @@ export default function ValoracionIngresoProgramaPerinatal() {
             setFirma={setFirma}
             handleChange={handleChange}
             anterior={() => setPaso(4)}
-            siguiente={() => setPaso(6)} // <-- ¡ESTO ES LO IMPORTANTE!
+            siguiente={siguiente} // <-- Usar la función real
           />
         )}
-        {paso === 6 && (
+        {paso === 6 && (formulario.tipoPrograma === "fisico" || formulario.tipoPrograma === "ambos") && (
           <Paso6ConsentimientoFisicoPerinatal
             formulario={formulario}
             handleChange={handleChange}
             setFirma={setFirma}
             anterior={anterior}
-            onSubmit={siguiente}
+            onSubmit={handleSubmit}
+            siguiente={siguiente}
+            tipoPrograma={formulario.tipoPrograma}
             paciente={paciente}
           />
         )}
-        {paso === 7 && (
+        {paso === 7 && (formulario.tipoPrograma === "educacion" || formulario.tipoPrograma === "ambos") && (
           <Paso7ConsentimientoEducacionNacimientoPerinatal
             formulario={formulario}
             handleChange={handleChange}
             setFirma={setFirma}
             anterior={anterior}
-            onSubmit={siguiente}
+            onSubmit={handleSubmit}
+            tipoPrograma={formulario.tipoPrograma}
+            {...(formulario.tipoPrograma === "ambos" && prevPaso !== 6 ? { siguiente } : {})}
             paciente={paciente}
           />
         )}
-        {paso === 8 && (
+        {paso === 8 && formulario.tipoPrograma === "intensivo" && (
           <Paso8ConsentimientoEducacionIntensivoPerinatal
             formulario={formulario}
             handleChange={handleChange}
             setFirma={setFirma}
             anterior={anterior}
             onSubmit={handleSubmit}
+            tipoPrograma={formulario.tipoPrograma}
             paciente={paciente}
           />
         )}

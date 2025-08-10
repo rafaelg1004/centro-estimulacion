@@ -159,6 +159,10 @@ export default function ListaConsentimientosPerinatales() {
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
             <div className="bg-white border border-red-300 text-red-800 px-6 py-6 rounded-2xl shadow-lg flex flex-col items-center gap-4 max-w-md w-full">
               <span className="font-bold text-lg">¿Seguro que deseas eliminar este consentimiento?</span>
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 w-full">
+                <p className="font-bold">¡Advertencia!</p>
+                <p>Esta acción eliminará permanentemente la valoración y todas las sesiones individuales que aparecen en la lista de sesiones del paciente.</p>
+              </div>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={async () => {

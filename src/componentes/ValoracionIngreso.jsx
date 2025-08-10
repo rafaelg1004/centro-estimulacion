@@ -77,7 +77,7 @@ const ValoracionIngreso = () => {
   const [consentimiento, setConsentimiento] = useState({
     consentimiento_nombreAcudiente: "",
     consentimiento_ccAcudiente: "",
-    consentimiento_lugarExpedicion: "",
+    consentimiento_lugarExpedicion: "Montería",
     consentimiento_nombreNino: "",
     consentimiento_registroCivil: "",
     consentimiento_fecha: "",
@@ -262,8 +262,8 @@ const ValoracionIngreso = () => {
             nombrePadre: data.nombrePadre || "",
             edadPadre: data.edadPadre || "",
             ocupacionPadre: data.ocupacionPadre || "",
-            nombreAcudiente: data.nombreAcudiente || data.nombreMadre || data.nombrePadre || "",
-            cedulaAcudiente: data.cedulaAcudiente || data.documentoRepresentante || "",
+            nombreAcudiente: data.nombreAcudiente || "",
+            cedulaAcudiente: data.cedulaAcudiente || "",
             autorizacionNombre: data.nombres || "",
             autorizacionRegistro: data.registroCivil || "",
           }));
@@ -549,7 +549,7 @@ const ValoracionIngreso = () => {
       setConsentimiento({
         consentimiento_nombreAcudiente: "",
         consentimiento_ccAcudiente: "",
-        consentimiento_lugarExpedicion: "",
+        consentimiento_lugarExpedicion: "Montería",
         consentimiento_nombreNino: "",
         consentimiento_registroCivil: "",
         consentimiento_fecha: "",
@@ -696,7 +696,7 @@ const ValoracionIngreso = () => {
       {paso === 8 && (
         <Paso8Consentimiento
           consentimiento={consentimiento || {}}
-          fortmulario={formulario}
+          formulario={formulario}
           onChange={handleConsentimientoChange}
           consentimientoCompleto={consentimientoCompleto}
           onVolver={() => setPaso(7)}
