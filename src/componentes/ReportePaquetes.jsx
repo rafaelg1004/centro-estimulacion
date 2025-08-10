@@ -154,31 +154,31 @@ export default function ReportePaquetes() {
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-indigo-100 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6">
+          <div className="bg-white rounded-2xl p-3 md:p-6 shadow-lg border border-indigo-100 text-center">
             <ChartBarIcon className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-indigo-700">{estadisticas.total}</div>
-            <div className="text-sm text-gray-600">Total Paquetes</div>
+            <div className="text-xl md:text-2xl font-bold text-indigo-700">{estadisticas.total}</div>
+            <div className="text-xs md:text-sm text-gray-600">Total Paquetes</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-100 text-center">
             <CheckCircleIcon className="h-8 w-8 text-green-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-green-700">{estadisticas.activos}</div>
-            <div className="text-sm text-gray-600">Paquetes Activos</div>
+            <div className="text-xl md:text-2xl font-bold text-green-700">{estadisticas.activos}</div>
+            <div className="text-xs md:text-sm text-gray-600">Paquetes Activos</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 text-center">
             <ExclamationTriangleIcon className="h-8 w-8 text-red-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-red-700">{estadisticas.agotados}</div>
-            <div className="text-sm text-gray-600">Paquetes Agotados</div>
+            <div className="text-xl md:text-2xl font-bold text-red-700">{estadisticas.agotados}</div>
+            <div className="text-xs md:text-sm text-gray-600">Paquetes Agotados</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100 text-center">
             <CreditCardIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-blue-700">{estadisticas.totalClasesPagadas}</div>
-            <div className="text-sm text-gray-600">Clases Pagadas</div>
+            <div className="text-xl md:text-2xl font-bold text-blue-700">{estadisticas.totalClasesPagadas}</div>
+            <div className="text-xs md:text-sm text-gray-600">Clases Pagadas</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100 text-center">
             <PlayIcon className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-purple-700">{estadisticas.totalClasesUsadas}</div>
-            <div className="text-sm text-gray-600">Clases Usadas</div>
+            <div className="text-xl md:text-2xl font-bold text-purple-700">{estadisticas.totalClasesUsadas}</div>
+            <div className="text-xs md:text-sm text-gray-600">Clases Usadas</div>
           </div>
         </div>
 
@@ -230,90 +230,173 @@ export default function ReportePaquetes() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-indigo-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Paciente</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Registro Civil</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Factura</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Pagadas</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Usadas</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Disponibles</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">% Uso</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Estado</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paquetesFiltrados.map((paquete) => (
-                    <tr key={paquete._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-semibold text-gray-900">{paquete.paciente.nombres}</div>
-                        <div className="text-sm text-gray-500">{paquete.paciente.genero} • {paquete.paciente.edad} meses</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                        {paquete.paciente.registroCivil}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-800">
-                        {paquete.numeroFactura}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
-                          {paquete.clasesPagadas}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-semibold">
-                          {paquete.clasesUsadas}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
-                          paquete.clasesDisponibles > 0 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {paquete.clasesDisponibles}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="flex flex-col items-center">
-                          <span className="text-sm font-semibold text-gray-700">{paquete.porcentajeUso}%</span>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                paquete.porcentajeUso === 100 ? 'bg-red-500' : 
-                                paquete.porcentajeUso >= 80 ? 'bg-yellow-500' : 'bg-green-500'
-                              }`}
-                              style={{ width: `${paquete.porcentajeUso}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          paquete.estado === 'Activo' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {paquete.estado}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <button
-                          onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition flex items-center gap-1 mx-auto"
-                        >
-                          <EyeIcon className="h-4 w-4" />
-                          Ver
-                        </button>
-                      </td>
+            <>
+              {/* Vista de tabla para desktop */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-indigo-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Paciente</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Registro Civil</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Factura</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Pagadas</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Usadas</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Disponibles</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">% Uso</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Estado</th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paquetesFiltrados.map((paquete) => (
+                      <tr key={paquete._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-semibold text-gray-900">{paquete.paciente.nombres}</div>
+                          <div className="text-sm text-gray-500">{paquete.paciente.genero} • {paquete.paciente.edad} meses</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                          {paquete.paciente.registroCivil}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-800">
+                          {paquete.numeroFactura}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
+                            {paquete.clasesPagadas}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-semibold">
+                            {paquete.clasesUsadas}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
+                            paquete.clasesDisponibles > 0 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {paquete.clasesDisponibles}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <div className="flex flex-col items-center">
+                            <span className="text-sm font-semibold text-gray-700">{paquete.porcentajeUso}%</span>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  paquete.porcentajeUso === 100 ? 'bg-red-500' : 
+                                  paquete.porcentajeUso >= 80 ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}
+                                style={{ width: `${paquete.porcentajeUso}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            paquete.estado === 'Activo' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {paquete.estado}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition flex items-center gap-1 mx-auto"
+                          >
+                            <EyeIcon className="h-4 w-4" />
+                            Ver
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Vista de tarjetas para móvil y tablet */}
+              <div className="lg:hidden space-y-4 p-4">
+                {paquetesFiltrados.map((paquete) => (
+                  <div key={paquete._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 text-lg">{paquete.paciente.nombres}</h3>
+                        <p className="text-sm text-gray-600">{paquete.paciente.genero} • {paquete.paciente.edad} meses</p>
+                        <p className="text-sm text-gray-600">RC: {paquete.paciente.registroCivil}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                        paquete.estado === 'Activo' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {paquete.estado}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="text-center">
+                        <p className="text-xs text-gray-500 mb-1">Factura</p>
+                        <p className="font-mono text-sm font-semibold">{paquete.numeroFactura}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs text-gray-500 mb-1">% Uso</p>
+                        <p className="text-sm font-semibold">{paquete.porcentajeUso}%</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex space-x-4">
+                        <div className="text-center">
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
+                            {paquete.clasesPagadas}
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">Pagadas</p>
+                        </div>
+                        <div className="text-center">
+                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-semibold">
+                            {paquete.clasesUsadas}
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">Usadas</p>
+                        </div>
+                        <div className="text-center">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            paquete.clasesDisponibles > 0 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {paquete.clasesDisponibles}
+                          </span>
+                          <p className="text-xs text-gray-500 mt-1">Disponibles</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${
+                            paquete.porcentajeUso === 100 ? 'bg-red-500' : 
+                            paquete.porcentajeUso >= 80 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${paquete.porcentajeUso}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                    >
+                      <EyeIcon className="h-4 w-4" />
+                      Ver Paciente
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
 

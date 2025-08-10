@@ -41,6 +41,7 @@ import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/Edi
 import APIStatusIndicator from "./componentes/APIStatusIndicator";
 import ReportePaquetes from "./componentes/ReportePaquetes";
 
+
 import {
   HomeIcon,
   UsersIcon,
@@ -310,6 +311,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/valoraciones-piso-pelvico/:id" element={<DetalleValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
+
           </Routes>
         </div>
       </main>
