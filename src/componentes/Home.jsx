@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo from "../assents/LOGO.png"; // Ajusta la ruta si es necesario
 import { UserGroupIcon } from "@heroicons/react/24/outline";
-import { ClipboardDocumentListIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
+import { ClipboardDocumentListIcon, AcademicCapIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -70,6 +70,12 @@ export default function Home() {
           >
             <ClipboardDocumentListIcon className="h-6 w-6" /> Lista de Valoraciones
           </button>
+          <Link
+            to="/reporte-paquetes"
+            className="flex items-center justify-center gap-2 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 font-bold py-3 rounded-xl text-center transition transform hover:scale-105 shadow"
+          >
+            <ChartBarIcon className="h-6 w-6" /> Reporte de Paquetes
+          </Link>
         </div>
       </div>
     </div>
