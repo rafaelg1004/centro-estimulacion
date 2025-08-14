@@ -1,21 +1,51 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 //import Swal from "sweetalert2";
-import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon } from "@heroicons/react/24/solid";
+import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon, EyeIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
 import { HeartIcon } from "@heroicons/react/24/solid"; // Para el botón de piso pélvico
 import { apiRequest } from "../config/api";
 
 export default function DetallePacienteAdulto() {
   const { id } = useParams();
   const [paciente, setPaciente] = useState(null);
+  const [valoraciones, setValoraciones] = useState([]);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showExistingModal, setShowExistingModal] = useState(false);
+  const [existingValoracion, setExistingValoracion] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Cargar datos del paciente
     apiRequest(`/pacientes-adultos/${id}`)
       .then(data => setPaciente(data))
       .catch(() => setError("No se pudo cargar el paciente"));
+    
+    // Cargar valoraciones del paciente adulto
+    console.log('=== CARGANDO VALORACIONES FRONTEND ===');
+    console.log('Paciente adulto ID:', id);
+    console.log('URL de la petición:', `/valoraciones/adulto/${id}`);
+    
+    apiRequest(`/valoraciones/adulto/${id}`)
+      .then(data => {
+        console.log('=== RESPUESTA DEL BACKEND ===');
+        console.log('Datos recibidos:', data);
+        console.log('Tipo de datos:', typeof data);
+        console.log('Es array:', Array.isArray(data));
+        console.log('Número de valoraciones:', data?.length || 0);
+        
+        if (data && data.length > 0) {
+          console.log('Primera valoración:', data[0]);
+        }
+        
+        setValoraciones(data || []);
+      })
+      .catch(err => {
+        console.error('=== ERROR CARGANDO VALORACIONES ===');
+        console.error('Error completo:', err);
+        console.error('Mensaje:', err.message);
+        setValoraciones([]);
+      });
   }, [id]);
 
   
@@ -102,6 +132,7 @@ export default function DetallePacienteAdulto() {
               </div>
             </div>
           </div>
+          
           <div className="flex flex-col md:flex-row justify-center gap-4 mt-8">
             <button
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
@@ -132,6 +163,61 @@ export default function DetallePacienteAdulto() {
               Iniciar Valoración
             </button>
           </div>
+          
+          {/* Sección de Valoraciones del Paciente */}
+          <div className="mt-8 bg-gradient-to-r from-gray-50 to-indigo-50 rounded-2xl p-6 border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-indigo-700 flex items-center gap-3">
+                <ClipboardDocumentListIcon className="h-6 w-6" />
+                Historial de Valoraciones
+              </h3>
+              <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                {valoraciones.length} valoración{valoraciones.length !== 1 ? 'es' : ''}
+              </span>
+            </div>
+            
+            {valoraciones.length > 0 ? (
+              <div className="grid gap-4">
+                {valoraciones.map((valoracion) => (
+                  <div key={valoracion._id} className="bg-white rounded-xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className={valoracion.tipo === 'Lactancia' ? 'px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 border border-blue-200' : valoracion.tipo === 'Piso Pélvico' ? 'px-3 py-1 rounded-full text-sm font-semibold bg-pink-100 text-pink-800 border border-pink-200' : 'px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800 border border-green-200'}>
+                            {valoracion.tipo}
+                          </span>
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                            {valoracion.fecha || (valoracion.createdAt ? new Date(valoracion.createdAt).toLocaleDateString() : 'Sin fecha')}
+                          </span>
+                        </div>
+
+
+                      </div>
+                      <button
+                        onClick={() => navigate(valoracion.ruta)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                        Ver Detalle
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <ClipboardDocumentListIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h4 className="text-lg font-medium text-gray-600 mb-2">Sin valoraciones registradas</h4>
+                <p className="text-gray-500 mb-4">Este paciente aún no tiene valoraciones en el sistema.</p>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Crear Primera Valoración
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -144,8 +230,15 @@ export default function DetallePacienteAdulto() {
               <button
                 className="flex items-center gap-3 bg-green-100 hover:bg-green-200 text-green-800 font-bold py-4 px-6 rounded-xl text-lg w-full justify-center transition"
                 onClick={() => {
-                  setShowModal(false);
-                  navigate(`/valoracion-ingreso-programa-perinatal/${paciente._id}`);
+                  const existing = valoraciones.find(v => v.tipo === 'Perinatal');
+                  if (existing) {
+                    setExistingValoracion({ tipo: 'Perinatal', ruta: existing.ruta });
+                    setShowModal(false);
+                    setShowExistingModal(true);
+                  } else {
+                    setShowModal(false);
+                    navigate(`/valoracion-ingreso-programa-perinatal/${paciente._id}`);
+                  }
                 }}
               >
                 <ClipboardDocumentListIcon className="h-7 w-7" />
@@ -154,8 +247,15 @@ export default function DetallePacienteAdulto() {
               <button
                 className="flex items-center gap-3 bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-4 px-6 rounded-xl text-lg w-full justify-center transition"
                 onClick={() => {
-                  setShowModal(false);
-                  navigate(`/valoracion-adultos/nueva/${paciente._id}`);
+                  const existing = valoraciones.find(v => v.tipo === 'Lactancia');
+                  if (existing) {
+                    setExistingValoracion({ tipo: 'Lactancia', ruta: existing.ruta });
+                    setShowModal(false);
+                    setShowExistingModal(true);
+                  } else {
+                    setShowModal(false);
+                    navigate(`/valoracion-adultos/nueva/${paciente._id}`);
+                  }
                 }}
               >
                 <ClipboardDocumentListIcon className="h-7 w-7" />
@@ -164,8 +264,15 @@ export default function DetallePacienteAdulto() {
               <button
                 className="flex items-center gap-3 bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold py-4 px-6 rounded-xl text-lg w-full justify-center transition"
                 onClick={() => {
-                  setShowModal(false);
-                  navigate(`/valoracion-piso-pelvico/${paciente._id}`);
+                  const existing = valoraciones.find(v => v.tipo === 'Piso Pélvico');
+                  if (existing) {
+                    setExistingValoracion({ tipo: 'Piso Pélvico', ruta: existing.ruta });
+                    setShowModal(false);
+                    setShowExistingModal(true);
+                  } else {
+                    setShowModal(false);
+                    navigate(`/valoracion-piso-pelvico/${paciente._id}`);
+                  }
                 }}
               >
                 <HeartIcon className="h-7 w-7" />
@@ -178,6 +285,44 @@ export default function DetallePacienteAdulto() {
             >
               Cancelar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de valoración existente */}
+      {showExistingModal && existingValoracion && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full flex flex-col items-center">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-4">⚠️</div>
+              <h2 className="text-2xl font-bold text-orange-700 mb-4">Valoración Existente</h2>
+              <p className="text-gray-600 mb-2">
+                Este paciente ya tiene una valoración de <strong>{existingValoracion.tipo}</strong> registrada.
+              </p>
+              <p className="text-gray-500 text-sm">
+                Puedes ver o editar la valoración existente en lugar de crear una nueva.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 w-full">
+              <button
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition"
+                onClick={() => {
+                  setShowExistingModal(false);
+                  navigate(existingValoracion.ruta);
+                }}
+              >
+                Ver/Editar Valoración Existente
+              </button>
+              <button
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-xl transition"
+                onClick={() => {
+                  setShowExistingModal(false);
+                  setExistingValoracion(null);
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
