@@ -18,7 +18,9 @@ const ListaValoraciones = () => {
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (busqueda) params.append("documento", busqueda);
+      if (busqueda) {
+        params.append("busqueda", busqueda);
+      }
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
 
@@ -84,7 +86,7 @@ const ListaValoraciones = () => {
           <div className="flex flex-col md:flex-row gap-2 w-full">
             <input
               type="text"
-              placeholder="Buscar por documento"
+              placeholder="Buscar por nombre o documento"
               value={busqueda}
               onChange={e => setBusqueda(e.target.value)}
               className="border border-indigo-200 rounded-xl px-3 py-2 w-full md:w-48 bg-indigo-50 focus:ring-2 focus:ring-indigo-400 transition"
@@ -122,7 +124,11 @@ const ListaValoraciones = () => {
           <div className="space-y-4">
             {valoraciones
               .slice()
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .sort((a, b) => {
+                const nombreA = (a.paciente?.nombres || a.nombres || "").toLowerCase();
+                const nombreB = (b.paciente?.nombres || b.nombres || "").toLowerCase();
+                return nombreA.localeCompare(nombreB);
+              })
               .map((valoracion) => (
                 <div
                   key={valoracion._id}
