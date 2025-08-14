@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 //import Swal from "sweetalert2";
-import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon } from "@heroicons/react/24/solid";
 import { HeartIcon } from "@heroicons/react/24/solid"; // Para el botón de piso pélvico
 import { apiRequest } from "../config/api";
 
@@ -116,6 +116,13 @@ export default function DetallePacienteAdulto() {
             >
               <PencilSquareIcon className="h-6 w-6" />
               Editar Paciente
+            </button>
+            <button
+              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
+              onClick={() => navigate(`/pacientes/${paciente._id}/sesiones-perinatal`)}
+            >
+              <CalendarDaysIcon className="h-6 w-6" />
+              Ver Sesiones
             </button>
             <button
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"

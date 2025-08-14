@@ -31,6 +31,7 @@ import ValoracionIngresoProgramaPerinatal from "./componentes/valoracionperinata
 import ListaConsentimientosPerinatales from "./componentes/valoracionperinatal/ListaConsentimientosPerinatales";
 import DetalleConsentimientoPerinatal from "./componentes/valoracionperinatal/DetalleConsentimientoPerinatal";
 import EditarConsentimientoPerinatal from "./componentes/valoracionperinatal/EditarConsentimientoPerinatal";
+import ListaSesionesPerinatal from "./componentes/valoracionperinatal/ListaSesionesPerinatal";
 import EditarClase from "./componentes/EditarClase";
 import "./componentes/logout.css";
 import Swal from "sweetalert2";
@@ -310,6 +311,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/valoraciones-piso-pelvico" element={<ListaValoracionesPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id" element={<DetalleValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />
+            <Route path="/pacientes/:id/sesiones-perinatal" element={<ListaSesionesPerinatal />} />
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
 
           </Routes>
