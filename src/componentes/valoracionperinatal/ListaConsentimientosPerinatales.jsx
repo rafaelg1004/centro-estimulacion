@@ -7,18 +7,26 @@ import Spinner from "../ui/Spinner";
 export default function ListaConsentimientosPerinatales() {
   const [consentimientos, setConsentimientos] = useState(null);
   const [busqueda, setBusqueda] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [cargando, setCargando] = useState(false);
   const [confirmarId, setConfirmarId] = useState(null);
   const [mensaje, setMensaje] = useState("");
 
-  const buscarConsentimientos = async (q = "") => {
+  const buscarConsentimientos = async () => {
     setCargando(true);
-    let url = "/consentimiento-perinatal";
-    if (q.trim() !== "") {
-      url += `/buscar?q=${encodeURIComponent(q)}`;
+    try {
+      const params = new URLSearchParams();
+      if (busqueda) params.append("busqueda", busqueda);
+      if (fechaInicio) params.append("fechaInicio", fechaInicio);
+      if (fechaFin) params.append("fechaFin", fechaFin);
+
+      const data = await apiRequest(`/consentimiento-perinatal?${params.toString()}`);
+      setConsentimientos(data);
+    } catch (error) {
+      console.error('Error al buscar consentimientos:', error);
+      setConsentimientos([]);
     }
-    const data = await apiRequest(url);
-    setConsentimientos(data);
     setCargando(false);
   };
 
@@ -26,17 +34,7 @@ export default function ListaConsentimientosPerinatales() {
     buscarConsentimientos();
   }, []);
 
-  const handleInputChange = (e) => {
-    setBusqueda(e.target.value);
-    if (e.target.value.trim() === "") {
-      buscarConsentimientos("");
-    }
-  };
 
-  const handleBuscar = (e) => {
-    e.preventDefault();
-    buscarConsentimientos(busqueda);
-  };
 
   const eliminarConsentimiento = async (id) => {
     try {
@@ -84,21 +82,60 @@ export default function ListaConsentimientosPerinatales() {
           </div>
         )}
         <h2 className="text-3xl font-bold mb-6 text-indigo-700 text-center">Consentimientos Perinatales</h2>
-        <form onSubmit={handleBuscar} className="mb-6 flex justify-center gap-2">
-          <input
-            type="text"
-            placeholder="Buscar por nombre o cédula..."
-            value={busqueda}
-            onChange={handleInputChange}
-            className="border border-indigo-200 rounded-xl px-3 py-2 w-72 bg-indigo-50 focus:ring-2 focus:ring-indigo-400 transition"
-          />
-          <button
-            type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-semibold shadow transition"
-          >
-            Buscar
-          </button>
-        </form>
+        <div className="bg-indigo-50 rounded-xl p-4 mb-6">
+          <h4 className="font-semibold text-indigo-700 mb-3">Filtros de búsqueda</h4>
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o cédula..."
+                  value={busqueda}
+                  onChange={e => setBusqueda(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  onChange={e => setFechaInicio(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+                <input
+                  type="date"
+                  value={fechaFin}
+                  onChange={e => setFechaFin(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+            </div>
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={buscarConsentimientos}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+              >
+                Buscar
+              </button>
+              <button
+                onClick={() => {
+                  setBusqueda("");
+                  setFechaInicio("");
+                  setFechaFin("");
+                  setTimeout(() => buscarConsentimientos(), 100);
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+              >
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="overflow-x-auto rounded shadow">
           <table className="min-w-full text-base bg-white rounded-xl overflow-hidden">
             <thead>

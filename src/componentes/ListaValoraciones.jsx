@@ -82,35 +82,58 @@ const ListaValoraciones = () => {
           </div>
         )}
         <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Lista de Valoraciones</h2>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-2 w-full">
-            <input
-              type="text"
-              placeholder="Buscar por nombre o documento"
-              value={busqueda}
-              onChange={e => setBusqueda(e.target.value)}
-              className="border border-indigo-200 rounded-xl px-3 py-2 w-full md:w-48 bg-indigo-50 focus:ring-2 focus:ring-indigo-400 transition"
-            />
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={e => setFechaInicio(e.target.value)}
-              className="border border-indigo-200 rounded-xl px-3 py-2 w-full md:w-40 bg-indigo-50 focus:ring-2 focus:ring-indigo-400 transition"
-              placeholder="Desde"
-            />
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={e => setFechaFin(e.target.value)}
-              className="border border-indigo-200 rounded-xl px-3 py-2 w-full md:w-40 bg-indigo-50 focus:ring-2 focus:ring-indigo-400 transition"
-              placeholder="Hasta"
-            />
-            <button
-              onClick={buscarValoraciones}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
-            >
-              Buscar
-            </button>
+        <div className="bg-indigo-50 rounded-xl p-4 mb-6">
+          <h4 className="font-semibold text-indigo-700 mb-3">Filtros de búsqueda</h4>
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o documento"
+                  value={busqueda}
+                  onChange={e => setBusqueda(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  onChange={e => setFechaInicio(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+                <input
+                  type="date"
+                  value={fechaFin}
+                  onChange={e => setFechaFin(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+            </div>
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={buscarValoraciones}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+              >
+                Buscar
+              </button>
+              <button
+                onClick={() => {
+                  setBusqueda("");
+                  setFechaInicio("");
+                  setFechaFin("");
+                  setTimeout(() => buscarValoraciones(), 100);
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+              >
+                Limpiar
+              </button>
+            </div>
           </div>
         </div>
         {cargando ? (

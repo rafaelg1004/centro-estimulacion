@@ -5,15 +5,31 @@ import { apiRequest } from "../config/api";
 export default function ListaClases() {
   const [clases, setClases] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [confirmarId, setConfirmarId] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  useEffect(() => {
+  const buscarClases = async () => {
     setCargando(true);
-    apiRequest("/clases")
-      .then(setClases)
-      .finally(() => setCargando(false));
+    try {
+      const params = new URLSearchParams();
+      if (fechaInicio) params.append("fechaInicio", fechaInicio);
+      if (fechaFin) params.append("fechaFin", fechaFin);
+
+      const data = await apiRequest(`/clases?${params.toString()}`);
+      setClases(data);
+    } catch (error) {
+      console.error('Error al cargar clases:', error);
+      setClases([]);
+    }
+    setCargando(false);
+  };
+
+  useEffect(() => {
+    buscarClases();
+    // eslint-disable-next-line
   }, []);
 
   const eliminarClase = async (id) => {
@@ -41,13 +57,60 @@ export default function ListaClases() {
             + Nueva Sesión
           </Link>
         </div>
-        <input
-          type="text"
-          placeholder="Buscar por nombre..."
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-400 rounded-xl px-4 py-2 mb-8 w-full transition outline-none shadow-sm bg-indigo-50"
-        />
+        <div className="bg-indigo-50 rounded-xl p-4 mb-6">
+          <h4 className="font-semibold text-indigo-700 mb-3">Filtros de búsqueda</h4>
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre..."
+                  value={busqueda}
+                  onChange={e => setBusqueda(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  onChange={e => setFechaInicio(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+                <input
+                  type="date"
+                  value={fechaFin}
+                  onChange={e => setFechaFin(e.target.value)}
+                  className="w-full border border-indigo-200 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-400 transition"
+                />
+              </div>
+            </div>
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={buscarClases}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+              >
+                Buscar
+              </button>
+              <button
+                onClick={() => {
+                  setBusqueda("");
+                  setFechaInicio("");
+                  setFechaFin("");
+                  setTimeout(() => buscarClases(), 100);
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+              >
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
         {mensaje && (
           <div className="mb-4 flex items-center justify-between bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded shadow transition">
             <span>{mensaje}</span>
