@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 //import Swal from "sweetalert2";
-import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon, EyeIcon, PlusCircleIcon } from "@heroicons/react/24/solid";
+import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { HeartIcon } from "@heroicons/react/24/solid"; // Para el botón de piso pélvico
 import { apiRequest } from "../config/api";
 

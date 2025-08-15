@@ -32,6 +32,7 @@ export default function ListaConsentimientosPerinatales() {
 
   useEffect(() => {
     buscarConsentimientos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 

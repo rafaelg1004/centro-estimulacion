@@ -125,12 +125,10 @@ export default function ListaSesionesPerinatal() {
           
           const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
           const tieneFisicoFirmado = consentimiento.firmaPacienteFisico && consentimiento.firmaFisioterapeutaFisico;
-          const tieneIntensivoFirmado = consentimiento.firmaPacienteEducacion && consentimiento.firmaFisioterapeutaEducacion;
           
           console.log('Consentimientos firmados:', {
             educacion: tieneEducacionFirmada,
-            fisico: tieneFisicoFirmado,
-            intensivo: tieneIntensivoFirmado
+            fisico: tieneFisicoFirmado
           });
           
           // Si no tiene sesiones, preparar las opciones disponibles
@@ -139,9 +137,10 @@ export default function ListaSesionesPerinatal() {
               (!consentimiento.sesionesIntensivo || consentimiento.sesionesIntensivo.length === 0)) {
             const { sesiones, sesionesIntensivo } = crearSesionesDinamicas(
               consentimiento.tipoPrograma, 
-              { tieneEducacionFirmada, tieneFisicoFirmado, tieneIntensivoFirmado }
+              { tieneEducacionFirmada, tieneFisicoFirmado }
             );
-            setSesionesDisponibles({ sesiones, sesionesIntensivo, tieneEducacionFirmada, tieneFisicoFirmado, tieneIntensivoFirmado });
+            setSesionesDisponibles({ sesiones, sesionesIntensivo, tieneEducacionFirmada, tieneFisicoFirmado });
+
           }
           
           console.log('Sesiones del consentimiento:', consentimiento.sesiones);
@@ -245,11 +244,9 @@ export default function ListaSesionesPerinatal() {
     try {
       // Verificar qué tipos de sesiones puede crear basado en consentimientos firmados
       const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
-      const tieneFisicoFirmado = consentimiento.firmaPacienteFisico && consentimiento.firmaFisioterapeutaFisico;
-      const tieneIntensivoFirmado = consentimiento.firmaPacienteEducacion && consentimiento.firmaFisioterapeutaEducacion;
       
       // Crear sesión extra del tipo que tenga firmado
-      const tipoSesion = tieneEducacionFirmada ? 'educacion' : tieneFisicoFirmado ? 'fisico' : 'intensivo';
+      const tipoSesion = tieneEducacionFirmada ? 'educacion' : 'fisico';
       const nuevaSesion = {
         nombre: `Sesión Extra ${tipoSesion === 'educacion' ? 'Educativa' : tipoSesion === 'fisico' ? 'Física' : 'Intensiva'} - ${new Date().toLocaleDateString()}`,
         fecha: "",
@@ -550,9 +547,8 @@ export default function ListaSesionesPerinatal() {
                       // Verificar qué tipos de sesiones puede crear basado en consentimientos firmados
                       const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
                       const tieneFisicoFirmado = consentimiento.firmaPacienteFisico && consentimiento.firmaFisioterapeutaFisico;
-                      const tieneIntensivoFirmado = consentimiento.firmaPacienteEducacion && consentimiento.firmaFisioterapeutaEducacion;
                       
-                      if (tieneEducacionFirmada || tieneFisicoFirmado || tieneIntensivoFirmado) {
+                      if (tieneEducacionFirmada || tieneFisicoFirmado) {
                         setMostrarConfirmacionAgregarSesion(true);
                       } else {
                         setMensajeError('No hay consentimientos firmados para agregar sesiones extras');
@@ -603,9 +599,7 @@ export default function ListaSesionesPerinatal() {
                   {sesionesDisponibles.tieneFisicoFirmado && consentimiento.tipoPrograma === 'ambos' && (
                     <li>• <strong>Físico adicional:</strong> {sesionesDisponibles.sesionesIntensivo?.length || 0} sesiones</li>
                   )}
-                  {sesionesDisponibles.tieneIntensivoFirmado && (
-                    <li>• <strong>Intensivo:</strong> {sesionesDisponibles.sesionesIntensivo?.length || 0} sesiones</li>
-                  )}
+
                 </ul>
               </div>
               <button
@@ -684,12 +678,7 @@ export default function ListaSesionesPerinatal() {
                     {sesion.nombre}
                   </li>
                 ))}
-                {sesionesDisponibles.tieneIntensivoFirmado && sesionesDisponibles.sesionesIntensivo?.map((sesion, index) => (
-                  <li key={`int-${index}`} className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                    {sesion.nombre}
-                  </li>
-                ))}
+
                 {sesionesDisponibles.tieneFisicoFirmado && consentimiento.tipoPrograma === 'ambos' && sesionesDisponibles.sesionesIntensivo?.map((sesion, index) => (
                   <li key={`amb-${index}`} className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
