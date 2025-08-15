@@ -182,7 +182,48 @@ export default function DetallePaciente() {
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <button
               className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
-              onClick={() => navigate(`/valoracion?paciente=${paciente._id}`)}
+              onClick={async () => {
+                try {
+                  // Verificar si ya existe una valoración para este paciente
+                  const response = await apiRequest(`/valoraciones/verificar/${paciente._id}`);
+                  
+                  if (response.tieneValoracion) {
+                    // Si ya tiene valoración, mostrar modal de confirmación
+                    const result = await Swal.fire({
+                      title: 'Valoración Existente',
+                      html: `
+                        <div class="text-center">
+                          <div class="text-6xl mb-4">⚠️</div>
+                          <p class="text-lg mb-4">Este paciente ya tiene una valoración de ingreso registrada.</p>
+                          <p class="text-gray-600 mb-4">Fecha: <strong>${response.valoracion.fecha || 'No especificada'}</strong></p>
+                          <p class="text-gray-600 mb-4">Motivo: <strong>${response.valoracion.motivoDeConsulta || 'No especificado'}</strong></p>
+                          <p class="text-sm text-gray-500">¿Qué deseas hacer?</p>
+                        </div>
+                      `,
+                      icon: 'warning',
+                      showCancelButton: true,
+                      confirmButtonColor: '#3085d6',
+                      cancelButtonColor: '#6c757d',
+                                             confirmButtonText: 'Ver/Editar Valoración',
+                       cancelButtonText: 'Cancelar',
+                      reverseButtons: true
+                    });
+
+                                         if (result.isConfirmed) {
+                       // Ir a ver/editar la valoración existente
+                       navigate(`/valoraciones/${response.valoracion.id}`);
+                     }
+                     // Si se cancela, no hacer nada (mantener en la página actual)
+                  } else {
+                    // No tiene valoración, proceder normalmente
+                    navigate(`/valoracion?paciente=${paciente._id}`);
+                  }
+                } catch (error) {
+                  console.error('Error al verificar valoración:', error);
+                  // En caso de error, permitir continuar
+                  navigate(`/valoracion?paciente=${paciente._id}`);
+                }
+              }}
             >
               <ClipboardDocumentListIcon className="h-5 w-5" />
               Nueva Valoración

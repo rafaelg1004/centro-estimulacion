@@ -11,9 +11,18 @@ const ListaValoraciones = () => {
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [confirmarId, setConfirmarId] = useState(null);
+  const [pagina, setPagina] = useState(1);
+  const [paginacion, setPaginacion] = useState({
+    pagina: 1,
+    limite: 15,
+    total: 0,
+    totalPaginas: 0,
+    tieneSiguiente: false,
+    tieneAnterior: false
+  });
  
 
-  const buscarValoraciones = async () => {
+  const buscarValoraciones = async (paginaActual = 1) => {
     setCargando(true);
     setError(null);
     try {
@@ -23,10 +32,31 @@ const ListaValoraciones = () => {
       }
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
+      params.append("pagina", paginaActual.toString());
+      params.append("limite", "15");
 
-      const data = await apiRequest(`/valoraciones?${params.toString()}`);
-      setValoraciones(data);
+      console.log('🔍 Buscando valoraciones con parámetros:', {
+        busqueda,
+        fechaInicio,
+        fechaFin,
+        pagina: paginaActual,
+        url: `/valoraciones?${params.toString()}`
+      });
+
+      const response = await apiRequest(`/valoraciones?${params.toString()}`);
+      console.log('📋 Respuesta del servidor:', response);
+      
+      setValoraciones(response.valoraciones || []);
+      setPaginacion(response.paginacion || {
+        pagina: 1,
+        limite: 15,
+        total: 0,
+        totalPaginas: 0,
+        tieneSiguiente: false,
+        tieneAnterior: false
+      });
     } catch (err) {
+      console.error('❌ Error buscando valoraciones:', err);
       setError('No se pudieron cargar las valoraciones.');
       setValoraciones([]);
     }
@@ -60,9 +90,14 @@ const ListaValoraciones = () => {
 
   // Cargar todas al inicio
   useEffect(() => {
-    buscarValoraciones();
+    buscarValoraciones(1);
     // eslint-disable-next-line
   }, []);
+
+  const cambiarPagina = (nuevaPagina) => {
+    setPagina(nuevaPagina);
+    buscarValoraciones(nuevaPagina);
+  };
 
   if (error) return <p className="text-red-500 text-center">{error}</p>;
 
@@ -115,25 +150,26 @@ const ListaValoraciones = () => {
                 />
               </div>
             </div>
-            <div className="flex justify-center gap-2">
-              <button
-                onClick={buscarValoraciones}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
-              >
-                Buscar
-              </button>
-              <button
-                onClick={() => {
-                  setBusqueda("");
-                  setFechaInicio("");
-                  setFechaFin("");
-                  setTimeout(() => buscarValoraciones(), 100);
-                }}
-                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
-              >
-                Limpiar
-              </button>
-            </div>
+                         <div className="flex justify-center gap-2">
+               <button
+                 onClick={() => buscarValoraciones(1)}
+                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+               >
+                 Buscar
+               </button>
+               <button
+                 onClick={() => {
+                   setBusqueda("");
+                   setFechaInicio("");
+                   setFechaFin("");
+                   setPagina(1);
+                   setTimeout(() => buscarValoraciones(1), 100);
+                 }}
+                 className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+               >
+                 Limpiar
+               </button>
+             </div>
           </div>
         </div>
         {cargando ? (
@@ -144,15 +180,14 @@ const ListaValoraciones = () => {
         ) : valoraciones.length === 0 ? (
           <p className="text-gray-500 text-center">No hay valoraciones registradas.</p>
         ) : (
-          <div className="space-y-4">
-            {valoraciones
-              .slice()
-              .sort((a, b) => {
-                const nombreA = (a.paciente?.nombres || a.nombres || "").toLowerCase();
-                const nombreB = (b.paciente?.nombres || b.nombres || "").toLowerCase();
-                return nombreA.localeCompare(nombreB);
-              })
-              .map((valoracion) => (
+          <>
+                         <div className="mb-4 text-center">
+               <p className="text-sm text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg p-2 inline-block">
+                 📋 Página {paginacion.pagina} de {paginacion.totalPaginas} - Mostrando {valoraciones.length} de {paginacion.total} valoraciones
+               </p>
+             </div>
+                         <div className="space-y-4">
+             {valoraciones.map((valoracion) => (
                 <div
                   key={valoracion._id}
                   className="border border-indigo-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between hover:shadow-xl transition bg-indigo-50"
@@ -191,10 +226,44 @@ const ListaValoraciones = () => {
                       Eliminar
                     </button>
                   </div>
-                </div>
-              ))}
-          </div>
-        )}
+                                 </div>
+               ))}
+                         </div>
+             
+             {/* Controles de paginación */}
+             {paginacion.totalPaginas > 1 && (
+               <div className="mt-6 flex justify-center items-center gap-2">
+                 <button
+                   onClick={() => cambiarPagina(paginacion.pagina - 1)}
+                   disabled={!paginacion.tieneAnterior}
+                   className={`px-3 py-2 rounded-lg font-medium transition ${
+                     paginacion.tieneAnterior
+                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                   }`}
+                 >
+                   ← Anterior
+                 </button>
+                 
+                 <span className="px-4 py-2 text-sm text-gray-600">
+                   Página {paginacion.pagina} de {paginacion.totalPaginas}
+                 </span>
+                 
+                 <button
+                   onClick={() => cambiarPagina(paginacion.pagina + 1)}
+                   disabled={!paginacion.tieneSiguiente}
+                   className={`px-3 py-2 rounded-lg font-medium transition ${
+                     paginacion.tieneSiguiente
+                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                   }`}
+                 >
+                   Siguiente →
+                 </button>
+               </div>
+             )}
+           </>
+         )}
         {confirmarId && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
             <div className="bg-white border border-pink-200 text-pink-800 px-6 py-6 rounded-2xl shadow-lg flex flex-col items-center gap-4 max-w-md w-full">

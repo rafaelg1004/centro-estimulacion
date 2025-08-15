@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-//import Swal from "sweetalert2";
+import Swal from "sweetalert2";
 import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { HeartIcon } from "@heroicons/react/24/solid"; // Para el botón de piso pélvico
 import { apiRequest } from "../config/api";
@@ -157,7 +157,46 @@ export default function DetallePacienteAdulto() {
             </button>
             <button
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
-              onClick={() => setShowModal(true)}
+              onClick={async () => {
+                try {
+                  // Verificar si ya tiene valoraciones de lactancia o piso pélvico
+                  const [lactanciaResponse, pisoPelvicoResponse] = await Promise.all([
+                    apiRequest(`/valoracion-ingreso-adultos-lactancia/verificar/${paciente._id}`),
+                    apiRequest(`/valoracion-piso-pelvico/verificar/${paciente._id}`)
+                  ]);
+                  
+                  const tieneLactancia = lactanciaResponse.tieneValoracion;
+                  const tienePisoPelvico = pisoPelvicoResponse.tieneValoracion;
+                  
+                  if (tieneLactancia && tienePisoPelvico) {
+                    // Si ya tiene ambas valoraciones, mostrar mensaje
+                    Swal.fire({
+                      title: 'Valoraciones Completas',
+                      html: `
+                        <div class="text-center">
+                          <div class="text-6xl mb-4">✅</div>
+                          <p class="text-lg mb-4">Este paciente ya tiene todas las valoraciones registradas:</p>
+                          <ul class="text-left text-gray-600 mb-4">
+                            <li>• <strong>Lactancia:</strong> ${lactanciaResponse.valoracion.fecha || 'No especificada'}</li>
+                            <li>• <strong>Piso Pélvico:</strong> ${pisoPelvicoResponse.valoracion.fecha || 'No especificada'}</li>
+                          </ul>
+                          <p class="text-sm text-gray-500">Puedes ver o editar las valoraciones existentes.</p>
+                        </div>
+                      `,
+                      icon: 'info',
+                      confirmButtonColor: '#3085d6',
+                      confirmButtonText: 'Ver Valoraciones'
+                    });
+                  } else {
+                    // Mostrar modal para seleccionar tipo de valoración
+                    setShowModal(true);
+                  }
+                } catch (error) {
+                  console.error('Error al verificar valoraciones:', error);
+                  // En caso de error, mostrar modal normalmente
+                  setShowModal(true);
+                }
+              }}
             >
               <ClipboardDocumentListIcon className="h-6 w-6" />
               Iniciar Valoración

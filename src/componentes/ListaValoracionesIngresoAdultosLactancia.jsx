@@ -12,17 +12,36 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [confirmarId, setConfirmarId] = useState(null);
+  const [pagina, setPagina] = useState(1);
+  const [paginacion, setPaginacion] = useState({
+    pagina: 1,
+    limite: 15,
+    total: 0,
+    totalPaginas: 0,
+    tieneSiguiente: false,
+    tieneAnterior: false
+  });
 
-  const buscarValoraciones = async () => {
+  const buscarValoraciones = async (paginaActual = 1) => {
     setCargando(true);
     try {
       const params = new URLSearchParams();
       if (busqueda) params.append("busqueda", busqueda);
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
+      params.append("pagina", paginaActual.toString());
+      params.append("limite", "15");
 
-      const data = await apiRequest(`/valoracion-ingreso-adultos-lactancia?${params.toString()}`);
-      setValoraciones(Array.isArray(data) ? data : []);
+      const response = await apiRequest(`/valoracion-ingreso-adultos-lactancia?${params.toString()}`);
+      setValoraciones(Array.isArray(response.valoraciones) ? response.valoraciones : []);
+      setPaginacion(response.paginacion || {
+        pagina: 1,
+        limite: 15,
+        total: 0,
+        totalPaginas: 0,
+        tieneSiguiente: false,
+        tieneAnterior: false
+      });
     } catch {
       setValoraciones([]);
     }
@@ -30,9 +49,14 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   };
 
   useEffect(() => {
-    buscarValoraciones();
+    buscarValoraciones(1);
     // eslint-disable-next-line
   }, []);
+
+  const cambiarPagina = (nuevaPagina) => {
+    setPagina(nuevaPagina);
+    buscarValoraciones(nuevaPagina);
+  };
 
 
 
@@ -113,25 +137,26 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
                 />
               </div>
             </div>
-            <div className="flex justify-center gap-2">
-              <button
-                onClick={buscarValoraciones}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
-              >
-                Buscar
-              </button>
-              <button
-                onClick={() => {
-                  setBusqueda("");
-                  setFechaInicio("");
-                  setFechaFin("");
-                  setTimeout(() => buscarValoraciones(), 100);
-                }}
-                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
-              >
-                Limpiar
-              </button>
-            </div>
+                         <div className="flex justify-center gap-2">
+               <button
+                 onClick={() => buscarValoraciones(1)}
+                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+               >
+                 Buscar
+               </button>
+               <button
+                 onClick={() => {
+                   setBusqueda("");
+                   setFechaInicio("");
+                   setFechaFin("");
+                   setPagina(1);
+                   setTimeout(() => buscarValoraciones(1), 100);
+                 }}
+                 className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+               >
+                 Limpiar
+               </button>
+             </div>
           </div>
         </div>
         <div className="overflow-x-auto rounded shadow">
@@ -151,14 +176,22 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
                     <Spinner />
                   </td>
                 </tr>
-              ) : lista.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
-                    No hay valoraciones registradas.
-                  </td>
-                </tr>
-              ) : (
-                lista.map((valoracion, idx) => (
+                             ) : lista.length === 0 ? (
+                 <tr>
+                   <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
+                     No hay valoraciones registradas.
+                   </td>
+                 </tr>
+               ) : (
+                 <>
+                   <tr>
+                     <td colSpan={4} className="px-4 py-3 text-center">
+                                            <p className="text-sm text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg p-2 inline-block">
+                       📋 Página {paginacion.pagina} de {paginacion.totalPaginas} - Mostrando {lista.length} de {paginacion.total} valoraciones
+                     </p>
+                     </td>
+                   </tr>
+                                       {lista.map((valoracion, idx) => (
                   <tr
                     key={valoracion._id}
                     className={idx % 2 === 0 ? "bg-indigo-50 hover:bg-indigo-100" : "bg-white hover:bg-indigo-50"}
@@ -186,13 +219,47 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
                       >
                         Eliminar
                       </button>
-                    </td>
-                  </tr>
-                ))
-              )}
+                                         </td>
+                   </tr>
+                 ))}
+                 </>
+               )}
             </tbody>
-          </table>
-        </div>
+                     </table>
+         </div>
+         
+         {/* Controles de paginación */}
+         {paginacion.totalPaginas > 1 && (
+           <div className="mt-6 flex justify-center items-center gap-2">
+             <button
+               onClick={() => cambiarPagina(paginacion.pagina - 1)}
+               disabled={!paginacion.tieneAnterior}
+               className={`px-3 py-2 rounded-lg font-medium transition ${
+                 paginacion.tieneAnterior
+                   ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+               }`}
+             >
+               ← Anterior
+             </button>
+             
+             <span className="px-4 py-2 text-sm text-gray-600">
+               Página {paginacion.pagina} de {paginacion.totalPaginas}
+             </span>
+             
+             <button
+               onClick={() => cambiarPagina(paginacion.pagina + 1)}
+               disabled={!paginacion.tieneSiguiente}
+               className={`px-3 py-2 rounded-lg font-medium transition ${
+                 paginacion.tieneSiguiente
+                   ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+               }`}
+             >
+               Siguiente →
+             </button>
+           </div>
+         )}
         {confirmarId && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
             <div className="bg-white border border-pink-200 text-pink-800 px-6 py-4 rounded-2xl shadow-lg flex flex-col items-center gap-4 max-w-md w-full">

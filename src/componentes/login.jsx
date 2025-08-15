@@ -28,7 +28,7 @@ export default function Login({ onLogin }) {
         body: JSON.stringify({ email: usuarioOEmail, usuario: usuarioOEmail, password }),
       });
       
-      localStorage.setItem("token", data.token);
+      sessionStorage.setItem("token", data.token);
       setExito(true);
       setTimeout(() => {
         setCargando(false);

@@ -73,7 +73,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 function App() {
-  const [usuario, setUsuario] = useState(localStorage.getItem("token"));
+  const [usuario, setUsuario] = useState(sessionStorage.getItem("token"));
 
   return (
     <BrowserRouter>
@@ -90,7 +90,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
   const navigate = useNavigate();
 
   if (!usuario && location.pathname !== "/registrar-usuario") {
-    return <Login onLogin={() => setUsuario(localStorage.getItem("token"))} />;
+    return <Login onLogin={() => setUsuario(sessionStorage.getItem("token"))} />;
   }
 
   if (cerrandoSesion) {
@@ -242,7 +242,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               if (result.isConfirmed) {
                 setCerrandoSesion(true);
                 setTimeout(() => {
-                  localStorage.removeItem("token");
+                  sessionStorage.removeItem("token");
                   setUsuario(null);
                   navigate("/");
                   setCerrandoSesion(false);
