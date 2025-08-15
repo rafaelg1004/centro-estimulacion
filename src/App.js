@@ -76,7 +76,12 @@ function App() {
   const [usuario, setUsuario] = useState(sessionStorage.getItem("token"));
 
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       <RutasAutenticadas usuario={usuario} setUsuario={setUsuario} />
     </BrowserRouter>
   );

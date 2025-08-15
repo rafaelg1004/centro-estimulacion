@@ -12,7 +12,7 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [confirmarId, setConfirmarId] = useState(null);
-  const [pagina, setPagina] = useState(1);
+
   const [paginacion, setPaginacion] = useState({
     pagina: 1,
     limite: 15,
@@ -54,7 +54,6 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
   }, []);
 
   const cambiarPagina = (nuevaPagina) => {
-    setPagina(nuevaPagina);
     buscarValoraciones(nuevaPagina);
   };
 
@@ -149,7 +148,7 @@ const ListaValoracionesIngresoAdultosLactancia = () => {
                    setBusqueda("");
                    setFechaInicio("");
                    setFechaFin("");
-                   setPagina(1);
+                   
                    setTimeout(() => buscarValoraciones(1), 100);
                  }}
                  className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
