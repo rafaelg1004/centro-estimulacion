@@ -306,14 +306,15 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             />
             <Route path="/valoraciones-adultos-lactancia" element={<ListaValoracionesIngresoAdultosLactancia />} />
             <Route path="/valoracion-ingreso-adultos-lactancia/:id" element={<DetalleValoracionIngresoAdultosLactancia />} />
+            <Route path="/valoraciones-adultos-lactancia/:id" element={<DetalleValoracionIngresoAdultosLactancia />} />
             <Route path="/editar-valoracion-ingreso-adultos-lactancia/:id" element={<EditarValoracionIngresoAdultosLactancia />} />
             <Route path="/valoracion-ingreso-programa-perinatal/:id" element={<ValoracionIngresoProgramaPerinatal />} />
             <Route path="/consentimientos-perinatales" element={<ListaConsentimientosPerinatales />} />
             <Route path="/consentimientos-perinatales/:id" element={<DetalleConsentimientoPerinatal />} />
             <Route path="/consentimientos-perinatales/:id/editar" element={<EditarConsentimientoPerinatal />} />
             <Route path="/clases/editar/:id" element={<EditarClase />} />
-            <Route path="/valoracion-piso-pelvico/:id" element={<ValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico" element={<ListaValoracionesPisoPelvico />} />
+            <Route path="/valoracion-piso-pelvico/:id" element={<ValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id" element={<DetalleValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />
             <Route path="/pacientes/:id/sesiones-perinatal" element={<ListaSesionesPerinatal />} />
