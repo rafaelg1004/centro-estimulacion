@@ -14,6 +14,31 @@ function calcularEdad(fechaNacimiento) {
   return edad;
 }
 
+function calcularFechaProbableParto(fum) {
+  if (!fum) return "";
+  
+  const fechaFUM = new Date(fum);
+  const fechaParto = new Date(fechaFUM);
+  
+  // Regla de Naegele: FUM + 7 días + 9 meses
+  fechaParto.setDate(fechaParto.getDate() + 7);
+  fechaParto.setMonth(fechaParto.getMonth() + 9);
+  
+  return fechaParto.toISOString().split('T')[0];
+}
+
+function calcularSemanasGestacion(fum) {
+  if (!fum) return "";
+  
+  const fechaFUM = new Date(fum);
+  const hoy = new Date();
+  const diferenciaTiempo = hoy.getTime() - fechaFUM.getTime();
+  const diferenciaDias = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24));
+  const semanas = Math.floor(diferenciaDias / 7);
+  
+  return semanas > 0 ? semanas.toString() : "0";
+}
+
 const FORMULARIO_INICIAL = {
   nombres: "",
   cedula: "",
@@ -72,6 +97,14 @@ export default function EditarPacienteAdulto() {
           ...f,
           fechaNacimiento: value,
           edad: calcularEdad(value).toString(),
+        };
+      }
+      if (name === "fum") {
+        return {
+          ...f,
+          fum: value,
+          fechaProbableParto: calcularFechaProbableParto(value),
+          semanasGestacion: calcularSemanasGestacion(value),
         };
       }
       return { ...f, [name]: value };
@@ -177,21 +210,11 @@ export default function EditarPacienteAdulto() {
                 </div>
               );
             }
-            if (key === "fechaNacimiento" || key === "fum" || key === "fechaProbableParto") {
-              // Solo mostrar campos de gestación si está en gestación o es un paciente existente sin estado definido
-              if ((key === "fum" || key === "fechaProbableParto") && 
-                  formulario.estadoEmbarazo !== "gestacion" && 
-                  formulario.estadoEmbarazo !== "") {
-                return null;
-              }
+            if (key === "fechaNacimiento") {
               return (
                 <div key={key}>
                   <label className="block text-sm font-semibold mb-1" htmlFor={key}>
-                    {key === "fechaNacimiento"
-                      ? "Fecha de Nacimiento"
-                      : key === "fum"
-                      ? "FUM (Fecha de Última Menstruación)"
-                      : "Fecha probable de parto"}
+                    Fecha de Nacimiento
                   </label>
                   <input
                     id={key}
@@ -200,20 +223,97 @@ export default function EditarPacienteAdulto() {
                     value={formulario[key]}
                     onChange={handleChange}
                     required
-                    className={`w-full px-4 py-3 rounded-lg border-2 outline-none text-base ${
-                      key === "fechaNacimiento" 
-                        ? "border-indigo-400 focus:ring-2 focus:ring-indigo-600" 
-                        : "border-pink-400 focus:ring-2 focus:ring-pink-600 bg-pink-50"
-                    }`}
+                    className="w-full px-4 py-3 rounded-lg border-2 border-indigo-400 focus:ring-2 focus:ring-indigo-600 outline-none text-base"
+                  />
+                </div>
+              );
+            }
+            
+            if (key === "fum") {
+              // Solo mostrar FUM si está en gestación
+              if (formulario.estadoEmbarazo !== "gestacion" && formulario.estadoEmbarazo !== "") {
+                return null;
+              }
+              return (
+                <div key={key}>
+                  <label className="block text-sm font-semibold mb-1" htmlFor={key}>
+                    FUM (Fecha de Última Menstruación)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id={key}
+                      name={key}
+                      type="date"
+                      value={formulario[key]}
+                      onChange={handleChange}
+                      required
+                      className="flex-1 px-4 py-3 rounded-lg border-2 border-pink-400 focus:ring-2 focus:ring-pink-600 outline-none text-base bg-pink-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (formulario.fum) {
+                          setFormulario(f => ({
+                            ...f,
+                            fechaProbableParto: calcularFechaProbableParto(formulario.fum),
+                            semanasGestacion: calcularSemanasGestacion(formulario.fum),
+                          }));
+                        }
+                      }}
+                      className="px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-medium transition-colors shadow-sm"
+                      title="Recalcular fechas"
+                    >
+                      🔄
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+            
+            if (key === "fechaProbableParto") {
+              // Solo mostrar fecha probable si está en gestación
+              if (formulario.estadoEmbarazo !== "gestacion" && formulario.estadoEmbarazo !== "") {
+                return null;
+              }
+              return (
+                <div key={key}>
+                  <label className="block text-sm font-semibold mb-1" htmlFor={key}>
+                    Fecha probable de parto (calculada automáticamente)
+                  </label>
+                  <input
+                    id={key}
+                    name={key}
+                    type="date"
+                    value={formulario[key]}
+                    readOnly
+                    className="w-full px-4 py-3 rounded-lg border-2 border-pink-400 bg-pink-100 text-base"
                   />
                 </div>
               );
             }
             
             // Solo mostrar semanas de gestación si está en gestación
-            if (key === "semanasGestacion" && formulario.estadoEmbarazo !== "gestacion") {
-              return null;
+            if (key === "semanasGestacion") {
+              if (formulario.estadoEmbarazo !== "gestacion" && formulario.estadoEmbarazo !== "") {
+                return null;
+              }
+              return (
+                <div key={key}>
+                  <label className="block text-sm font-semibold mb-1" htmlFor={key}>
+                    Semanas de gestación (calculadas automáticamente)
+                  </label>
+                  <input
+                    id={key}
+                    name={key}
+                    value={formulario[key]}
+                    readOnly
+                    className="w-full px-4 py-3 rounded-lg border border-pink-200 bg-pink-100 text-base"
+                    placeholder="Se calcula automáticamente"
+                  />
+                </div>
+              );
             }
+            
             return (
               <div key={key}>
                 <label className="block text-sm font-semibold mb-1" htmlFor={key}>
@@ -230,11 +330,7 @@ export default function EditarPacienteAdulto() {
                   value={formulario[key]}
                   onChange={handleChange}
                   required
-                  className={`w-full px-4 py-3 rounded-lg border outline-none text-base ${
-                    key === "semanasGestacion" 
-                      ? "border-pink-200 focus:ring-2 focus:ring-pink-400 bg-pink-50" 
-                      : "border-gray-300 focus:ring-2 focus:ring-indigo-400"
-                  }`}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none text-base"
                   placeholder={key
                     .replace(/([A-Z])/g, " $1")
                     .replace(/^./, str => str.toUpperCase())}

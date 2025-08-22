@@ -14,6 +14,31 @@ function calcularEdad(fechaNacimiento) {
   return edad;
 }
 
+function calcularFechaProbableParto(fum) {
+  if (!fum) return "";
+  
+  const fechaFUM = new Date(fum);
+  const fechaParto = new Date(fechaFUM);
+  
+  // Regla de Naegele: FUM + 7 días + 9 meses
+  fechaParto.setDate(fechaParto.getDate() + 7);
+  fechaParto.setMonth(fechaParto.getMonth() + 9);
+  
+  return fechaParto.toISOString().split('T')[0];
+}
+
+function calcularSemanasGestacion(fum) {
+  if (!fum) return "";
+  
+  const fechaFUM = new Date(fum);
+  const hoy = new Date();
+  const diferenciaTiempo = hoy.getTime() - fechaFUM.getTime();
+  const diferenciaDias = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24));
+  const semanas = Math.floor(diferenciaDias / 7);
+  
+  return semanas > 0 ? semanas.toString() : "0";
+}
+
 const FORMULARIO_INICIAL = {
   nombres: "",
   cedula: "",
@@ -53,6 +78,14 @@ export default function RegistrarPacienteAdulto() {
           ...f,
           fechaNacimiento: value,
           edad: calcularEdad(value).toString(),
+        };
+      }
+      if (name === "fum") {
+        return {
+          ...f,
+          fum: value,
+          fechaProbableParto: calcularFechaProbableParto(value),
+          semanasGestacion: calcularSemanasGestacion(value),
         };
       }
       return { ...f, [name]: value };
@@ -383,44 +416,60 @@ export default function RegistrarPacienteAdulto() {
             <>
               <div>
                 <label className="block text-sm font-semibold mb-1" htmlFor="semanasGestacion">
-                  Semanas de gestación
+                  Semanas de gestación (calculadas automáticamente)
                 </label>
                 <input
                   id="semanasGestacion"
                   name="semanasGestacion"
                   value={formulario.semanasGestacion}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-pink-200 focus:ring-2 focus:ring-pink-400 outline-none text-base bg-pink-50 shadow-sm"
-                  placeholder="Semanas de gestación"
+                  readOnly
+                  className="w-full px-4 py-3 rounded-xl border border-pink-200 bg-pink-100 text-base shadow-sm"
+                  placeholder="Se calcula automáticamente"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1" htmlFor="fum">
                   FUM (Fecha de Última Menstruación)
                 </label>
-                <input
-                  id="fum"
-                  name="fum"
-                  type="date"
-                  value={formulario.fum}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border-2 border-pink-400 focus:ring-2 focus:ring-pink-600 outline-none text-base bg-pink-50 shadow-sm"
-                />
+                <div className="flex gap-2">
+                  <input
+                    id="fum"
+                    name="fum"
+                    type="date"
+                    value={formulario.fum}
+                    onChange={handleChange}
+                    required
+                    className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-400 focus:ring-2 focus:ring-pink-600 outline-none text-base bg-pink-50 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (formulario.fum) {
+                        setFormulario(f => ({
+                          ...f,
+                          fechaProbableParto: calcularFechaProbableParto(formulario.fum),
+                          semanasGestacion: calcularSemanasGestacion(formulario.fum),
+                        }));
+                      }
+                    }}
+                    className="px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-medium transition-colors shadow-sm"
+                    title="Recalcular fechas"
+                  >
+                    🔄
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1" htmlFor="fechaProbableParto">
-                  Fecha probable de parto
+                  Fecha probable de parto (calculada automáticamente)
                 </label>
                 <input
                   id="fechaProbableParto"
                   name="fechaProbableParto"
                   type="date"
                   value={formulario.fechaProbableParto}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border-2 border-pink-400 focus:ring-2 focus:ring-pink-600 outline-none text-base bg-pink-50 shadow-sm"
+                  readOnly
+                  className="w-full px-4 py-3 rounded-xl border-2 border-pink-400 bg-pink-100 text-base shadow-sm"
                 />
               </div>
             </>
