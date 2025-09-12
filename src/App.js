@@ -41,6 +41,7 @@ import DetalleValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/De
 import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/EditarValoracionPisoPelvico";
 import APIStatusIndicator from "./componentes/APIStatusIndicator";
 import ReportePaquetes from "./componentes/ReportePaquetes";
+import EditarPaquete from "./componentes/EditarPaquete";
 
 
 import {
@@ -319,6 +320,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />
             <Route path="/pacientes/:id/sesiones-perinatal" element={<ListaSesionesPerinatal />} />
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
+            <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
 
           </Routes>
         </div>

@@ -32,10 +32,22 @@ export default function ListaSesionesPerinatal() {
     
     // Solo crear sesiones si el consentimiento correspondiente está firmado
     if ((tipoPrograma === 'educacion' || tipoPrograma === 'ambos') && firmasValidadas.tieneEducacionFirmada) {
-      // Crear 10 sesiones solo con números
-      for (let i = 1; i <= 10; i++) {
+      const nombresSesiones = [
+        "Sesión 1: Cambios anatómicos y fisiológicos del embarazo",
+        "Sesión 2: Nutrición durante el embarazo", 
+        "Sesión 3: Ejercicio y relajación",
+        "Sesión 4: Trabajo de parto y parto",
+        "Sesión 5: Manejo del dolor",
+        "Sesión 6: Lactancia materna",
+        "Sesión 7: Cuidados del recién nacido",
+        "Sesión 8: Sesión para abuelos",
+        "Sesión 9: Visita postparto inmediato",
+        "Sesión 10: Visita postparto 15 días"
+      ];
+      
+      for (let i = 0; i < 10; i++) {
         sesiones.push({
-          nombre: `Sesión ${i}`,
+          nombre: nombresSesiones[i],
           fecha: "",
           firmaPaciente: ""
         });
@@ -43,33 +55,32 @@ export default function ListaSesionesPerinatal() {
     }
     
     if (tipoPrograma === 'fisico' && firmasValidadas.tieneFisicoFirmado) {
-      // Crear 8 sesiones físicas solo con números
-      for (let i = 1; i <= 8; i++) {
-        sesiones.push({
-          nombre: `Sesión ${i}`,
-          fecha: "",
-          firmaPaciente: ""
-        });
-      }
+      sesiones = [
+        { nombre: "Sesión Física 1: Evaluación inicial", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 2: Acondicionamiento básico", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 3: Fortalecimiento core", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 4: Ejercicios respiratorios", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 5: Yoga prenatal", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 6: Balonterapia", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 7: Ejercicios con banda", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión Física 8: Sesión final", fecha: "", firmaPaciente: "" }
+      ];
     }
     
     if (tipoPrograma === 'intensivo' && firmasValidadas.tieneIntensivoFirmado) {
-      // Crear 3 sesiones intensivas solo con números
-      for (let i = 1; i <= 3; i++) {
-        sesionesIntensivo.push({
-          nombre: `Sesión ${i}`,
-          fecha: "",
-          firmaPaciente: ""
-        });
-      }
+      sesionesIntensivo = [
+        { nombre: "Sesión 1: Preparación integral para el parto", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión 2: Técnicas de relajación y respiración", fecha: "", firmaPaciente: "" },
+        { nombre: "Sesión 3: Lactancia y cuidados del bebé", fecha: "", firmaPaciente: "" }
+      ];
     }
     
     if (tipoPrograma === 'ambos') {
       // Para ambos, crear sesiones físicas solo si está firmado el consentimiento físico
       if (firmasValidadas.tieneFisicoFirmado) {
-        for (let i = 1; i <= 8; i++) {
+        for (let i = 0; i < 8; i++) {
           sesionesIntensivo.push({
-            nombre: `Sesión ${i}`,
+            nombre: `Sesión Física ${i+1}: Acondicionamiento especializado`,
             fecha: "",
             firmaPaciente: ""
           });
@@ -236,17 +247,8 @@ export default function ListaSesionesPerinatal() {
       
       // Crear sesión extra del tipo que tenga firmado
       const tipoSesion = tieneEducacionFirmada ? 'educacion' : 'fisico';
-      
-      // Obtener el siguiente número de sesión
-      let siguienteNumero = 1;
-      if (tipoSesion === 'educacion' && consentimiento.sesiones) {
-        siguienteNumero = consentimiento.sesiones.length + 1;
-      } else if (tipoSesion === 'fisico' && consentimiento.sesionesIntensivo) {
-        siguienteNumero = consentimiento.sesionesIntensivo.length + 1;
-      }
-      
       const nuevaSesion = {
-        nombre: `Sesión ${siguienteNumero}`,
+        nombre: `Sesión Extra ${tipoSesion === 'educacion' ? 'Educativa' : tipoSesion === 'fisico' ? 'Física' : 'Intensiva'} - ${new Date().toLocaleDateString()}`,
         fecha: "",
         firmaPaciente: ""
       };

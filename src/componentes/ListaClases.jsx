@@ -132,33 +132,52 @@ export default function ListaClases() {
           ) : clasesFiltradas.length === 0 ? (
             <div className="col-span-2 text-center text-gray-500">No se encontraron Sesiones.</div>
           ) : null}
-          {clasesFiltradas.map(clase => (
-            <div
-              key={clase._id}
-              className="relative block bg-gradient-to-br from-indigo-50 via-pink-50 to-green-50 border border-indigo-200 rounded-2xl shadow hover:shadow-xl hover:border-indigo-400 transition p-6"
-            >
-              <Link
-                to={`/clases/${clase._id}`}
-                className="block"
+          {clasesFiltradas.map(clase => {
+            // Contar niños sin paquete
+            const ninosSinPaquete = clase.ninos ? clase.ninos.filter(n => !n.numeroFactura || n.numeroFactura.trim() === '').length : 0;
+            
+            return (
+              <div
+                key={clase._id}
+                className={`relative block bg-gradient-to-br from-indigo-50 via-pink-50 to-green-50 border rounded-2xl shadow hover:shadow-xl hover:border-indigo-400 transition p-6 ${
+                  ninosSinPaquete > 0 ? 'border-red-300 bg-gradient-to-br from-red-50 via-pink-50 to-orange-50' : 'border-indigo-200'
+                }`}
               >
-                <h3 className="text-xl font-bold text-indigo-700 mb-2">{clase.nombre}</h3>
-                <div className="text-sm text-gray-600 mb-1">
-                  <span className="font-semibold">Fecha:</span> {clase.fecha}
-                </div>
-                <div className="text-gray-700">{clase.descripcion}</div>
-              </Link>
-              <button
-                onClick={() => setConfirmarId(clase._id)}
-                className="absolute top-2 right-2 bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 text-xs font-bold flex items-center justify-center shadow"
-                title="Eliminar sesión"
-              >
-                {/* Ícono de cesto de basura */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10" />
-                </svg>
-              </button>
-            </div>
-          ))}
+                <Link
+                  to={`/clases/${clase._id}`}
+                  className="block"
+                >
+                  <h3 className="text-xl font-bold text-indigo-700 mb-2">{clase.nombre}</h3>
+                  {ninosSinPaquete > 0 && (
+                    <div className="mb-2">
+                      <span className="bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full border border-red-300 inline-block">
+                        ⚠️ {ninosSinPaquete} sin paquete
+                      </span>
+                    </div>
+                  )}
+                  <div className="text-sm text-gray-600 mb-1">
+                    <span className="font-semibold">Fecha:</span> {clase.fecha}
+                  </div>
+                  <div className="text-gray-700">{clase.descripcion}</div>
+                  {clase.ninos && clase.ninos.length > 0 && (
+                    <div className="text-sm text-gray-600 mt-2">
+                      <span className="font-semibold">Inscritos:</span> {clase.ninos.length} niño(s)
+                    </div>
+                  )}
+                </Link>
+                <button
+                  onClick={() => setConfirmarId(clase._id)}
+                  className="absolute top-2 right-2 bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 text-xs font-bold flex items-center justify-center shadow"
+                  title="Eliminar sesión"
+                >
+                  {/* Ícono de cesto de basura */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h10" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })}
         </div>
         {confirmarId && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

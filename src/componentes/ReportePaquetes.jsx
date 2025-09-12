@@ -11,7 +11,9 @@ import {
   CheckCircleIcon,
   CreditCardIcon,
   PlayIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/solid";
+import Swal from 'sweetalert2';
 
 export default function ReportePaquetes() {
   const [paquetes, setPaquetes] = useState([]);
@@ -20,6 +22,23 @@ export default function ReportePaquetes() {
   const [filtro, setFiltro] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
   const navigate = useNavigate();
+
+  const editarPaquete = async (paquete) => {
+    const result = await Swal.fire({
+      title: 'Editar Paquete',
+      text: `¿Deseas editar el paquete ${paquete.numeroFactura}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, editar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      navigate(`/paquetes/editar/${paquete._id}`);
+    }
+  };
 
   useEffect(() => {
     cargarReportePaquetes();
@@ -233,45 +252,46 @@ export default function ReportePaquetes() {
             <>
               {/* Vista de tabla para desktop */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 text-xs">
                   <thead className="bg-indigo-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Paciente</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Registro Civil</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Factura</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Pagadas</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Usadas</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Disponibles</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">% Uso</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Estado</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Acciones</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Paciente</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Registro Civil</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Factura</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Pagadas</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Usadas</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Disponibles</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">% Uso</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Estado</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Clases</th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paquetesFiltrados.map((paquete) => (
                       <tr key={paquete._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-semibold text-gray-900">{paquete.paciente.nombres}</div>
-                          <div className="text-sm text-gray-500">{paquete.paciente.genero} • {paquete.paciente.edad} meses</div>
+                        <td className="px-2 py-2">
+                          <div className="font-semibold text-gray-900 text-xs">{paquete.paciente.nombres}</div>
+                          <div className="text-xs text-gray-500">{paquete.paciente.genero} • {paquete.paciente.edad}m</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                        <td className="px-2 py-2 text-xs text-gray-800">
                           {paquete.paciente.registroCivil}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-800">
+                        <td className="px-2 py-2 text-xs font-mono text-gray-800">
                           {paquete.numeroFactura}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-semibold">
+                        <td className="px-2 py-2 text-center">
+                          <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-xs font-semibold">
                             {paquete.clasesPagadas}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-semibold">
+                        <td className="px-2 py-2 text-center">
+                          <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded text-xs font-semibold">
                             {paquete.clasesUsadas}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`px-2 py-1 rounded-full text-sm font-semibold ${
+                        <td className="px-2 py-2 text-center">
+                          <span className={`px-1 py-0.5 rounded text-xs font-semibold ${
                             paquete.clasesDisponibles > 0 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-red-100 text-red-800'
@@ -279,12 +299,12 @@ export default function ReportePaquetes() {
                             {paquete.clasesDisponibles}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <td className="px-2 py-2 text-center">
                           <div className="flex flex-col items-center">
-                            <span className="text-sm font-semibold text-gray-700">{paquete.porcentajeUso}%</span>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                            <span className="text-xs font-semibold text-gray-700">{paquete.porcentajeUso}%</span>
+                            <div className="w-full bg-gray-200 rounded-full h-1 mt-0.5">
                               <div 
-                                className={`h-2 rounded-full ${
+                                className={`h-1 rounded-full ${
                                   paquete.porcentajeUso === 100 ? 'bg-red-500' : 
                                   paquete.porcentajeUso >= 80 ? 'bg-yellow-500' : 'bg-green-500'
                                 }`}
@@ -293,8 +313,8 @@ export default function ReportePaquetes() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                        <td className="px-2 py-2 text-center">
+                          <span className={`px-1 py-0.5 rounded text-xs font-bold ${
                             paquete.estado === 'Activo' 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-red-100 text-red-800'
@@ -302,14 +322,41 @@ export default function ReportePaquetes() {
                             {paquete.estado}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition flex items-center gap-1 mx-auto"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                            Ver
-                          </button>
+                        <td className="px-2 py-2 text-center">
+                          <div className="flex flex-col gap-0.5">
+                            {paquete.clasesConPaquete && paquete.clasesConPaquete.length > 0 && (
+                              <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded text-xs">
+                                ✓{paquete.clasesConPaquete.length}
+                              </span>
+                            )}
+                            {paquete.clasesSinPaquete && paquete.clasesSinPaquete.length > 0 && (
+                              <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded text-xs">
+                                ⚠️{paquete.clasesSinPaquete.length}
+                              </span>
+                            )}
+                            {(!paquete.clasesConPaquete || paquete.clasesConPaquete.length === 0) && 
+                             (!paquete.clasesSinPaquete || paquete.clasesSinPaquete.length === 0) && (
+                              <span className="text-gray-500 text-xs">-</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-2 py-2 text-center">
+                          <div className="flex gap-1 justify-center">
+                            <button
+                              onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs font-medium transition"
+                              title="Ver paciente"
+                            >
+                              <EyeIcon className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => editarPaquete(paquete)}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs font-medium transition"
+                              title="Editar paquete"
+                            >
+                              <PencilSquareIcon className="h-3 w-3" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -386,13 +433,42 @@ export default function ReportePaquetes() {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                      Ver Paciente
-                    </button>
+                    {/* Información de clases */}
+                    <div className="mb-3">
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {paquete.clasesConPaquete && paquete.clasesConPaquete.length > 0 && (
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                            ✓ {paquete.clasesConPaquete.length} con paquete
+                          </span>
+                        )}
+                        {paquete.clasesSinPaquete && paquete.clasesSinPaquete.length > 0 && (
+                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">
+                            ⚠️ {paquete.clasesSinPaquete.length} sin paquete
+                          </span>
+                        )}
+                        {(!paquete.clasesConPaquete || paquete.clasesConPaquete.length === 0) && 
+                         (!paquete.clasesSinPaquete || paquete.clasesSinPaquete.length === 0) && (
+                          <span className="text-gray-500 text-xs">Sin clases</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                        Ver Paciente
+                      </button>
+                      <button
+                        onClick={() => editarPaquete(paquete)}
+                        className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                      >
+                        <PencilSquareIcon className="h-4 w-4" />
+                        Editar
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

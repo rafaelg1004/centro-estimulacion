@@ -230,10 +230,36 @@ export default function DetallePaciente() {
             </button>
             <button
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
-              onClick={() => navigate(`/pacientes/${paciente._id}/valoraciones`)}
+              onClick={async () => {
+                try {
+                  // Verificar si existe una valoración para este paciente
+                  const response = await apiRequest(`/valoraciones/verificar/${paciente._id}`);
+                  
+                  if (response.tieneValoracion) {
+                    // Si tiene valoración, ir directamente al detalle
+                    navigate(`/valoraciones/${response.valoracion.id}`);
+                  } else {
+                    // Si no tiene valoración, mostrar mensaje
+                    Swal.fire({
+                      title: 'Sin Valoración',
+                      text: 'Este paciente aún no tiene una valoración registrada.',
+                      icon: 'info',
+                      confirmButtonText: 'Entendido'
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error al verificar valoración:', error);
+                  Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo verificar la valoración del paciente.',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar'
+                  });
+                }
+              }}
             >
               <ClipboardDocumentListIcon className="h-5 w-5" />
-              Ver Valoraciones
+              Ver Valoración
             </button>
           </div>
           
@@ -281,6 +307,28 @@ export default function DetallePaciente() {
                   </span>
                   <span className="flex items-center gap-2">
                     <span className="text-xs text-gray-500">{p.fechaPago?.slice(0,10)}</span>
+                    <button
+                      onClick={async () => {
+                        const result = await Swal.fire({
+                          title: 'Editar Paquete',
+                          text: `¿Deseas editar el paquete ${p.numeroFactura}?`,
+                          icon: 'question',
+                          showCancelButton: true,
+                          confirmButtonColor: '#3085d6',
+                          cancelButtonColor: '#6c757d',
+                          confirmButtonText: 'Sí, editar',
+                          cancelButtonText: 'Cancelar'
+                        });
+                        if (result.isConfirmed) {
+                          navigate(`/paquetes/editar/${p._id}`);
+                        }
+                      }}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1 rounded font-bold flex items-center gap-1"
+                      title="Editar factura"
+                    >
+                      <PencilSquareIcon className="h-4 w-4" />
+                      Editar
+                    </button>
                     <button
                       onClick={() => eliminarFactura(p)}
                       className="bg-red-500 hover:bg-red-700 text-white text-xs px-2 py-1 rounded font-bold flex items-center gap-1"
