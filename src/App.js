@@ -42,23 +42,25 @@ import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/Edi
 import APIStatusIndicator from "./componentes/APIStatusIndicator";
 import ReportePaquetes from "./componentes/ReportePaquetes";
 import EditarPaquete from "./componentes/EditarPaquete";
+import GenerarRIPS from "./componentes/GenerarRIPS";
 
 
 import {
   HomeIcon,
   UsersIcon,
-  
+
   AcademicCapIcon,
- 
+
   ArrowLeftOnRectangleIcon,
-  
-  
+
+
+
   ClipboardDocumentCheckIcon,
   ClipboardIcon,
   DocumentTextIcon,
   ChartBarIcon,
-  
-  
+
+
 } from "@heroicons/react/24/solid";
 import { logAPIConfig, testAPIConnection } from "./config/api";
 
@@ -94,6 +96,9 @@ function RutasAutenticadas({ usuario, setUsuario }) {
   const [submenuValoraciones, setSubmenuValoraciones] = useState(false); // <--- NUEVO
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const navigate = useNavigate();
+
+  // Obtener rol del usuario desde sessionStorage
+  const userRole = sessionStorage.getItem("userRole");
 
   if (!usuario && location.pathname !== "/registrar-usuario") {
     return <Login onLogin={() => setUsuario(sessionStorage.getItem("token"))} />;
@@ -164,14 +169,28 @@ function RutasAutenticadas({ usuario, setUsuario }) {
                 <AcademicCapIcon className="h-5 w-5" />
                 Lista de Sesiones
               </Link>
-              <Link
-                to="/reporte-paquetes"
-                className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChartBarIcon className="h-5 w-5" />
-                Reporte de Paquetes
-              </Link>
+              {/* Solo administradores pueden ver el reporte de paquetes */}
+              {userRole === 'administracion' && (
+                <Link
+                  to="/reporte-paquetes"
+                  className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <ChartBarIcon className="h-5 w-5" />
+                  Reporte de Paquetes
+                </Link>
+              )}
+              {/* Solo administradores pueden generar RIPS */}
+              {userRole === 'administracion' && (
+                <Link
+                  to="/generar-rips"
+                  className="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <DocumentTextIcon className="h-5 w-5" />
+                  Generar RIPS
+                </Link>
+              )}
               <div>
                 <button
                   type="button"
@@ -233,33 +252,46 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               </div>
             </nav>
           </div>
-          <button
-            onClick={async () => {
-              const result = await Swal.fire({
-                title: "¿Deseas cerrar sesión?",
-                text: "Tu sesión se cerrará y volverás al inicio.",
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#e53e3e",
-                cancelButtonColor: "#6366f1",
-                confirmButtonText: "Sí, cerrar sesión",
-                cancelButtonText: "Cancelar"
-              });
-              if (result.isConfirmed) {
-                setCerrandoSesion(true);
-                setTimeout(() => {
-                  sessionStorage.removeItem("token");
-                  setUsuario(null);
-                  navigate("/");
-                  setCerrandoSesion(false);
-                }, 1200);
-              }
-            }}
-            className="bg-red-200 hover:bg-red-300 text-red-700 font-bold py-2 px-4 rounded transition mt-8 shadow flex items-center gap-2"
-          >
-            <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-            Cerrar sesión
-          </button>
+          <div className="mt-8 space-y-2">
+            {/* Información del usuario */}
+            <div className="text-center text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
+              <div className="font-semibold">{usuario}</div>
+              <div className="text-xs capitalize">
+                Rol: {userRole === 'fisioterapeuta' ? 'Fisioterapeuta' :
+                      userRole === 'auxiliar' ? 'Auxiliar' :
+                      userRole === 'administracion' ? 'Administración' : userRole}
+              </div>
+            </div>
+
+            <button
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: "¿Deseas cerrar sesión?",
+                  text: "Tu sesión se cerrará y volverás al inicio.",
+                  icon: "question",
+                  showCancelButton: true,
+                  confirmButtonColor: "#e53e3e",
+                  cancelButtonColor: "#6366f1",
+                  confirmButtonText: "Sí, cerrar sesión",
+                  cancelButtonText: "Cancelar"
+                });
+                if (result.isConfirmed) {
+                  setCerrandoSesion(true);
+                  setTimeout(() => {
+                    sessionStorage.removeItem("token");
+                    sessionStorage.removeItem("userRole");
+                    setUsuario(null);
+                    navigate("/");
+                    setCerrandoSesion(false);
+                  }, 1200);
+                }
+              }}
+              className="bg-red-200 hover:bg-red-300 text-red-700 font-bold py-2 px-4 rounded transition w-full shadow flex items-center justify-center gap-2"
+            >
+              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+              Cerrar sesión
+            </button>
+          </div>
         </aside>
       )}
 
@@ -321,6 +353,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/pacientes/:id/sesiones-perinatal" element={<ListaSesionesPerinatal />} />
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
             <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
+            <Route path="/generar-rips" element={<GenerarRIPS />} />
 
           </Routes>
         </div>

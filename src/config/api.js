@@ -97,19 +97,25 @@ export const apiRequest = async (endpoint, options = {}) => {
 export const API_ENDPOINTS = {
   // Autenticación
   LOGIN: '/auth/login',
-  
+  REGISTER: '/auth/register',
+  ENABLE_2FA: '/auth/enable-2fa',
+  VERIFY_2FA: '/auth/verify-2fa',
+  VERIFY_2FA_LOGIN: '/auth/verify-2fa-login',
+  DISABLE_2FA: '/auth/disable-2fa',
+  USER_INFO: '/auth/me',
+
   // Valoraciones
   VALORACIONES: '/valoraciones',
   VALORACION_BY_ID: (id) => `/valoraciones/${id}`,
-  
+
   // Consentimientos Perinatales
   CONSENTIMIENTO_PERINATAL: '/consentimiento-perinatal',
   CONSENTIMIENTO_PERINATAL_BY_ID: (id) => `/consentimiento-perinatal/${id}`,
-  
+
   // Pacientes
   PACIENTES: '/pacientes',
   PACIENTE_BY_ID: (id) => `/pacientes/${id}`,
-  
+
   // Upload
   UPLOAD: '/upload'
 };
