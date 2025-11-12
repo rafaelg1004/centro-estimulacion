@@ -255,11 +255,11 @@ function RutasAutenticadas({ usuario, setUsuario }) {
           <div className="mt-8 space-y-2">
             {/* Información del usuario */}
             <div className="text-center text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
-              <div className="font-semibold">{usuario}</div>
+         
               <div className="text-xs capitalize">
-                Rol: {userRole === 'fisioterapeuta' ? 'Fisioterapeuta' :
-                      userRole === 'auxiliar' ? 'Auxiliar' :
-                      userRole === 'administracion' ? 'Administración' : userRole}
+                {userRole === 'fisioterapeuta' ? 'Fisioterapeuta' :
+                 userRole === 'auxiliar' ? 'Auxiliar' :
+                 userRole === 'administracion' ? 'Administración' : userRole}
               </div>
             </div>
 
