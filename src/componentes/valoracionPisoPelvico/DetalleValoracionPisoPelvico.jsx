@@ -382,9 +382,11 @@ export default function DetalleValoracionPisoPelvico() {
   const consentimiento = [
     { label: "Fecha consentimiento", value: valoracion.consentimientoFecha },
     { label: "Ciudad", value: valoracion.consentimientoCiudad },
-    { label: "Nombre completo", value: valoracion.consentimientoNombre },
-    { label: "CC No.", value: valoracion.consentimientoCC },
+    { label: "Nombre completo", value: paciente?.nombres || valoracion.nombres  },
+    { label: "CC No.", value: paciente?.cedula || valoracion.cedula  },
   ];
+  
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-green-100 py-10 px-2">

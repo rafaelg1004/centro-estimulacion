@@ -479,7 +479,7 @@ const FORMULARIO_INICIAL = {
   firmaAutorizacion: "",
 
   // Paso 12: Consentimiento
-  consentimientoFecha: "",
+  consentimientoFecha: "2025-07-07",
   consentimientoCiudad: "Montería",
   consentimientoNombre: "",
   consentimientoCC: "",

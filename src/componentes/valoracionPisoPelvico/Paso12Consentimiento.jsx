@@ -41,6 +41,7 @@ export default function Paso12Consentimiento({ formulario, setFormulario, siguie
     }));
   }, [setFormulario]);
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
@@ -173,7 +174,7 @@ export default function Paso12Consentimiento({ formulario, setFormulario, siguie
                   icon={UserIcon}
                   type="text"
                   name="consentimientoNombre"
-                  value={formulario?.consentimientoNombre || formulario?.nombres || ""}
+                  value={formulario?.consentimientoNombre || formulario?.nombres || "Sin dato"}
                   readOnly
                   className="bg-gray-50"
                 />
@@ -182,7 +183,7 @@ export default function Paso12Consentimiento({ formulario, setFormulario, siguie
                   icon={IdentificationIcon}
                   type="text"
                   name="consentimientoCC"
-                  value={formulario?.consentimientoCC || formulario?.cedula || ""}
+                  value={formulario?.consentimientoCC || formulario?.cedula || "Sin dato"}
                   readOnly
                   className="bg-gray-50"
                 />

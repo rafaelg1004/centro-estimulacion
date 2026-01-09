@@ -15,10 +15,10 @@ export default function RegistroUsuario() {
     try {
       const data = await apiRequest("/auth/register", {
         method: "POST",
-        body: JSON.stringify({ email, usuario, nombre, password }),
+        body: JSON.stringify({ email, usuario, nombre, password, rol }),
       });
       setMensaje(data.mensaje);
-      setEmail(""); setUsuario(""); setNombre(""); setPassword("");
+      setEmail(""); setUsuario(""); setNombre(""); setPassword(""); setRol("auxiliar");
     } catch (err) {
       setError(err.message);
     }
@@ -31,6 +31,11 @@ export default function RegistroUsuario() {
       <input value={usuario} onChange={e => setUsuario(e.target.value)} placeholder="Usuario" required />
       <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Correo (opcional)" type="email" />
       <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña" required />
+      <select value={rol} onChange={e => setRol(e.target.value)} required>
+        <option value="fisioterapeuta">Fisioterapeuta</option>
+        <option value="auxiliar">Auxiliar</option>
+        <option value="administracion">Administración</option>
+      </select>
       <button type="submit">Registrar</button>
       {mensaje && <div style={{color: "green"}}>{mensaje}</div>}
       {error && <div style={{color: "red"}}>{error}</div>}
