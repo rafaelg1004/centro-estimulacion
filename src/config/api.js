@@ -26,12 +26,16 @@ export const API_CONFIG = {
 export const apiRequest = async (endpoint, options = {}) => {
   // Construir URL correctamente para cada entorno
   const url = `${API_CONFIG.BASE_URL}/api${endpoint}`;
-  
+
+  // Agregar token de autenticación si existe
+  const token = sessionStorage.getItem("token");
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
   const config = {
-    headers: API_CONFIG.HEADERS,
+    headers: { ...API_CONFIG.HEADERS, ...authHeaders },
     ...options,
     ...(options.headers && {
-      headers: { ...API_CONFIG.HEADERS, ...options.headers }
+      headers: { ...API_CONFIG.HEADERS, ...authHeaders, ...options.headers }
     })
   };
 
