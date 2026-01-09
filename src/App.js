@@ -43,6 +43,7 @@ import APIStatusIndicator from "./componentes/APIStatusIndicator";
 import ReportePaquetes from "./componentes/ReportePaquetes";
 import EditarPaquete from "./componentes/EditarPaquete";
 import GenerarRIPS from "./componentes/GenerarRIPS";
+import GestionUsuarios from "./componentes/GestionUsuarios";
 
 
 import {
@@ -169,16 +170,26 @@ function RutasAutenticadas({ usuario, setUsuario }) {
                 <AcademicCapIcon className="h-5 w-5" />
                 Lista de Sesiones
               </Link>
-              {/* Solo administradores pueden ver el reporte de paquetes */}
+              {/* Solo administradores pueden ver el reporte de paquetes y gestión de usuarios */}
               {userRole === 'administracion' && (
-                <Link
-                  to="/reporte-paquetes"
-                  className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <ChartBarIcon className="h-5 w-5" />
-                  Reporte de Paquetes
-                </Link>
+                <>
+                  <Link
+                    to="/reporte-paquetes"
+                    className="bg-green-100 hover:bg-green-200 text-green-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <ChartBarIcon className="h-5 w-5" />
+                    Reporte de Paquetes
+                  </Link>
+                  <Link
+                    to="/gestion-usuarios"
+                    className="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <UsersIcon className="h-5 w-5" />
+                    Gestión de Usuarios
+                  </Link>
+                </>
               )}
               <Link
                 to="/generar-rips"
@@ -351,6 +362,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
             <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
             <Route path="/generar-rips" element={<GenerarRIPS />} />
+            <Route path="/gestion-usuarios" element={<GestionUsuarios />} />
 
           </Routes>
         </div>
