@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest, API_CONFIG } from "../../config/api";
 import Paso1DatosPersonalesPerinatal from "./Paso1DatosPersonalesPerinatal";
@@ -131,7 +131,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     // Si es evento de input
     if (e && e.target) {
       const { name, value, type, checked } = e.target;
@@ -154,7 +154,7 @@ export default function ValoracionIngresoProgramaPerinatal() {
         ...e,
       }));
     }
-  };
+  }, []);
 
   const setFirma = (name, value) => {
     console.log(`🖊️ Firma actualizada: ${name} = ${value ? 'imagen capturada' : 'vacía'}`);

@@ -20,7 +20,7 @@ export default function Paso3EstadoSaludPerinatal({ formulario, handleChange, si
       // Si no hay datos suficientes, limpiar el IMC
       handleChange({ imc: "" });
     }
-  }, [formulario.pesoActual, formulario.talla]);
+  }, [formulario.pesoActual, formulario.talla, formulario.imc, handleChange]);
 
   return (
     <div>
