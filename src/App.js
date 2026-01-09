@@ -180,17 +180,14 @@ function RutasAutenticadas({ usuario, setUsuario }) {
                   Reporte de Paquetes
                 </Link>
               )}
-              {/* Solo administradores pueden generar RIPS */}
-              {userRole === 'administracion' && (
-                <Link
-                  to="/generar-rips"
-                  className="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <DocumentTextIcon className="h-5 w-5" />
-                  Generar RIPS
-                </Link>
-              )}
+              <Link
+                to="/generar-rips"
+                className="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <DocumentTextIcon className="h-5 w-5" />
+                Generar RIPS
+              </Link>
               <div>
                 <button
                   type="button"
