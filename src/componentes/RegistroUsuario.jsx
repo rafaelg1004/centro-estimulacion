@@ -6,19 +6,25 @@ export default function RegistroUsuario() {
   const [usuario, setUsuario] = useState("");
   const [nombre, setNombre] = useState("");
   const [password, setPassword] = useState("");
+  const [rol, setRol] = useState("auxiliar");
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
+  const [twoFactorSetup, setTwoFactorSetup] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); setMensaje("");
+    setError(""); setMensaje(""); setTwoFactorSetup(null);
     try {
       const data = await apiRequest("/auth/register", {
         method: "POST",
         body: JSON.stringify({ email, usuario, nombre, password, rol }),
       });
       setMensaje(data.mensaje);
-      setEmail(""); setUsuario(""); setNombre(""); setPassword(""); setRol("auxiliar");
+      if (data.twoFactorSetup) {
+        setTwoFactorSetup(data.twoFactorSetup);
+      } else {
+        setEmail(""); setUsuario(""); setNombre(""); setPassword(""); setRol("auxiliar");
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -39,6 +45,15 @@ export default function RegistroUsuario() {
       <button type="submit">Registrar</button>
       {mensaje && <div style={{color: "green"}}>{mensaje}</div>}
       {error && <div style={{color: "red"}}>{error}</div>}
+      {twoFactorSetup && (
+        <div style={{marginTop: "2rem", padding: "1rem", border: "1px solid #ccc", borderRadius: "8px"}}>
+          <h3>Configuración de Autenticación de Dos Factores</h3>
+          <p>{twoFactorSetup.instrucciones}</p>
+          <img src={twoFactorSetup.qrCode} alt="QR Code para 2FA" style={{maxWidth: "200px"}} />
+          <p><strong>Secreto:</strong> {twoFactorSetup.secret}</p>
+          <button onClick={() => {setTwoFactorSetup(null); setEmail(""); setUsuario(""); setNombre(""); setPassword(""); setRol("auxiliar");}}>Cerrar</button>
+        </div>
+      )}
     </form>
   );
 }
