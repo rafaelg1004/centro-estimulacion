@@ -4,11 +4,27 @@ import { apiRequest, API_ENDPOINTS } from '../config/api';
 
 const GenerarRIPS = () => {
   const navigate = useNavigate();
+
+  // Calcular fechas del mes anterior por defecto (Regla: se reporta los primeros 5 días el mes anterior)
+  const getFechasMesAnterior = () => {
+    const date = new Date();
+    const firstDayPrevMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+    const lastDayPrevMonth = new Date(date.getFullYear(), date.getMonth(), 0);
+    
+    return {
+      inicio: firstDayPrevMonth.toISOString().split('T')[0],
+      fin: lastDayPrevMonth.toISOString().split('T')[0]
+    };
+  };
+
+  const fechasDefecto = getFechasMesAnterior();
+
   const [facturaData, setFacturaData] = useState({
+    sinFactura: true,
     numFactura: '',
     pacienteIds: [],
-    fechaInicio: '',
-    fechaFin: ''
+    fechaInicio: fechasDefecto.inicio,
+    fechaFin: fechasDefecto.fin
   });
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,10 +66,10 @@ const GenerarRIPS = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFacturaData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -75,6 +91,7 @@ const GenerarRIPS = () => {
     try {
       const response = await apiRequest('/rips/generate', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(facturaData)
       });
       setResultado(response);
@@ -92,7 +109,8 @@ const GenerarRIPS = () => {
     const dataStr = JSON.stringify(resultado.data.rips, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `RIPS_${facturaData.numFactura}_${new Date().toISOString().split('T')[0]}.json`;
+    const invoiceName = facturaData.sinFactura ? 'SIN_FACTURA' : facturaData.numFactura;
+    const exportFileDefaultName = `RIPS_${invoiceName}_${new Date().toISOString().split('T')[0]}.json`;
 
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -139,54 +157,37 @@ const GenerarRIPS = () => {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Datos de la factura */}
+        {/* Datos del Periodo */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Datos de la Factura
+            Periodo del Reporte (Sin Factura - Res. 2275)
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Número de Factura *
+                Fecha Inicio
               </label>
               <input
-                type="text"
-                name="numFactura"
-                value={facturaData.numFactura}
+                type="date"
+                name="fechaInicio"
+                value={facturaData.fechaInicio}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ej: FE001-2024"
-                required
               />
             </div>
 
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha Inicio
-                </label>
-                <input
-                  type="date"
-                  name="fechaInicio"
-                  value={facturaData.fechaInicio}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha Fin
-                </label>
-                <input
-                  type="date"
-                  name="fechaFin"
-                  value={facturaData.fechaFin}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fecha Fin
+              </label>
+              <input
+                type="date"
+                name="fechaFin"
+                value={facturaData.fechaFin}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
         </div>
@@ -196,6 +197,9 @@ const GenerarRIPS = () => {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Seleccionar Pacientes
           </h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Si no selecciona ningún paciente, se buscarán automáticamente todos los que hayan tenido servicios en el rango de fechas seleccionado.
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
             {pacientes.map((paciente) => (
@@ -249,10 +253,10 @@ const GenerarRIPS = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={loading || !facturaData.numFactura || facturaData.pacienteIds.length === 0}
+            disabled={loading || (facturaData.pacienteIds.length === 0 && (!facturaData.fechaInicio || !facturaData.fechaFin))}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Generando RIPS...' : 'Generar RIPS'}
+            {loading ? 'Generando RIPS...' : 'Generar RIPS (Res. 2275)'}
           </button>
         </div>
       </form>
