@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { apiRequest } from "../config/api";
 import Swal from "sweetalert2";
+import {
+  ShieldCheckIcon,
+  ShieldExclamationIcon,
+  UserMinusIcon,
+  UserPlusIcon,
+  KeyIcon
+} from "@heroicons/react/24/solid";
 
 export default function GestionUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -90,6 +97,35 @@ export default function GestionUsuarios() {
     }
   };
 
+  const cambiarContrasena = async (id) => {
+    const { value: newPassword } = await Swal.fire({
+      title: "Cambiar Contraseña",
+      input: "password",
+      inputLabel: "Nueva contraseña (mínimo 6 caracteres)",
+      inputPlaceholder: "Ingresa la nueva contraseña",
+      inputValidator: (value) => {
+        if (!value || value.length < 6) {
+          return "La contraseña debe tener al menos 6 caracteres";
+        }
+      },
+      showCancelButton: true,
+      confirmButtonText: "Cambiar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (newPassword) {
+      try {
+        await apiRequest(`/auth/change-password/${id}`, {
+          method: "POST",
+          body: JSON.stringify({ newPassword })
+        });
+        Swal.fire("Éxito", "Contraseña cambiada correctamente", "success");
+      } catch (error) {
+        Swal.fire("Error", "No se pudo cambiar la contraseña", "error");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -143,38 +179,51 @@ export default function GestionUsuarios() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex flex-wrap gap-1">
                       {usuario.twoFactorEnabled ? (
                         <button
                           onClick={() => deshabilitar2FA(usuario._id)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs"
+                          className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
-                          Deshabilitar 2FA
+                          <ShieldExclamationIcon className="h-3 w-3" />
+                          Deshab 2FA
                         </button>
                       ) : (
                         <button
                           onClick={() => habilitar2FA(usuario._id)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs"
+                          className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
-                          Habilitar 2FA
+                          <ShieldCheckIcon className="h-3 w-3" />
+                          Hab 2FA
                         </button>
                       )}
 
                       {usuario.bloqueadoHasta && usuario.bloqueadoHasta > new Date() ? (
                         <button
                           onClick={() => desbloquearUsuario(usuario._id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
-                          Desbloquear
+                          <UserPlusIcon className="h-3 w-3" />
+                          Desbloq
                         </button>
                       ) : (
                         <button
                           onClick={() => bloquearUsuario(usuario._id)}
-                          className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-xs"
+                          className="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
-                          Bloquear
+                          <UserMinusIcon className="h-3 w-3" />
+                          Bloq
                         </button>
                       )}
+                      <button
+                        onClick={() => cambiarContrasena(usuario._id)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
+                      >
+                        <KeyIcon className="h-3 w-3" />
+                        Pass
+                      </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
