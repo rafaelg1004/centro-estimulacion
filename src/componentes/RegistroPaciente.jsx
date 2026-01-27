@@ -17,6 +17,7 @@ function calcularEdadEnMeses(fechaNacimiento) {
 
 const FORMULARIO_INICIAL = {
   nombres: "",
+  tipoDocumento: "RC",
   registroCivil: "",
   genero: "",
   lugarNacimiento: "",
@@ -127,8 +128,25 @@ export default function RegistroPaciente() {
               />
             </div>
             <div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="tipoDocumento">
+                Tipo de Documento
+              </label>
+              <select
+                id="tipoDocumento"
+                name="tipoDocumento"
+                value={formulario.tipoDocumento}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
+              >
+                <option value="RC">Registro Civil (RC)</option>
+                <option value="TI">Tarjeta de Identidad (TI)</option>
+                <option value="MS">Menor sin Identificación (MS)</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-semibold mb-1" htmlFor="registroCivil">
-                Registro Civil
+                Número de Documento
               </label>
               <input
                 id="registroCivil"
@@ -137,7 +155,7 @@ export default function RegistroPaciente() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                placeholder="Registro Civil"
+                placeholder="Número de Documento"
               />
             </div>
             <div>

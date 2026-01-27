@@ -60,32 +60,68 @@ const FirmaCanvas = ({ label, name, setFormulario, formulario, onFirmaChange }) 
 
   // Guardar firma subiendo a S3
   const guardarFirma = async () => {
-    if (sigRef.current && !sigRef.current.isEmpty()) {
-      setSubiendo(true);
+    if (!sigRef.current) {
+      console.error("error: sigRef.current no está definido");
+      return;
+    }
+
+    if (sigRef.current.isEmpty()) {
+      alert("Por favor, realice la firma antes de guardar.");
+      return;
+    }
+
+    setSubiendo(true);
+    try {
+      if (typeof sigRef.current.getTrimmedCanvas !== 'function') {
+        throw new TypeError("getTrimmedCanvas no es una función en el pad de firma");
+      }
+
+      console.log(`Procesando firma para el campo: ${name}...`);
+      
+      // Implementación robusta: intentar recortar, si falla usar el canvas original
+      let canvas;
       try {
-        const firmaBase64 = sigRef.current.getTrimmedCanvas().toDataURL("image/png");
-        
-        // Si ya hay una firma anterior, eliminarla de S3
-        if (formulario[name] && typeof formulario[name] === 'string' && formulario[name].includes('amazonaws.com')) {
-          console.log(`Eliminando firma anterior de S3: ${formulario[name]}`);
-          await eliminarImagenDeS3(formulario[name]);
-        }
-        
-        // Subir nueva firma a S3
-        console.log(`Subiendo nueva firma a S3...`);
-        const urlS3 = await subirFirmaAS3(firmaBase64);
-        console.log(`✓ Firma subida a S3: ${urlS3}`);
-        
+        canvas = sigRef.current.getTrimmedCanvas();
+        if (!canvas) throw new Error("Recorte no devolvió canvas");
+      } catch (err) {
+        console.warn("Falla interna detectada en getTrimmedCanvas, procediendo con canvas original:", err);
+        // Fallback al canvas original si el módulo de recorte falla
+        canvas = sigRef.current.getCanvas();
+      }
+      
+      const firmaBase64 = canvas.toDataURL("image/png");
+      
+      // Si ya hay una firma anterior, eliminarla de S3
+      if (formulario && formulario[name] && typeof formulario[name] === 'string' && formulario[name].includes('amazonaws.com')) {
+        console.log(`Eliminando firma anterior de S3: ${formulario[name]}`);
+        await eliminarImagenDeS3(formulario[name]);
+      }
+      
+      // Subir nueva firma a S3
+      console.log(`Subiendo nueva firma a S3...`);
+      const urlS3 = await subirFirmaAS3(firmaBase64);
+      console.log(`✓ Firma subida a S3: ${urlS3}`);
+      
+      if (typeof setFormulario === "function") {
         setFormulario(name, urlS3);
+      } else {
+        console.error("setFormulario no es una función. Tipo recibido:", typeof setFormulario);
+        // Fallback si onFirmaChange sí es función (algunos componentes lo pasan así)
         if (typeof onFirmaChange === "function") {
           onFirmaChange(name, urlS3, true);
+        } else {
+          throw new TypeError("No se encontró una función válida para actualizar el formulario (setFormulario no es función)");
         }
-      } catch (error) {
-        console.error('Error al procesar firma:', error);
-        alert('Error al guardar la firma. Inténtalo de nuevo.');
-      } finally {
-        setSubiendo(false);
       }
+
+      if (typeof onFirmaChange === "function") {
+        onFirmaChange(name, urlS3, true);
+      }
+    } catch (error) {
+      console.error('Error al procesar firma:', error);
+      alert(`Error al guardar la firma: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setSubiendo(false);
     }
   };
 

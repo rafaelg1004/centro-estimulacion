@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon, EyeIcon } from "@heroicons/react/24/solid";
+import { ClipboardDocumentListIcon, PencilSquareIcon, ArrowLeftIcon, CalendarDaysIcon, EyeIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { HeartIcon } from "@heroicons/react/24/solid"; // Para el botón de piso pélvico
 import { apiRequest } from "../config/api";
 
@@ -49,6 +49,81 @@ export default function DetallePacienteAdulto() {
   }, [id]);
 
   
+  const descargarRDA = async () => {
+    try {
+      Swal.fire({
+        title: 'Generando RDA...',
+        text: 'Construyendo el resumen digital en formato FHIR (Resolución 866 de 2021)',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const response = await apiRequest(`/rda/patient/${paciente._id}`);
+      const dataStr = JSON.stringify(response, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      const fileName = `RDA_PACIENTE_${paciente.cedula || id}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', fileName);
+      linkElement.click();
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡RDA Generado!',
+        text: 'El Resumen Digital de Atención (FHIR) se ha descargado correctamente.',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error descargando RDA:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo generar el RDA FHIR.'
+      });
+    }
+  };
+
+  const descargarRDAEncuentro = async (valoracion) => {
+    try {
+      Swal.fire({
+        title: 'Generando RDA de Consulta...',
+        text: 'Construyendo el resumen del encuentro en formato FHIR',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // El backend requiere el tipo (adulto/nino)
+      const type = 'adulto'; 
+      const response = await apiRequest(`/rda/encounter/${valoracion._id}?type=${type}`);
+      
+      const dataStr = JSON.stringify(response, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      const fileName = `RDA_CONSULTA_${valoracion.tipo.replace(/\s+/g, '_')}_${valoracion.fecha || 'SIN_FECHA'}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', fileName);
+      linkElement.click();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'RDA de Consulta Descargado',
+        text: 'El archivo FHIR ha sido generado con éxito.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error descargando RDA Encuentro:', error);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo generar el RDA del encuentro.' });
+    }
+  };
+
   if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!paciente) return (
     <div className="flex flex-col items-center justify-center min-h-[300px] bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100">
@@ -156,6 +231,13 @@ export default function DetallePacienteAdulto() {
               Ver Sesiones
             </button>
             <button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
+              onClick={descargarRDA}
+            >
+              <ArrowDownTrayIcon className="h-6 w-6" />
+              Descargar RDA (FHIR)
+            </button>
+            <button
               className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
               onClick={async () => {
                 try {
@@ -232,13 +314,22 @@ export default function DetallePacienteAdulto() {
 
 
                       </div>
-                      <button
-                        onClick={() => navigate(valoracion.ruta)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                        Ver Detalle
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => descargarRDAEncuentro(valoracion)}
+                          className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2.5 rounded-lg transition-colors shadow-sm"
+                          title="Descargar RDA FHIR de esta consulta"
+                        >
+                          <ArrowDownTrayIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => navigate(valoracion.ruta)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          Ver Detalle
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

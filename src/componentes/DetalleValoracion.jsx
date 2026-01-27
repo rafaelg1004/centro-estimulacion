@@ -5,6 +5,7 @@ import logo from "../assents/LOGO.png";
 import { ArrowDownTrayIcon, PencilSquareIcon, HomeIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
 import { exportarValoracionPisoPelvicoAWord } from "../utils/exportarValoracionWord";
+import Swal from 'sweetalert2';
 
 // Función helper para renderizar valores de forma segura
 const renderValue = (value) => {
@@ -54,6 +55,53 @@ const DetalleValoracion = () => {
     } catch (error) {
       console.error('❌ Error al exportar a Word:', error);
       alert("Error al exportar documento a Word");
+    }
+  };
+
+  const exportarPDF = async () => {
+    try {
+      Swal.fire({
+        title: 'Generando PDF...',
+        text: 'Preparando el informe con firmas desde el servidor',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/valoraciones/reporte/exportar-pdf/${id}?type=nino`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) throw new Error('Error al generar el PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `REPORTE_VALORACION_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡PDF Generado!',
+        text: 'El reporte se ha descargado correctamente.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error exportando PDF:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo generar el reporte PDF.'
+      });
     }
   };
 
@@ -205,41 +253,33 @@ const DetalleValoracion = () => {
         <section className="mb-8 bg-indigo-50 rounded-xl p-4 shadow">
           <h3 className="text-lg font-semibold text-indigo-600 border-b pb-1 mb-4">Desarrollo Ontológico</h3>
           
-          {/* Motricidad Gruesa */}
           <div className="mb-6">
             <h4 className="text-md font-semibold text-indigo-500 mb-3">Motricidad Gruesa</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Sostiene Cabeza:</strong> {valoracion.sostieneCabeza_si ? 'Sí' : valoracion.sostieneCabeza_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.sostieneCabeza_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.sostieneCabeza_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Se Voltea:</strong> {valoracion.seVoltea_si ? 'Sí' : valoracion.seVoltea_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.seVoltea_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.seVoltea_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Se Sienta sin Apoyo:</strong> {valoracion.seSientaSinApoyo_si ? 'Sí' : valoracion.seSientaSinApoyo_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.seSientaSinApoyo_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.seSientaSinApoyo_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Gatea:</strong> {valoracion.gatea_si ? 'Sí' : valoracion.gatea_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.gatea_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.gatea_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Se Pone de Pie Apoyado:</strong> {valoracion.sePoneDePerApoyado_si ? 'Sí' : valoracion.sePoneDePerApoyado_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.sePoneDePerApoyado_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.sePoneDePerApoyado_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Camina Solo:</strong> {valoracion.caminaSolo_si ? 'Sí' : valoracion.caminaSolo_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.caminaSolo_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.caminaSolo_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-indigo-300 pl-3">
                 <p><strong>Corre y Salta:</strong> {valoracion.correSalta_si ? 'Sí' : valoracion.correSalta_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.correSalta_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.correSalta_observaciones}</p>}
@@ -247,36 +287,29 @@ const DetalleValoracion = () => {
             </div>
           </div>
 
-          {/* Motricidad Fina */}
           <div className="mb-6">
             <h4 className="text-md font-semibold text-pink-500 mb-3">Motricidad Fina</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
               <div className="border-l-4 border-pink-300 pl-3">
                 <p><strong>Sigue Objetos con la Mirada:</strong> {valoracion.sigueObjetosMirada_si ? 'Sí' : valoracion.sigueObjetosMirada_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.sigueObjetosMirada_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.sigueObjetosMirada_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-pink-300 pl-3">
                 <p><strong>Lleva Objetos a la Boca:</strong> {valoracion.llevaObjetosBoca_si ? 'Sí' : valoracion.llevaObjetosBoca_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.llevaObjetosBoca_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.llevaObjetosBoca_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-pink-300 pl-3">
                 <p><strong>Pasa Objetos entre Manos:</strong> {valoracion.pasaObjetosEntreManos_si ? 'Sí' : valoracion.pasaObjetosEntreManos_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.pasaObjetosEntreManos_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.pasaObjetosEntreManos_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-pink-300 pl-3">
                 <p><strong>Pinza Superior:</strong> {valoracion.pinzaSuperior_si ? 'Sí' : valoracion.pinzaSuperior_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.pinzaSuperior_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.pinzaSuperior_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-pink-300 pl-3">
                 <p><strong>Encaja Piezas Grandes:</strong> {valoracion.encajaPiezasGrandes_si ? 'Sí' : valoracion.encajaPiezasGrandes_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.encajaPiezasGrandes_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.encajaPiezasGrandes_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-pink-300 pl-3">
                 <p><strong>Dibuja Garabatos:</strong> {valoracion.dibujaGarabatos_si ? 'Sí' : valoracion.dibujaGarabatos_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.dibujaGarabatos_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.dibujaGarabatos_observaciones}</p>}
@@ -284,36 +317,29 @@ const DetalleValoracion = () => {
             </div>
           </div>
 
-          {/* Lenguaje y Comunicación */}
           <div className="mb-6">
             <h4 className="text-md font-semibold text-green-500 mb-3">Lenguaje y Comunicación</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
               <div className="border-l-4 border-green-300 pl-3">
                 <p><strong>Balbucea:</strong> {valoracion.balbucea_si ? 'Sí' : valoracion.balbucea_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.balbucea_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.balbucea_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-green-300 pl-3">
                 <p><strong>Dice Mamá/Papá:</strong> {valoracion.diceMamaPapa_si ? 'Sí' : valoracion.diceMamaPapa_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.diceMamaPapa_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.diceMamaPapa_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-green-300 pl-3">
                 <p><strong>Señala lo que Quiere:</strong> {valoracion.senalaQueQuiere_si ? 'Sí' : valoracion.senalaQueQuiere_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.senalaQueQuiere_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.senalaQueQuiere_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-green-300 pl-3">
                 <p><strong>Dice 5-10 Palabras:</strong> {valoracion.dice5a10Palabras_si ? 'Sí' : valoracion.dice5a10Palabras_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.dice5a10Palabras_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.dice5a10Palabras_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-green-300 pl-3">
                 <p><strong>Entiende Órdenes Simples:</strong> {valoracion.entiendeOrdenesSimples_si ? 'Sí' : valoracion.entiendeOrdenesSimples_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.entiendeOrdenesSimples_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.entiendeOrdenesSimples_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-green-300 pl-3">
                 <p><strong>Usa Frases de 2 Palabras:</strong> {valoracion.usaFrases2Palabras_si ? 'Sí' : valoracion.usaFrases2Palabras_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.usaFrases2Palabras_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.usaFrases2Palabras_observaciones}</p>}
@@ -321,31 +347,25 @@ const DetalleValoracion = () => {
             </div>
           </div>
 
-          {/* Socioemocional */}
           <div className="mb-6">
             <h4 className="text-md font-semibold text-purple-500 mb-3">Socioemocional</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
               <div className="border-l-4 border-purple-300 pl-3">
                 <p><strong>Sonríe Socialmente:</strong> {valoracion.sonrieSocialmente_si ? 'Sí' : valoracion.sonrieSocialmente_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.sonrieSocialmente_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.sonrieSocialmente_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-purple-300 pl-3">
                 <p><strong>Responde al Nombre:</strong> {valoracion.respondeNombre_si ? 'Sí' : valoracion.respondeNombre_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.respondeNombre_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.respondeNombre_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-purple-300 pl-3">
                 <p><strong>Se Interesa por Otros Niños:</strong> {valoracion.interesaOtrosNinos_si ? 'Sí' : valoracion.interesaOtrosNinos_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.interesaOtrosNinos_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.interesaOtrosNinos_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-purple-300 pl-3">
                 <p><strong>Juego Simbólico:</strong> {valoracion.juegoSimbolico_si ? 'Sí' : valoracion.juegoSimbolico_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.juegoSimbolico_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.juegoSimbolico_observaciones}</p>}
               </div>
-
               <div className="border-l-4 border-purple-300 pl-3">
                 <p><strong>Se Despide/Lanza Besos:</strong> {valoracion.seDespideLanzaBesos_si ? 'Sí' : valoracion.seDespideLanzaBesos_no ? 'No' : 'No evaluado'}</p>
                 {valoracion.seDespideLanzaBesos_observaciones && <p className="text-sm text-gray-600"><strong>Observaciones:</strong> {valoracion.seDespideLanzaBesos_observaciones}</p>}
@@ -353,7 +373,6 @@ const DetalleValoracion = () => {
             </div>
           </div>
 
-          {/* Conclusión General */}
           <div className="mb-4">
             <h4 className="text-md font-semibold text-orange-500 mb-3">Conclusión General</h4>
             <div className="bg-orange-50 p-4 rounded-lg">
@@ -545,6 +564,13 @@ const DetalleValoracion = () => {
           >
             <ArrowDownTrayIcon className="h-6 w-6" />
             Exportar a Word
+          </button>
+          <button
+            onClick={exportarPDF}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg"
+          >
+            <ArrowDownTrayIcon className="h-6 w-6" />
+            Exportar a PDF (Firmas)
           </button>
           <button
             onClick={() => navigate(`/valoraciones/editar/${id}`)}

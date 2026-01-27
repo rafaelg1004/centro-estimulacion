@@ -3,7 +3,7 @@ import { apiRequest } from "../../config/api";
 import { exportarValoracionPisoPelvicoAWord } from "../../utils/exportarValoracionWord";
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
-import { PencilSquareIcon, ArrowLeftIcon, DocumentArrowDownIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 
 const Card = ({ title, children }) => (
   <div className="bg-indigo-50 rounded-2xl shadow p-6 mb-8 border border-indigo-100">
@@ -144,6 +144,30 @@ export default function DetalleValoracionPisoPelvico() {
   // Función para exportar a Word usando la utilidad
   const exportarAWord = () => {
     exportarValoracionPisoPelvicoAWord(valoracion, paciente, setExportando);
+  };
+
+  const exportarPDF = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/valoraciones/reporte/exportar-pdf/${id}?type=adulto`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/pdf' },
+      });
+
+      if (!response.ok) throw new Error('Error al generar el PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `REPORTE_PISO_PELVICO_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exportando PDF:', error);
+      alert('No se pudo generar el reporte PDF.');
+    }
   };
 
   if (loading || !valoracion) return (
@@ -640,8 +664,16 @@ export default function DetalleValoracionPisoPelvico() {
             disabled={exportando}
             className="bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
           >
-            <DocumentArrowDownIcon className="h-6 w-6" />
+            <ArrowDownTrayIcon className="h-6 w-6" />
             {exportando ? 'Exportando...' : 'Exportar a Word'}
+          </button>
+
+          <button
+            onClick={exportarPDF}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
+          >
+            <ArrowDownTrayIcon className="h-6 w-6" />
+            Exportar a PDF (Firmas)
           </button>
           
           <Link

@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, TrashIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
 import Swal from 'sweetalert2';
 
@@ -113,6 +113,47 @@ export default function DetallePaciente() {
           });
         }
       }
+    }
+  };
+
+  const descargarRDA = async () => {
+    try {
+      // Mostrar cargando
+      Swal.fire({
+        title: 'Generando RDA...',
+        text: 'Construyendo el resumen digital en formato FHIR (Resolución 866 de 2021)',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const response = await apiRequest(`/rda/patient/${paciente._id}`);
+      
+      const dataStr = JSON.stringify(response, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+      const fileName = `RDA_PACIENTE_${paciente.numeroDocumento || paciente.registroCivil || id}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', fileName);
+      linkElement.click();
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡RDA Generado!',
+        text: 'El Resumen Digital de Atención (FHIR) se ha descargado correctamente.',
+        timer: 2500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error descargando RDA:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo generar el RDA FHIR. Verifique que el paciente tenga al menos una valoración registrada.'
+      });
     }
   };
 
@@ -279,6 +320,13 @@ export default function DetallePaciente() {
               <CreditCardIcon className="h-5 w-5" />
               Comprar Paquete
             </Link>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow transition flex items-center justify-center gap-2 text-base"
+              onClick={descargarRDA}
+            >
+              <ArrowDownTrayIcon className="h-5 w-5" />
+              Descargar RDA (FHIR)
+            </button>
           </div>
           
           {/* Grupo 3: Navegación */}

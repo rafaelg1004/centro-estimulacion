@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
 
 const Card = ({ title, children }) => (
@@ -32,6 +32,41 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
   const [valoracion, setValoracion] = useState(null);
   const [cargando, setCargando] = useState(true);
   const navigate = useNavigate();
+
+  const exportarPDF = async () => {
+    try {
+      const { default: Swal } = await import('sweetalert2');
+      Swal.fire({
+        title: 'Generando PDF...',
+        text: 'Preparando informe con firmas',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/valoraciones/reporte/exportar-pdf/${id}?type=lactancia`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/pdf' },
+      });
+
+      if (!response.ok) throw new Error('Error al generar PDF');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `REPORTE_LACTANCIA_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      Swal.close();
+    } catch (error) {
+      console.error('Error exportando PDF:', error);
+      alert('Error al generar reporte PDF');
+    }
+  };
 
   useEffect(() => {
     apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`)
@@ -75,6 +110,14 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
           >
             <PencilSquareIcon className="h-6 w-6" />
             Editar
+          </button>
+          <button
+            onClick={exportarPDF}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
+            title="Exportar PDF con firmas"
+          >
+            <ArrowDownTrayIcon className="h-6 w-6" />
+            Exportar PDF
           </button>
         </div>
 
