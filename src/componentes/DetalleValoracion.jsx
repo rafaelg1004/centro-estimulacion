@@ -482,7 +482,7 @@ const DetalleValoracion = () => {
             </p>
 
             <p className="text-sm text-gray-700 mb-4">
-              Para constancia de lo anterior se firma y otorga en la ciudad de <span className="font-semibold border-b border-black px-2">{valoracion.ciudadFirma}</span>, el día <span className="font-semibold border-b border-black px-2">{valoracion.diaFirma}</span> del mes de <span className="font-semibold border-b border-black px-2">{valoracion.mesFirma}</span> de <span className="font-semibold border-b border-black px-2">{valoracion.anioFirma}</span>.
+              Para constancia de lo anterior se firma y otorga en la ciudad de <span className="font-semibold border-b border-black px-2">Montería</span>, el día <span className="font-semibold border-b border-black px-2">{valoracion.diaFirma || '___'}</span> del mes de <span className="font-semibold border-b border-black px-2">{valoracion.mesFirma || '___'}</span> de <span className="font-semibold border-b border-black px-2">{valoracion.anioFirma || '___'}</span>.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">

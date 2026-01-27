@@ -72,7 +72,7 @@ const Paso7Autorizacion = ({
             id="ciudadFirma"
             type="text"
             name="ciudadFirma"
-            value="Montería"
+            value={formulario.ciudadFirma || "Montería"}
             readOnly
             className="w-full border rounded-md p-2 bg-gray-100"
             placeholder="Ciudad"

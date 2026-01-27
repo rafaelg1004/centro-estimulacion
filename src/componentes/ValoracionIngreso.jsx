@@ -147,7 +147,7 @@ const ValoracionIngreso = () => {
     firmaFisioterapeuta: "",
     autorizacionNombre: "",
     autorizacionRegistro: "",
-    ciudadFirma: "",
+    ciudadFirma: "Montería",
     diaFirma: "",
     mesFirma: "",
     anioFirma: "",

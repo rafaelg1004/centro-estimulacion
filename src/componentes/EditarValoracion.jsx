@@ -280,7 +280,11 @@ export default function EditarValoracion() {
           escolaridadPadre: obtenerDatoPaciente(data, 'escolaridadPadre') || obtenerDatoPaciente(data, 'padreEscolaridad'),
           padreEscolaridad: obtenerDatoPaciente(data, 'padreEscolaridad') || obtenerDatoPaciente(data, 'escolaridadPadre'),
           numeroHermanos: obtenerDatoPaciente(data, 'numeroHermanos'),
-          lugarQueOcupa: obtenerDatoPaciente(data, 'lugarQueOcupa')
+          lugarQueOcupa: obtenerDatoPaciente(data, 'lugarQueOcupa'),
+          ciudadFirma: data.ciudadFirma || "Montería",
+          diaFirma: data.diaFirma || "",
+          mesFirma: data.mesFirma || "",
+          anioFirma: data.anioFirma || ""
         };
         
         console.log('🔄 Datos unificados del paciente aplicados');
