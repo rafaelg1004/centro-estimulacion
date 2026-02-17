@@ -44,6 +44,9 @@ import ReportePaquetes from "./componentes/ReportePaquetes";
 import EditarPaquete from "./componentes/EditarPaquete";
 import GenerarRIPS from "./componentes/GenerarRIPS";
 import GestionUsuarios from "./componentes/GestionUsuarios";
+import ListaSesionesMensuales from "./componentes/ListaSesionesMensuales";
+import CrearSesionMensual from "./componentes/CrearSesionMensual";
+import DetalleSesionMensual from "./componentes/DetalleSesionMensual";
 
 
 import {
@@ -169,6 +172,14 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               >
                 <AcademicCapIcon className="h-5 w-5" />
                 Lista de Sesiones
+              </Link>
+              <Link
+                to="/sesiones-mensuales"
+                className="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <ClipboardDocumentCheckIcon className="h-5 w-5" />
+                Sesiones Mensuales
               </Link>
               {/* Solo administradores pueden ver el reporte de paquetes y gestión de usuarios */}
               {userRole === 'administracion' && (
@@ -363,6 +374,9 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
             <Route path="/generar-rips" element={<GenerarRIPS />} />
             <Route path="/gestion-usuarios" element={<GestionUsuarios />} />
+            <Route path="/sesiones-mensuales" element={<ListaSesionesMensuales />} />
+            <Route path="/sesiones-mensuales/nueva" element={<CrearSesionMensual />} />
+            <Route path="/sesiones-mensuales/:id" element={<DetalleSesionMensual />} />
 
           </Routes>
         </div>

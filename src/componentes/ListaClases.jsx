@@ -10,16 +10,29 @@ export default function ListaClases() {
   const [mensaje, setMensaje] = useState("");
   const [confirmarId, setConfirmarId] = useState(null);
   const [cargando, setCargando] = useState(true);
+  
+  // Paginación
+  const [pagina, setPagina] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const limite = 10;
 
-  const buscarClases = async () => {
+  const buscarClases = async (page = 1) => {
     setCargando(true);
     try {
       const params = new URLSearchParams();
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
+      if (busqueda) params.append("busqueda", busqueda);
+      params.append("page", page);
+      params.append("limit", limite);
 
-      const data = await apiRequest(`/clases?${params.toString()}`);
-      setClases(data);
+      const response = await apiRequest(`/clases?${params.toString()}`);
+      // La respuesta ahora es un objeto { data, total, page, totalPages }
+      setClases(response.data || []);
+      setTotalPaginas(response.totalPages || 1);
+      setTotalItems(response.total || 0);
+      setPagina(response.page || 1);
     } catch (error) {
       console.error('Error al cargar clases:', error);
       setClases([]);
@@ -28,22 +41,32 @@ export default function ListaClases() {
   };
 
   useEffect(() => {
-    buscarClases();
+    buscarClases(pagina);
     // eslint-disable-next-line
-  }, []);
+  }, [pagina]);
 
   const eliminarClase = async (id) => {
-    await apiRequest(`/clases/${id}`, {
-      method: "DELETE",
-    });
-    setClases(clases.filter(c => c._id !== id));
-    setMensaje("Sesión eliminada correctamente");
-    setTimeout(() => setMensaje(""), 4000);
+    try {
+      await apiRequest(`/clases/${id}`, {
+        method: "DELETE",
+      });
+      setClases(clases.filter(c => c._id !== id));
+      setMensaje("Sesión eliminada correctamente");
+      setTimeout(() => setMensaje(""), 4000);
+      
+      // Si la página se queda vacía, volver a la anterior si existe
+      if (clases.length === 1 && pagina > 1) {
+        setPagina(prev => prev - 1);
+      } else {
+        buscarClases(pagina);
+      }
+    } catch (error) {
+      console.error("Error al eliminar clase:", error);
+    }
   };
 
-  const clasesFiltradas = clases.filter(clase =>
-    clase.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  // El filtrado ya se hace en el servidor para mayor eficiencia
+  const clasesAMostrar = clases;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100 py-10 px-2">
@@ -92,7 +115,10 @@ export default function ListaClases() {
             </div>
             <div className="flex justify-center gap-2">
               <button
-                onClick={buscarClases}
+                onClick={() => {
+                  setPagina(1);
+                  buscarClases(1);
+                }}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
               >
                 Buscar
@@ -102,7 +128,8 @@ export default function ListaClases() {
                   setBusqueda("");
                   setFechaInicio("");
                   setFechaFin("");
-                  setTimeout(() => buscarClases(), 100);
+                  setPagina(1);
+                  setTimeout(() => buscarClases(1), 100);
                 }}
                 className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
               >
@@ -129,10 +156,13 @@ export default function ListaClases() {
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-600 border-solid"></div>
               <span className="mt-4 text-indigo-700 font-bold">Cargando...</span>
             </div>
-          ) : clasesFiltradas.length === 0 ? (
-            <div className="col-span-2 text-center text-gray-500">No se encontraron Sesiones.</div>
+          ) : clasesAMostrar.length === 0 ? (
+            <div className="col-span-2 text-center text-gray-500 py-12">
+              <p className="text-xl">No se encontraron Sesiones.</p>
+              {busqueda && <p className="mt-2">Intenta con otros términos de búsqueda.</p>}
+            </div>
           ) : null}
-          {clasesFiltradas.map(clase => {
+          {!cargando && clasesAMostrar.map(clase => {
             // Contar niños sin paquete
             const ninosSinPaquete = clase.ninos ? clase.ninos.filter(n => !n.numeroFactura || n.numeroFactura.trim() === '').length : 0;
             
@@ -179,6 +209,73 @@ export default function ListaClases() {
             );
           })}
         </div>
+
+        {/* Paginación */}
+        {!cargando && totalPaginas > 1 && (
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <div className="text-sm text-gray-600">
+              Mostrando <span className="font-semibold">{clasesAMostrar.length}</span> de <span className="font-semibold">{totalItems}</span> sesiones
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setPagina(prev => Math.max(prev - 1, 1))}
+                disabled={pagina === 1}
+                className={`px-4 py-2 rounded-xl font-bold transition ${
+                  pagina === 1 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 shadow-sm'
+                }`}
+              >
+                &larr; Anterior
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {[...Array(totalPaginas)].map((_, i) => {
+                  const p = i + 1;
+                  // Mostrar solo algunas páginas si hay demasiadas
+                  if (
+                    totalPaginas <= 7 || 
+                    p === 1 || 
+                    p === totalPaginas || 
+                    (p >= pagina - 1 && p <= pagina + 1)
+                  ) {
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPagina(p)}
+                        className={`w-10 h-10 rounded-xl font-bold transition ${
+                          pagina === p
+                            ? 'bg-indigo-600 text-white shadow-md scale-110'
+                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  } else if (
+                    (p === 2 && pagina > 3) || 
+                    (p === totalPaginas - 1 && pagina < totalPaginas - 2)
+                  ) {
+                    return <span key={p} className="px-1 text-gray-400">...</span>;
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() => setPagina(prev => Math.min(prev + 1, totalPaginas))}
+                disabled={pagina === totalPaginas}
+                className={`px-4 py-2 rounded-xl font-bold transition ${
+                  pagina === totalPaginas 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 shadow-sm'
+                }`}
+              >
+                Siguiente &rarr;
+              </button>
+            </div>
+          </div>
+        )}
         {confirmarId && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center border border-pink-200">
