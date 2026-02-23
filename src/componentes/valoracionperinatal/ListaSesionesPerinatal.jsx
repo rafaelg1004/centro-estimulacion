@@ -29,12 +29,12 @@ export default function ListaSesionesPerinatal() {
   const crearSesionesDinamicas = (tipoPrograma, firmasValidadas = {}) => {
     let sesiones = [];
     let sesionesIntensivo = [];
-    
+
     // Solo crear sesiones si el consentimiento correspondiente está firmado
     if ((tipoPrograma === 'educacion' || tipoPrograma === 'ambos') && firmasValidadas.tieneEducacionFirmada) {
       const nombresSesiones = [
         "Sesión 1: Cambios anatómicos y fisiológicos del embarazo",
-        "Sesión 2: Nutrición durante el embarazo", 
+        "Sesión 2: Nutrición durante el embarazo",
         "Sesión 3: Ejercicio y relajación",
         "Sesión 4: Trabajo de parto y parto",
         "Sesión 5: Manejo del dolor",
@@ -44,7 +44,7 @@ export default function ListaSesionesPerinatal() {
         "Sesión 9: Visita postparto inmediato",
         "Sesión 10: Visita postparto 15 días"
       ];
-      
+
       for (let i = 0; i < 10; i++) {
         sesiones.push({
           nombre: nombresSesiones[i],
@@ -53,7 +53,7 @@ export default function ListaSesionesPerinatal() {
         });
       }
     }
-    
+
     if (tipoPrograma === 'fisico' && firmasValidadas.tieneFisicoFirmado) {
       sesiones = [
         { nombre: "Sesión Física 1: Evaluación inicial", fecha: "", firmaPaciente: "" },
@@ -66,7 +66,7 @@ export default function ListaSesionesPerinatal() {
         { nombre: "Sesión Física 8: Sesión final", fecha: "", firmaPaciente: "" }
       ];
     }
-    
+
     if (tipoPrograma === 'intensivo' && firmasValidadas.tieneIntensivoFirmado) {
       sesionesIntensivo = [
         { nombre: "Sesión 1: Preparación integral para el parto", fecha: "", firmaPaciente: "" },
@@ -74,20 +74,20 @@ export default function ListaSesionesPerinatal() {
         { nombre: "Sesión 3: Lactancia y cuidados del bebé", fecha: "", firmaPaciente: "" }
       ];
     }
-    
+
     if (tipoPrograma === 'ambos') {
       // Para ambos, crear sesiones físicas solo si está firmado el consentimiento físico
       if (firmasValidadas.tieneFisicoFirmado) {
         for (let i = 0; i < 8; i++) {
           sesionesIntensivo.push({
-            nombre: `Sesión Física ${i+1}: Acondicionamiento especializado`,
+            nombre: `Sesión Física ${i + 1}: Acondicionamiento especializado`,
             fecha: "",
             firmaPaciente: ""
           });
         }
       }
     }
-    
+
     return { sesiones, sesionesIntensivo };
   };
 
@@ -108,12 +108,12 @@ export default function ListaSesionesPerinatal() {
         const consentimientos = await apiRequest(`/consentimiento-perinatal/paciente/${id}`);
         console.log('Consentimientos encontrados para paciente:', consentimientos);
         console.log('Número de consentimientos encontrados:', consentimientos?.length || 0);
-        
+
         if (consentimientos && consentimientos.length > 0) {
           const consentimiento = consentimientos[0];
           console.log('Consentimiento seleccionado:', consentimiento);
           console.log('Paciente del consentimiento:', consentimiento.paciente);
-          
+
           // Verificar qué consentimientos están firmados para mostrar opciones
           console.log('=== VERIFICANDO FIRMAS DESDE BACKEND ===');
           console.log('firmaPacienteGeneral:', consentimiento.firmaPacienteGeneral);
@@ -122,30 +122,30 @@ export default function ListaSesionesPerinatal() {
           console.log('firmaFisioterapeutaFisico:', consentimiento.firmaFisioterapeutaFisico);
           console.log('firmaPacienteEducacion:', consentimiento.firmaPacienteEducacion);
           console.log('firmaFisioterapeutaEducacion:', consentimiento.firmaFisioterapeutaEducacion);
-          
+
           const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
           const tieneFisicoFirmado = consentimiento.firmaPacienteFisico && consentimiento.firmaFisioterapeutaFisico;
-          
+
           console.log('Consentimientos firmados:', {
             educacion: tieneEducacionFirmada,
             fisico: tieneFisicoFirmado
           });
-          
+
           // Si no tiene sesiones, preparar las opciones disponibles
-          if (consentimiento.tipoPrograma && 
-              (!consentimiento.sesiones || consentimiento.sesiones.length === 0) &&
-              (!consentimiento.sesionesIntensivo || consentimiento.sesionesIntensivo.length === 0)) {
+          if (consentimiento.tipoPrograma &&
+            (!consentimiento.sesiones || consentimiento.sesiones.length === 0) &&
+            (!consentimiento.sesionesIntensivo || consentimiento.sesionesIntensivo.length === 0)) {
             const { sesiones, sesionesIntensivo } = crearSesionesDinamicas(
-              consentimiento.tipoPrograma, 
+              consentimiento.tipoPrograma,
               { tieneEducacionFirmada, tieneFisicoFirmado }
             );
             setSesionesDisponibles({ sesiones, sesionesIntensivo, tieneEducacionFirmada, tieneFisicoFirmado });
 
           }
-          
+
           console.log('Sesiones del consentimiento:', consentimiento.sesiones);
           console.log('Sesiones intensivo del consentimiento:', consentimiento.sesionesIntensivo);
-          
+
           // Verificar que el consentimiento pertenece al paciente correcto
           const pacienteDelConsentimiento = consentimiento.paciente?._id || consentimiento.paciente;
           if (pacienteDelConsentimiento === id) {
@@ -163,7 +163,7 @@ export default function ListaSesionesPerinatal() {
         try {
           const todosConsentimientos = await apiRequest('/consentimiento-perinatal');
           console.log('Todos los consentimientos:', todosConsentimientos);
-          const consentimientoPaciente = todosConsentimientos.find(c => 
+          const consentimientoPaciente = todosConsentimientos.find(c =>
             c.paciente && (c.paciente._id === id || c.paciente === id)
           );
           if (consentimientoPaciente) {
@@ -231,7 +231,7 @@ export default function ListaSesionesPerinatal() {
       setConsentimiento(datosActualizados);
       setSesionesDisponibles(null);
       setMostrarConfirmacion(false);
-      
+
       setMensajeExito(`✅ Sesiones creadas exitosamente\n\nTotal de sesiones creadas: ${(datosActualizados.sesiones?.length || 0) + (datosActualizados.sesionesIntensivo?.length || 0)}\nTipo de programa: ${consentimiento.tipoPrograma}\n\nLas sesiones están listas para ser programadas.`);
       setMostrarExito(true);
     } catch (error) {
@@ -244,7 +244,7 @@ export default function ListaSesionesPerinatal() {
     try {
       // Verificar qué tipos de sesiones puede crear basado en consentimientos firmados
       const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
-      
+
       // Crear sesión extra del tipo que tenga firmado
       const tipoSesion = tieneEducacionFirmada ? 'educacion' : 'fisico';
       const nuevaSesion = {
@@ -252,21 +252,21 @@ export default function ListaSesionesPerinatal() {
         fecha: "",
         firmaPaciente: ""
       };
-      
+
       const datosActualizados = { ...consentimiento };
       if (tipoSesion === 'educacion') {
         datosActualizados.sesiones = [...(datosActualizados.sesiones || []), nuevaSesion];
       } else {
         datosActualizados.sesionesIntensivo = [...(datosActualizados.sesionesIntensivo || []), nuevaSesion];
       }
-      
+
       // Actualizar en el backend
       await apiRequest(`/consentimiento-perinatal/${consentimiento._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datosActualizados)
       });
-      
+
       setConsentimiento(datosActualizados);
       setMostrarConfirmacionAgregarSesion(false);
       setMensajeExitoSesion('Sesión extra agregada correctamente');
@@ -281,7 +281,7 @@ export default function ListaSesionesPerinatal() {
   const eliminarSesionExtra = async () => {
     try {
       const datosActualizados = { ...consentimiento };
-      
+
       if (sesionAEliminar.tipo === 'educacion') {
         // Eliminar de sesiones regulares
         datosActualizados.sesiones = datosActualizados.sesiones.filter((_, index) => index !== sesionAEliminar.index);
@@ -325,7 +325,7 @@ export default function ListaSesionesPerinatal() {
     try {
       // Recopilar URLs de firmas de S3 para eliminar
       const firmasParaEliminar = [];
-      
+
       // Firmas de sesiones regulares
       if (consentimiento.sesiones) {
         consentimiento.sesiones.forEach(sesion => {
@@ -334,7 +334,7 @@ export default function ListaSesionesPerinatal() {
           }
         });
       }
-      
+
       // Firmas de sesiones intensivas
       if (consentimiento.sesionesIntensivo) {
         consentimiento.sesionesIntensivo.forEach(sesion => {
@@ -370,7 +370,7 @@ export default function ListaSesionesPerinatal() {
 
       setConsentimiento(datosActualizados);
       setMostrarConfirmacionEliminar(false);
-      
+
       const mensajeFirmas = firmasParaEliminar.length > 0 ? `\n\nSe eliminaron ${firmasParaEliminar.length} firmas de S3.` : '';
       setMensajeExito(`🗑️ Sesiones eliminadas exitosamente\n\nTodas las sesiones han sido eliminadas del programa.${mensajeFirmas}`);
       setMostrarExito(true);
@@ -398,22 +398,31 @@ export default function ListaSesionesPerinatal() {
                 </div>
                 <div className="flex items-center gap-2">
                   {sesion.firmaPaciente ? (
-                    <CheckCircleIcon className="h-6 w-6 text-green-600" title="Firmado" />
+                    <div className="flex flex-col items-center">
+                      <CheckCircleIcon className="h-6 w-6 text-green-600" title="Firmado" />
+                      {consentimiento.auditTrail?.[`${tipo === 'educacion' ? 'sesion' : 'sesionIntensivo'}_${index}_firmaPaciente`] && (
+                        <span className="text-[8px] text-gray-400 font-mono">
+                          IP: {consentimiento.auditTrail[`${tipo === 'educacion' ? 'sesion' : 'sesionIntensivo'}_${index}_firmaPaciente`].ip}
+                        </span>
+                      )}
+                    </div>
                   ) : (
                     <ClockIcon className="h-6 w-6 text-yellow-600" title="Pendiente" />
                   )}
-                  <button
-                    onClick={() => {
-                      setSesionEditando({ ...sesion, index, tipo });
-                      setFechaTemp(sesion.fecha || "");
-                      setFormularioTemp({ firmaPaciente: sesion.firmaPaciente || "" });
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition"
-                    title="Editar sesión"
-                  >
-                    <PencilSquareIcon className="h-4 w-4" />
-                  </button>
-                  {sesion.nombre.includes('Extra') && (
+                  {!consentimiento.bloqueada && (
+                    <button
+                      onClick={() => {
+                        setSesionEditando({ ...sesion, index, tipo });
+                        setFechaTemp(sesion.fecha || "");
+                        setFormularioTemp({ firmaPaciente: sesion.firmaPaciente || "" });
+                      }}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition"
+                      title="Editar sesión"
+                    >
+                      <PencilSquareIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  {sesion.nombre.includes('Extra') && !consentimiento.bloqueada && (
                     <button
                       onClick={() => {
                         setSesionAEliminar({ ...sesion, index, tipo });
@@ -502,6 +511,12 @@ export default function ListaSesionesPerinatal() {
               <p className="text-sm text-gray-500">
                 Tipo de programa: <span className="font-semibold capitalize">{consentimiento.tipoPrograma || 'No especificado'}</span>
               </p>
+              {consentimiento.bloqueada && (
+                <div className="mt-2 inline-flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                  <LockClosedIcon className="h-4 w-4 text-green-600" />
+                  <span className="text-[10px] font-bold text-green-700 uppercase">Registro Protegido - {consentimiento.selloIntegridad?.substring(0, 16)}...</span>
+                </div>
+              )}
             </div>
             <button
               onClick={() => navigate(`/pacientes-adultos/${id}`)}
@@ -515,67 +530,67 @@ export default function ListaSesionesPerinatal() {
           {/* Debug info */}
           {process.env.NODE_ENV === 'development' && (
             <div className="mb-4 p-3 bg-yellow-50 rounded border text-xs">
-              <strong>Debug:</strong> Tipo: {consentimiento.tipoPrograma}, 
-              Sesiones: {consentimiento.sesiones?.length || 0}, 
-              Intensivo: {consentimiento.sesionesIntensivo?.length || 0}<br/>
-              <strong>Firmas Consentimientos:</strong><br/>
-              • Educación: Pac={consentimiento.firmaPacienteGeneral ? 'SI' : 'NO'} Fisio={consentimiento.firmaFisioterapeutaGeneral ? 'SI' : 'NO'}<br/>
-              • Físico: Pac={consentimiento.firmaPacienteFisico ? 'SI' : 'NO'} Fisio={consentimiento.firmaFisioterapeutaFisico ? 'SI' : 'NO'}<br/>
+              <strong>Debug:</strong> Tipo: {consentimiento.tipoPrograma},
+              Sesiones: {consentimiento.sesiones?.length || 0},
+              Intensivo: {consentimiento.sesionesIntensivo?.length || 0}<br />
+              <strong>Firmas Consentimientos:</strong><br />
+              • Educación: Pac={consentimiento.firmaPacienteGeneral ? 'SI' : 'NO'} Fisio={consentimiento.firmaFisioterapeutaGeneral ? 'SI' : 'NO'}<br />
+              • Físico: Pac={consentimiento.firmaPacienteFisico ? 'SI' : 'NO'} Fisio={consentimiento.firmaFisioterapeutaFisico ? 'SI' : 'NO'}<br />
               • Intensivo: Pac={consentimiento.firmaPacienteEducacion ? 'SI' : 'NO'} Fisio={consentimiento.firmaFisioterapeutaEducacion ? 'SI' : 'NO'}
             </div>
           )}
 
           {/* Mostrar sesiones basándose en si existen */}
-          {((consentimiento.sesiones && consentimiento.sesiones.length > 0) || 
+          {((consentimiento.sesiones && consentimiento.sesiones.length > 0) ||
             (consentimiento.sesionesIntensivo && consentimiento.sesionesIntensivo.length > 0)) && (
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-indigo-700">Sesiones Creadas</h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      // Verificar que todas las sesiones estén finalizadas (firmadas)
-                      const todasLasSesiones = [...(consentimiento.sesiones || []), ...(consentimiento.sesionesIntensivo || [])];
-                      const sesionesNoFinalizadas = todasLasSesiones.filter(sesion => !sesion.firmaPaciente || !sesion.fecha);
-                      
-                      if (sesionesNoFinalizadas.length > 0) {
-                        setMensajeError(`No se pueden agregar sesiones extras. Primero debe finalizar todas las sesiones pendientes (${sesionesNoFinalizadas.length} sesiones sin completar).`);
-                        setMostrarModalError(true);
-                        return;
-                      }
-                      
-                      // Verificar qué tipos de sesiones puede crear basado en consentimientos firmados
-                      const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
-                      const tieneFisicoFirmado = consentimiento.firmaPacienteFisico && consentimiento.firmaFisioterapeutaFisico;
-                      
-                      if (tieneEducacionFirmada || tieneFisicoFirmado) {
-                        setMostrarConfirmacionAgregarSesion(true);
-                      } else {
-                        setMensajeError('No hay consentimientos firmados para agregar sesiones extras');
-                        setMostrarModalError(true);
-                      }
-                    }}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
-                  >
-                    ➕ Agregar Sesión Extra
-                  </button>
-                  <button
-                    onClick={() => setMostrarConfirmacionEliminar(true)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
-                  >
-                    🗑️ Eliminar Todas las Sesiones
-                  </button>
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-indigo-700">Sesiones Creadas</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        // Verificar que todas las sesiones estén finalizadas (firmadas)
+                        const todasLasSesiones = [...(consentimiento.sesiones || []), ...(consentimiento.sesionesIntensivo || [])];
+                        const sesionesNoFinalizadas = todasLasSesiones.filter(sesion => !sesion.firmaPaciente || !sesion.fecha);
+
+                        if (sesionesNoFinalizadas.length > 0) {
+                          setMensajeError(`No se pueden agregar sesiones extras. Primero debe finalizar todas las sesiones pendientes (${sesionesNoFinalizadas.length} sesiones sin completar).`);
+                          setMostrarModalError(true);
+                          return;
+                        }
+
+                        // Verificar qué tipos de sesiones puede crear basado en consentimientos firmados
+                        const tieneEducacionFirmada = consentimiento.firmaPacienteGeneral && consentimiento.firmaFisioterapeutaGeneral;
+                        const tieneFisicoFirmado = consentimiento.firmaPacienteFisico && consentimiento.firmaFisioterapeutaFisico;
+
+                        if (tieneEducacionFirmada || tieneFisicoFirmado) {
+                          setMostrarConfirmacionAgregarSesion(true);
+                        } else {
+                          setMensajeError('No hay consentimientos firmados para agregar sesiones extras');
+                          setMostrarModalError(true);
+                        }
+                      }}
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
+                    >
+                      ➕ Agregar Sesión Extra
+                    </button>
+                    <button
+                      onClick={() => setMostrarConfirmacionEliminar(true)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
+                    >
+                      🗑️ Eliminar Todas las Sesiones
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {consentimiento.sesiones && consentimiento.sesiones.length > 0 && 
+          {consentimiento.sesiones && consentimiento.sesiones.length > 0 &&
             renderSesiones(consentimiento.sesiones, "Sesiones de Educación para el Nacimiento", "educacion")
           }
 
-          {consentimiento.sesionesIntensivo && consentimiento.sesionesIntensivo.length > 0 && 
-            renderSesiones(consentimiento.sesionesIntensivo, 
+          {consentimiento.sesionesIntensivo && consentimiento.sesionesIntensivo.length > 0 &&
+            renderSesiones(consentimiento.sesionesIntensivo,
               consentimiento.tipoPrograma === "intensivo" ? "Sesiones de Educación Intensivo" : "Sesiones Adicionales",
               "intensivo"
             )
@@ -612,30 +627,30 @@ export default function ListaSesionesPerinatal() {
           )}
 
           {/* Mensaje cuando no hay sesiones disponibles */}
-          {(!consentimiento.sesiones || consentimiento.sesiones.length === 0) && 
-           (!consentimiento.sesionesIntensivo || consentimiento.sesionesIntensivo.length === 0) && 
-           !sesionesDisponibles && (
-            <div className="text-center py-8">
-              <h3 className="text-xl font-bold text-orange-700 mb-2">Sesiones no disponibles</h3>
-              <p className="text-gray-600 mb-4">
-                Para habilitar las sesiones, debe completar y firmar los consentimientos correspondientes:
-              </p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-left max-w-md mx-auto">
-                <ul className="space-y-1">
-                  <li>• <strong>Educación:</strong> Requiere consentimiento de educación firmado</li>
-                  <li>• <strong>Físico:</strong> Requiere consentimiento físico firmado</li>
-                  <li>• <strong>Intensivo:</strong> Requiere consentimiento intensivo firmado</li>
-                  <li>• <strong>Ambos:</strong> Requiere ambos consentimientos firmados</li>
-                </ul>
+          {(!consentimiento.sesiones || consentimiento.sesiones.length === 0) &&
+            (!consentimiento.sesionesIntensivo || consentimiento.sesionesIntensivo.length === 0) &&
+            !sesionesDisponibles && (
+              <div className="text-center py-8">
+                <h3 className="text-xl font-bold text-orange-700 mb-2">Sesiones no disponibles</h3>
+                <p className="text-gray-600 mb-4">
+                  Para habilitar las sesiones, debe completar y firmar los consentimientos correspondientes:
+                </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-left max-w-md mx-auto">
+                  <ul className="space-y-1">
+                    <li>• <strong>Educación:</strong> Requiere consentimiento de educación firmado</li>
+                    <li>• <strong>Físico:</strong> Requiere consentimiento físico firmado</li>
+                    <li>• <strong>Intensivo:</strong> Requiere consentimiento intensivo firmado</li>
+                    <li>• <strong>Ambos:</strong> Requiere ambos consentimientos firmados</li>
+                  </ul>
+                </div>
+                <button
+                  onClick={() => navigate(`/consentimientos-perinatales/${consentimiento._id}/editar`)}
+                  className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl transition"
+                >
+                  Completar Consentimientos
+                </button>
               </div>
-              <button
-                onClick={() => navigate(`/consentimientos-perinatales/${consentimiento._id}/editar`)}
-                className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl transition"
-              >
-                Completar Consentimientos
-              </button>
-            </div>
-          )}
+            )}
 
           {/* Información adicional */}
           <div className="mt-8 bg-indigo-50 rounded-xl p-4">
@@ -649,6 +664,19 @@ export default function ListaSesionesPerinatal() {
               </p>
             )}
           </div>
+          {consentimiento.bloqueada && consentimiento.selloIntegridad && (
+            <div className="mt-4 pt-4 border-t border-indigo-200">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-2 text-[10px] text-gray-400 font-mono">
+                <div className="flex items-center gap-1">
+                  <span className="font-bold text-green-600">SELLO DE INTEGRIDAD (Ley 527):</span>
+                  <span className="break-all">{consentimiento.selloIntegridad}</span>
+                </div>
+                <div className="whitespace-nowrap italic">
+                  Cerrada el: {new Date(consentimiento.fechaBloqueo).toLocaleString()}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -662,7 +690,7 @@ export default function ListaSesionesPerinatal() {
             <p className="text-gray-600 mb-4">
               ¿Está seguro de que desea crear las siguientes sesiones?
             </p>
-            
+
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <h4 className="font-semibold text-gray-800 mb-2">Sesiones a crear:</h4>
               <ul className="space-y-2 text-sm">
@@ -686,7 +714,7 @@ export default function ListaSesionesPerinatal() {
                   </li>
                 ))}
               </ul>
-              
+
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <p className="text-sm font-medium text-gray-700">
                   Total: {(sesionesDisponibles.sesiones?.length || 0) + (sesionesDisponibles.sesionesIntensivo?.length || 0)} sesiones
@@ -725,7 +753,7 @@ export default function ListaSesionesPerinatal() {
             <p className="text-gray-600 mb-4">
               ¿Está seguro de que desea eliminar TODAS las sesiones?
             </p>
-            
+
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
               <h4 className="font-semibold text-red-800 mb-2">Esta acción eliminará:</h4>
               <ul className="space-y-1 text-sm text-red-700">
@@ -736,7 +764,7 @@ export default function ListaSesionesPerinatal() {
                   <li>• {consentimiento.sesionesIntensivo.length} sesiones {consentimiento.tipoPrograma === 'intensivo' ? 'intensivas' : 'adicionales'}</li>
                 )}
               </ul>
-              
+
               <div className="mt-3 pt-3 border-t border-red-200">
                 <p className="text-sm font-medium text-red-800">
                   Total: {(consentimiento.sesiones?.length || 0) + (consentimiento.sesionesIntensivo?.length || 0)} sesiones
@@ -800,7 +828,7 @@ export default function ListaSesionesPerinatal() {
             <h4 className="font-semibold text-gray-900 mb-4">
               {sesionEditando.nombre}
             </h4>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Fecha de la sesión
@@ -873,7 +901,7 @@ export default function ListaSesionesPerinatal() {
             <p className="text-gray-600 mb-4">
               ¿Está seguro de que desea agregar una sesión extra al programa?
             </p>
-            
+
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
               <h4 className="font-semibold text-orange-800 mb-2">Información importante:</h4>
               <ul className="space-y-1 text-sm text-orange-700">
@@ -912,7 +940,7 @@ export default function ListaSesionesPerinatal() {
             <p className="text-gray-600 mb-4">
               ¿Está seguro de que desea eliminar esta sesión extra?
             </p>
-            
+
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
               <h4 className="font-semibold text-red-800 mb-2">Sesión a eliminar:</h4>
               <p className="text-sm text-red-700">{sesionAEliminar.nombre}</p>

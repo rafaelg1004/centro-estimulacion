@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
+import { LockClosedIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
 
 const ListaValoraciones = () => {
@@ -20,7 +21,7 @@ const ListaValoraciones = () => {
     tieneSiguiente: false,
     tieneAnterior: false
   });
- 
+
 
   const buscarValoraciones = async (paginaActual = 1) => {
     setCargando(true);
@@ -45,7 +46,7 @@ const ListaValoraciones = () => {
 
       const response = await apiRequest(`/valoraciones?${params.toString()}`);
       console.log('📋 Respuesta del servidor:', response);
-      
+
       setValoraciones(response.valoraciones || []);
       setPaginacion(response.paginacion || {
         pagina: 1,
@@ -69,16 +70,16 @@ const ListaValoraciones = () => {
       const resultado = await apiRequest(`/valoraciones/${id}`, {
         method: "DELETE",
       });
-      
+
       console.log('Resultado de eliminación:', resultado);
-      
+
       setValoraciones(valoraciones.filter(v => v._id !== id));
-      
+
       // Mostrar mensaje con información de imágenes eliminadas
-      const mensajeCompleto = resultado.imagenesEliminadas > 0 
+      const mensajeCompleto = resultado.imagenesEliminadas > 0
         ? `Valoración eliminada correctamente (${resultado.imagenesEliminadas} imágenes eliminadas de S3)`
         : "Valoración eliminada correctamente";
-        
+
       setMensaje(mensajeCompleto);
       setTimeout(() => setMensaje(""), 6000);
     } catch (error) {
@@ -149,26 +150,26 @@ const ListaValoraciones = () => {
                 />
               </div>
             </div>
-                         <div className="flex justify-center gap-2">
-               <button
-                 onClick={() => buscarValoraciones(1)}
-                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
-               >
-                 Buscar
-               </button>
-               <button
-                 onClick={() => {
-                   setBusqueda("");
-                   setFechaInicio("");
-                   setFechaFin("");
-                   
-                   setTimeout(() => buscarValoraciones(1), 100);
-                 }}
-                 className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
-               >
-                 Limpiar
-               </button>
-             </div>
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={() => buscarValoraciones(1)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+              >
+                Buscar
+              </button>
+              <button
+                onClick={() => {
+                  setBusqueda("");
+                  setFechaInicio("");
+                  setFechaFin("");
+
+                  setTimeout(() => buscarValoraciones(1), 100);
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+              >
+                Limpiar
+              </button>
+            </div>
           </div>
         </div>
         {cargando ? (
@@ -180,13 +181,13 @@ const ListaValoraciones = () => {
           <p className="text-gray-500 text-center">No hay valoraciones registradas.</p>
         ) : (
           <>
-                         <div className="mb-4 text-center">
-               <p className="text-sm text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg p-2 inline-block">
-                 📋 Página {paginacion.pagina} de {paginacion.totalPaginas} - Mostrando {valoraciones.length} de {paginacion.total} valoraciones
-               </p>
-             </div>
-                         <div className="space-y-4">
-             {valoraciones.map((valoracion) => (
+            <div className="mb-4 text-center">
+              <p className="text-sm text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg p-2 inline-block">
+                📋 Página {paginacion.pagina} de {paginacion.totalPaginas} - Mostrando {valoraciones.length} de {paginacion.total} valoraciones
+              </p>
+            </div>
+            <div className="space-y-4">
+              {valoraciones.map((valoracion) => (
                 <div
                   key={valoracion._id}
                   className="border border-indigo-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between hover:shadow-xl transition bg-indigo-50"
@@ -198,9 +199,14 @@ const ListaValoraciones = () => {
                         {valoracion.paciente?.registroCivil || valoracion.registroCivil || "-"}
                       </span>
                     </p>
-                    <p className="font-semibold text-lg text-indigo-800">
-                      {valoracion.paciente?.nombres || valoracion.nombres || "Sin nombre"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-lg text-indigo-800">
+                        {valoracion.paciente?.nombres || valoracion.nombres || "Sin nombre"}
+                      </p>
+                      {valoracion.bloqueada && (
+                        <LockClosedIcon className="h-5 w-5 text-green-600" title="Registro Protegido" />
+                      )}
+                    </div>
                     <p className="text-indigo-500 text-sm">
                       Mamá: <span className="font-medium">
                         {valoracion.paciente?.nombreMadre || valoracion.madreNombre || "-"}
@@ -225,44 +231,42 @@ const ListaValoraciones = () => {
                       Eliminar
                     </button>
                   </div>
-                                 </div>
-               ))}
-                         </div>
-             
-             {/* Controles de paginación */}
-             {paginacion.totalPaginas > 1 && (
-               <div className="mt-6 flex justify-center items-center gap-2">
-                 <button
-                   onClick={() => cambiarPagina(paginacion.pagina - 1)}
-                   disabled={!paginacion.tieneAnterior}
-                   className={`px-3 py-2 rounded-lg font-medium transition ${
-                     paginacion.tieneAnterior
-                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                   }`}
-                 >
-                   ← Anterior
-                 </button>
-                 
-                 <span className="px-4 py-2 text-sm text-gray-600">
-                   Página {paginacion.pagina} de {paginacion.totalPaginas}
-                 </span>
-                 
-                 <button
-                   onClick={() => cambiarPagina(paginacion.pagina + 1)}
-                   disabled={!paginacion.tieneSiguiente}
-                   className={`px-3 py-2 rounded-lg font-medium transition ${
-                     paginacion.tieneSiguiente
-                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                   }`}
-                 >
-                   Siguiente →
-                 </button>
-               </div>
-             )}
-           </>
-         )}
+                </div>
+              ))}
+            </div>
+
+            {/* Controles de paginación */}
+            {paginacion.totalPaginas > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button
+                  onClick={() => cambiarPagina(paginacion.pagina - 1)}
+                  disabled={!paginacion.tieneAnterior}
+                  className={`px-3 py-2 rounded-lg font-medium transition ${paginacion.tieneAnterior
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                  ← Anterior
+                </button>
+
+                <span className="px-4 py-2 text-sm text-gray-600">
+                  Página {paginacion.pagina} de {paginacion.totalPaginas}
+                </span>
+
+                <button
+                  onClick={() => cambiarPagina(paginacion.pagina + 1)}
+                  disabled={!paginacion.tieneSiguiente}
+                  className={`px-3 py-2 rounded-lg font-medium transition ${paginacion.tieneSiguiente
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                  Siguiente →
+                </button>
+              </div>
+            )}
+          </>
+        )}
         {confirmarId && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
             <div className="bg-white border border-pink-200 text-pink-800 px-6 py-6 rounded-2xl shadow-lg flex flex-col items-center gap-4 max-w-md w-full">

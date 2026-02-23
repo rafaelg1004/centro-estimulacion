@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiRequest } from "../../config/api";
 
 import { Link } from "react-router-dom";
+import { LockClosedIcon } from "@heroicons/react/24/solid";
 import Spinner from "../ui/Spinner";
 
 export default function ListaConsentimientosPerinatales() {
@@ -21,7 +22,7 @@ export default function ListaConsentimientosPerinatales() {
       if (fechaInicio) params.append("fechaInicio", fechaInicio);
       if (fechaFin) params.append("fechaFin", fechaFin);
 
-      const data = await apiRequest(`/consentimiento-perinatal?${params.toString()}`);
+      const data = await apiRequest(`/ consentimiento - perinatal ? ${params.toString()} `);
       setConsentimientos(data);
     } catch (error) {
       console.error('Error al buscar consentimientos:', error);
@@ -32,7 +33,7 @@ export default function ListaConsentimientosPerinatales() {
 
   useEffect(() => {
     buscarConsentimientos();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -40,7 +41,7 @@ export default function ListaConsentimientosPerinatales() {
   const eliminarConsentimiento = async (id) => {
     try {
       // Eliminar el consentimiento del backend (esto también debería eliminar las imágenes S3)
-      const res = await apiRequest(`/consentimiento-perinatal/${id}`, {
+      const res = await apiRequest(`/ consentimiento - perinatal / ${id} `, {
         method: "DELETE",
       });
       console.log("Respuesta al eliminar:", res); // <-- Log de la respuesta
@@ -50,7 +51,7 @@ export default function ListaConsentimientosPerinatales() {
       if (res && res.mensaje) {
         setConsentimientos(consentimientos.filter(c => c._id !== id));
         const mensajeCompleto = res.imagenesEliminadas && res.imagenesEliminadas > 0
-          ? `Consentimiento eliminado correctamente. ${res.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
+          ? `Consentimiento eliminado correctamente.${res.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
           : "Consentimiento eliminado correctamente";
         setMensaje(mensajeCompleto);
         setTimeout(() => setMensaje(""), 4000);
@@ -165,15 +166,20 @@ export default function ListaConsentimientosPerinatales() {
                     key={c._id}
                     className={idx % 2 === 0 ? "bg-indigo-50 hover:bg-indigo-100" : "bg-white hover:bg-indigo-50"}
                   >
-                    <td className="px-4 py-2 border-b border-indigo-100 font-medium">
-                      {c.paciente?.nombres || "Sin nombre"}
+                    <td className="px-4 py-2 border-b border-indigo-100 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
+                      <div className="flex items-center gap-2">
+                        {c.paciente?.nombres || "Sin nombre"}
+                        {c.bloqueada && (
+                          <LockClosedIcon className="h-4 w-4 text-green-600" title="Registro Protegido" />
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-2 border-b border-indigo-100">
                       {c.fecha || "-"}
                     </td>
                     <td className="px-4 py-2 border-b border-indigo-100 text-center">
                       <Link
-                        to={`/consentimientos-perinatales/${c._id}`}
+                        to={`/ consentimientos - perinatales / ${c._id} `}
                         className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1 rounded-xl transition font-semibold shadow"
                       >
                         Ver detalle

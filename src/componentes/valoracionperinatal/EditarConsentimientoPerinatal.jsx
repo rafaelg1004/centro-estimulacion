@@ -69,24 +69,24 @@ export default function EditarConsentimientoPerinatal() {
           console.log('Datos completos:', JSON.stringify(data, null, 2));
           console.log('Campo tipoPrograma original:', data.tipoPrograma);
           console.log('Todas las propiedades:', Object.keys(data));
-          
+
           const tieneFirmaEducacion = !!(data.firmaPacienteGeneral || data.firmaFisioterapeutaGeneral);
           const tieneFirmaFisico = !!(data.firmaPacienteFisico || data.firmaFisioterapeutaFisico);
           const tieneFirmaIntensivo = !!(data.firmaPacienteEducacion || data.firmaFisioterapeutaEducacion);
-          
+
           const sesionesEducacion = data.sesiones?.length || 0;
           const sesionesIntensivo = data.sesionesIntensivo?.length || 0;
-          
-          console.log('Firmas detectadas:', { 
-            educacion: tieneFirmaEducacion, 
-            fisico: tieneFirmaFisico, 
-            intensivo: tieneFirmaIntensivo 
+
+          console.log('Firmas detectadas:', {
+            educacion: tieneFirmaEducacion,
+            fisico: tieneFirmaFisico,
+            intensivo: tieneFirmaIntensivo
           });
-          console.log('Sesiones detectadas:', { 
-            educacion: sesionesEducacion, 
-            intensivo: sesionesIntensivo 
+          console.log('Sesiones detectadas:', {
+            educacion: sesionesEducacion,
+            intensivo: sesionesIntensivo
           });
-          
+
           // Detectar por firmas y sesiones con lógica mejorada
           if (sesionesIntensivo === 3 && sesionesEducacion === 0) {
             data.tipoPrograma = "intensivo";
@@ -113,9 +113,9 @@ export default function EditarConsentimientoPerinatal() {
             data.tipoPrograma = "fisico";
             console.log('Detectado: FISICO (por firmas)');
           }
-          
+
           console.log(`RESULTADO: Tipo de programa = ${data.tipoPrograma}`);
-          
+
           if (!data.tipoPrograma) {
             console.error('❌ PROBLEMA: tipoPrograma no está guardado en la base de datos');
           }
@@ -123,15 +123,27 @@ export default function EditarConsentimientoPerinatal() {
           console.log(`Tipo de programa ya existía: ${data.tipoPrograma}`);
           console.log('Manteniendo tipo original sin detectar automáticamente');
         }
-        
+
         // Guardar el tipo de programa original para comparar después
         data._tipoPrograma_original = data.tipoPrograma;
-        
+
         // Si no se pudo determinar, usar el valor guardado en la base de datos
         if (!data.tipoPrograma) {
           console.warn("No se pudo determinar el tipo de programa automáticamente");
         }
-        
+
+        // Verificar si está bloqueada (HC Inmutable)
+        if (data.bloqueada) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Registro Bloqueado',
+            text: 'Esta historia clínica es inmutable y no puede ser editada por normativa de salud.',
+            confirmButtonColor: '#6366f1'
+          });
+          navigate(`/consentimientos-perinatales/${id}`);
+          return;
+        }
+
         setFormulario(data);
         setFormularioOriginal(data); // Guardar copia original
       });
@@ -158,7 +170,7 @@ export default function EditarConsentimientoPerinatal() {
       // Si está cambiando el tipo de programa, limpiar las sesiones anteriores
       if (e.tipoPrograma && e.tipoPrograma !== formulario.tipoPrograma) {
         const nuevoFormulario = { ...formulario, ...e };
-        
+
         // Limpiar todas las sesiones primero
         for (let i = 1; i <= 10; i++) {
           nuevoFormulario[`fechaSesion${i}`] = "";
@@ -168,13 +180,13 @@ export default function EditarConsentimientoPerinatal() {
         }
         nuevoFormulario.sesiones = [];
         nuevoFormulario.sesionesIntensivo = [];
-        
+
         // Mantener el tipo de programa original para comparar al guardar
         nuevoFormulario._tipoPrograma_original = formulario._tipoPrograma_original;
-        
+
         // Indicar que se deben actualizar las sesiones en el backend
         nuevoFormulario._actualizarSesiones = true;
-        
+
         setFormulario(nuevoFormulario);
       } else {
         setFormulario(prev => ({ ...prev, ...e }));
@@ -191,14 +203,14 @@ export default function EditarConsentimientoPerinatal() {
 
   const manejarCambioTipoPrograma = (tipo) => {
     // Si hay formulario original y tiene sesiones, mostrar advertencia
-    if (formularioOriginal && 
-        formularioOriginal.tipoPrograma !== tipo &&
-        ((formularioOriginal.sesiones && formularioOriginal.sesiones.length > 0) ||
-         (formularioOriginal.sesionesIntensivo && formularioOriginal.sesionesIntensivo.length > 0))) {
+    if (formularioOriginal &&
+      formularioOriginal.tipoPrograma !== tipo &&
+      ((formularioOriginal.sesiones && formularioOriginal.sesiones.length > 0) ||
+        (formularioOriginal.sesionesIntensivo && formularioOriginal.sesionesIntensivo.length > 0))) {
       setNuevoTipoPrograma(tipo);
       setMostrarAdvertenciaCambio(true);
     } else {
-      handleChange({tipoPrograma: tipo});
+      handleChange({ tipoPrograma: tipo });
     }
   };
 
@@ -206,7 +218,7 @@ export default function EditarConsentimientoPerinatal() {
     try {
       // Recopilar URLs de firmas de S3 para eliminar
       const firmasParaEliminar = [];
-      
+
       // Firmas de sesiones
       if (formularioOriginal.sesiones) {
         formularioOriginal.sesiones.forEach(sesion => {
@@ -215,7 +227,7 @@ export default function EditarConsentimientoPerinatal() {
           }
         });
       }
-      
+
       if (formularioOriginal.sesionesIntensivo) {
         formularioOriginal.sesionesIntensivo.forEach(sesion => {
           if (sesion.firmaPaciente && sesion.firmaPaciente.startsWith('https://')) {
@@ -223,7 +235,7 @@ export default function EditarConsentimientoPerinatal() {
           }
         });
       }
-      
+
       // Firmas de consentimientos que no se van a usar
       // Firmas de educación
       if (nuevoTipoPrograma !== 'educacion' && nuevoTipoPrograma !== 'ambos') {
@@ -234,7 +246,7 @@ export default function EditarConsentimientoPerinatal() {
           firmasParaEliminar.push(formularioOriginal.firmaFisioterapeutaGeneral);
         }
       }
-      
+
       // Firmas físicas
       if (nuevoTipoPrograma !== 'fisico' && nuevoTipoPrograma !== 'ambos') {
         if (formularioOriginal.firmaPacienteFisico && formularioOriginal.firmaPacienteFisico.startsWith('https://')) {
@@ -244,7 +256,7 @@ export default function EditarConsentimientoPerinatal() {
           firmasParaEliminar.push(formularioOriginal.firmaFisioterapeutaFisico);
         }
       }
-      
+
       // Firmas intensivas
       if (nuevoTipoPrograma !== 'intensivo') {
         if (formularioOriginal.firmaPacienteEducacion && formularioOriginal.firmaPacienteEducacion.startsWith('https://')) {
@@ -273,18 +285,18 @@ export default function EditarConsentimientoPerinatal() {
       datosActualizados.sesiones = [];
       datosActualizados.sesionesIntensivo = [];
       datosActualizados.tipoPrograma = nuevoTipoPrograma;
-      
+
       // Limpiar firmas de consentimientos que no se van a usar
       if (nuevoTipoPrograma !== 'educacion' && nuevoTipoPrograma !== 'ambos') {
         datosActualizados.firmaPacienteGeneral = '';
         datosActualizados.firmaFisioterapeutaGeneral = '';
       }
-      
+
       if (nuevoTipoPrograma !== 'fisico' && nuevoTipoPrograma !== 'ambos') {
         datosActualizados.firmaPacienteFisico = '';
         datosActualizados.firmaFisioterapeutaFisico = '';
       }
-      
+
       if (nuevoTipoPrograma !== 'intensivo') {
         datosActualizados.firmaPacienteEducacion = '';
         datosActualizados.firmaFisioterapeutaEducacion = '';
@@ -301,7 +313,7 @@ export default function EditarConsentimientoPerinatal() {
       setFormularioOriginal(datosActualizados);
       setMostrarAdvertenciaCambio(false);
       setNuevoTipoPrograma(null);
-      
+
       await Swal.fire({
         icon: 'success',
         title: 'Tipo de programa cambiado',
@@ -349,7 +361,7 @@ export default function EditarConsentimientoPerinatal() {
         cancelButtonText: "Cancelar",
         confirmButtonColor: "#6366f1"
       });
-      
+
       if (!confirmar.isConfirmed) {
         return;
       }
@@ -359,7 +371,7 @@ export default function EditarConsentimientoPerinatal() {
     const cambioTipoPrograma = formulario.tipoPrograma !== formulario._tipoPrograma_original;
 
     let sesiones, sesionesIntensivo;
-    
+
     if (cambioTipoPrograma) {
       // Si cambió el tipo, reconstruir desde campos individuales
       sesiones = [];
@@ -400,21 +412,21 @@ export default function EditarConsentimientoPerinatal() {
     // LIMPIAR FIRMAS SOLO SI CAMBIÓ EL TIPO DE PROGRAMA
     if (cambioTipoPrograma) {
       console.log('🧹 Limpiando firmas del tipo anterior:', formulario._tipoPrograma_original, '→', formulario.tipoPrograma);
-      
+
       // Limpiar firmas de educación si no es educación ni ambos
       if (formulario.tipoPrograma !== 'educacion' && formulario.tipoPrograma !== 'ambos') {
         dataToSend.firmaPacienteGeneral = '';
         dataToSend.firmaFisioterapeutaGeneral = '';
         console.log('🗑️ Limpiadas firmas de educación general');
       }
-      
+
       // Limpiar firmas físicas si no es físico ni ambos
       if (formulario.tipoPrograma !== 'fisico' && formulario.tipoPrograma !== 'ambos') {
         dataToSend.firmaPacienteFisico = '';
         dataToSend.firmaFisioterapeutaFisico = '';
         console.log('🗑️ Limpiadas firmas físicas');
       }
-      
+
       // Limpiar firmas de educación específica si no es intensivo
       if (formulario.tipoPrograma !== 'intensivo') {
         dataToSend.firmaPacienteEducacion = '';
@@ -427,7 +439,7 @@ export default function EditarConsentimientoPerinatal() {
 
     try {
       console.log('=== PROCESANDO FIRMAS ANTES DE ENVIAR ===');
-      
+
       // Lista de campos que pueden contener firmas en valoraciones perinatales
       const camposFirmas = [
         'firmaPaciente',
@@ -480,12 +492,12 @@ export default function EditarConsentimientoPerinatal() {
       console.log('- firmaPacienteEducacion:', dataToSend.firmaPacienteEducacion ? 'TIENE' : 'VACIO');
       console.log('- firmaFisioterapeutaEducacion:', dataToSend.firmaFisioterapeutaEducacion ? 'TIENE' : 'VACIO');
       console.log('Objeto completo:', JSON.stringify(dataToSend, null, 2));
-      
+
       const response = await apiRequest(`/consentimiento-perinatal/${id}`, {
         method: "PUT",
         body: JSON.stringify(dataToSend),
       });
-      
+
       console.log('=== RESPUESTA DEL BACKEND ===');
       console.log('Respuesta:', response);
 
@@ -519,7 +531,7 @@ export default function EditarConsentimientoPerinatal() {
       setPaso(paso + 1);
     }
   };
-  
+
   // Función para navegar al paso anterior
   const anterior = (nuevoPaso) => {
     if (nuevoPaso) setPaso(nuevoPaso);
@@ -532,11 +544,11 @@ export default function EditarConsentimientoPerinatal() {
         <h2 className="text-3xl font-extrabold mb-6 text-indigo-700 text-center drop-shadow">
           Editar Consentimiento Perinatal
         </h2>
-        
+
         {/* Debug info */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-4 p-3 bg-red-50 rounded border text-xs">
-            <strong>DEBUG EDICION:</strong> Paso: {paso}, Tipo: {formulario?.tipoPrograma}, 
+            <strong>DEBUG EDICION:</strong> Paso: {paso}, Tipo: {formulario?.tipoPrograma},
             Formulario existe: {formulario ? 'SI' : 'NO'}
           </div>
         )}
@@ -613,53 +625,49 @@ export default function EditarConsentimientoPerinatal() {
           {paso === 6 && (
             <div className="text-center">
               <h3 className="text-2xl font-bold text-indigo-700 mb-8">Elige el programa que mejor se adapte a las necesidades del paciente</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div 
-                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                    formulario.tipoPrograma === 'educacion' 
-                      ? 'border-green-500 bg-green-50 shadow-lg transform scale-105' 
+                <div
+                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${formulario.tipoPrograma === 'educacion'
+                      ? 'border-green-500 bg-green-50 shadow-lg transform scale-105'
                       : 'border-gray-200 hover:border-green-300'
-                  }`}
+                    }`}
                   onClick={() => manejarCambioTipoPrograma('educacion')}
                 >
                   <div className="text-4xl mb-4">📚</div>
                   <h4 className="text-xl font-bold text-green-700 mb-2">Educación</h4>
                   <p className="text-gray-600 text-sm">10 sesiones teórico-prácticas de preparación para el parto</p>
                 </div>
-                
-                <div 
-                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                    formulario.tipoPrograma === 'fisico' 
-                      ? 'border-blue-500 bg-blue-50 shadow-lg transform scale-105' 
+
+                <div
+                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${formulario.tipoPrograma === 'fisico'
+                      ? 'border-blue-500 bg-blue-50 shadow-lg transform scale-105'
                       : 'border-gray-200 hover:border-blue-300'
-                  }`}
+                    }`}
                   onClick={() => manejarCambioTipoPrograma('fisico')}
                 >
                   <div className="text-4xl mb-4">💪</div>
                   <h4 className="text-xl font-bold text-blue-700 mb-2">Físico</h4>
                   <p className="text-gray-600 text-sm">8 sesiones de acondicionamiento físico perinatal</p>
                 </div>
-                
-                <div 
-                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                    formulario.tipoPrograma === 'ambos' 
-                      ? 'border-orange-500 bg-orange-50 shadow-lg transform scale-105' 
+
+                <div
+                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${formulario.tipoPrograma === 'ambos'
+                      ? 'border-orange-500 bg-orange-50 shadow-lg transform scale-105'
                       : 'border-gray-200 hover:border-orange-300'
-                  }`}
+                    }`}
                   onClick={() => manejarCambioTipoPrograma('ambos')}
                 >
                   <div className="text-4xl mb-4">🌟</div>
                   <h4 className="text-xl font-bold text-orange-700 mb-2">Educación y Físico</h4>
                   <p className="text-gray-600 text-sm">Ambos programas: 10 sesiones educación + 8 sesiones físico</p>
                 </div>
-                
-                <div 
-                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                    formulario.tipoPrograma === 'intensivo' 
-                      ? 'border-purple-500 bg-purple-50 shadow-lg transform scale-105' 
+
+                <div
+                  className={`p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${formulario.tipoPrograma === 'intensivo'
+                      ? 'border-purple-500 bg-purple-50 shadow-lg transform scale-105'
                       : 'border-gray-200 hover:border-purple-300'
-                  }`}
+                    }`}
                   onClick={() => manejarCambioTipoPrograma('intensivo')}
                 >
                   <div className="text-4xl mb-4">⚡</div>
@@ -667,7 +675,7 @@ export default function EditarConsentimientoPerinatal() {
                   <p className="text-gray-600 text-sm">3 sesiones intensivas (solo intensivo)</p>
                 </div>
               </div>
-              
+
               <div className="flex justify-between">
                 <button
                   type="button"
@@ -700,7 +708,7 @@ export default function EditarConsentimientoPerinatal() {
               paciente={formulario.paciente}
             />
           )}
-          
+
           {/* FISICO: Solo consentimiento físico */}
           {paso === 7 && formulario.tipoPrograma === "fisico" && (
             <Paso6ConsentimientoFisicoPerinatal
@@ -713,7 +721,7 @@ export default function EditarConsentimientoPerinatal() {
               paciente={formulario.paciente}
             />
           )}
-          
+
           {/* AMBOS: Primero educación (paso 7) */}
           {paso === 7 && formulario.tipoPrograma === "ambos" && (
             <Paso7ConsentimientoEducacionNacimientoPerinatal
@@ -726,7 +734,7 @@ export default function EditarConsentimientoPerinatal() {
               paciente={formulario.paciente}
             />
           )}
-          
+
           {/* AMBOS: Luego físico (paso 8) */}
           {paso === 8 && formulario.tipoPrograma === "ambos" && (
             <Paso6ConsentimientoFisicoPerinatal
@@ -739,7 +747,7 @@ export default function EditarConsentimientoPerinatal() {
               paciente={formulario.paciente}
             />
           )}
-          
+
           {/* INTENSIVO: Solo consentimiento intensivo */}
           {paso === 7 && formulario.tipoPrograma === "intensivo" && (
             <Paso8ConsentimientoEducacionIntensivoPerinatal
@@ -754,7 +762,7 @@ export default function EditarConsentimientoPerinatal() {
           )}
         </div>
       </form>
-      
+
       {/* Modal de advertencia para cambio de tipo de programa */}
       {mostrarAdvertenciaCambio && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -765,7 +773,7 @@ export default function EditarConsentimientoPerinatal() {
             <p className="text-gray-600 mb-4">
               Al cambiar el tipo de programa se eliminarán TODAS las sesiones existentes y sus firmas.
             </p>
-            
+
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
               <h4 className="font-semibold text-orange-800 mb-2">Se eliminarán:</h4>
               <ul className="space-y-1 text-sm text-orange-700">
@@ -778,7 +786,7 @@ export default function EditarConsentimientoPerinatal() {
                 <li>• Todas las firmas asociadas a las sesiones</li>
                 <li>• Firmas de consentimientos no utilizados</li>
               </ul>
-              
+
               <div className="mt-3 pt-3 border-t border-orange-200">
                 <p className="text-sm font-medium text-orange-800">
                   Cambio: {formularioOriginal?.tipoPrograma} → {nuevoTipoPrograma}

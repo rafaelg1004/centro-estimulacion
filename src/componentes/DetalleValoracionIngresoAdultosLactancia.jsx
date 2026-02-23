@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+import Swal from 'sweetalert2';
 import { apiRequest } from "../config/api";
 
 const Card = ({ title, children }) => (
@@ -10,12 +11,19 @@ const Card = ({ title, children }) => (
   </div>
 );
 
-function Field({ label, value, isImage }) {
-  if (isImage && value && value.toString().startsWith("data:image")) {
+function Field({ label, value, isImage, audit }) {
+  if (isImage && value) {
     return (
-      <div className="flex flex-col items-center mb-2">
+      <div className="flex flex-col items-center mb-4">
         {label && <span className="font-semibold text-gray-700 mb-1">{label}:</span>}
-        <img src={value} alt={label} className="max-w-xs rounded shadow border" />
+        <img src={value} alt={label} className="max-w-xs rounded shadow border bg-white max-h-32 object-contain" />
+        {audit && (
+          <div className="text-[9px] text-gray-400 mt-1 text-center font-mono leading-tight">
+            Firma Electrónica - IP: {audit.ip} <br />
+            {new Date(audit.fechaHora).toLocaleString()}
+            {audit.registroProfesional && <><br />Reg: {audit.registroProfesional}</>}
+          </div>
+        )}
       </div>
     );
   }
@@ -69,12 +77,44 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
   };
 
   useEffect(() => {
+    loadData();
+  }, [id]);
+
+  const bloquearRegistro = async () => {
+    const result = await Swal.fire({
+      title: '¿Cerrar Historia Clínica?',
+      text: "Una vez bloqueada, la historia clínica será inmutable y no podrá ser editada ni eliminada.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, bloquear permanentemente',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        Swal.fire({ title: 'Bloqueando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        await apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bloqueada: true })
+        });
+        const updated = await apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`);
+        setValoracion(updated);
+        Swal.fire('¡Bloqueada!', 'El registro ahora es inmutable.', 'success');
+      } catch (error) {
+        Swal.fire('Error', 'No se pudo bloquear: ' + error.message, 'error');
+      }
+    }
+  };
+
+  const loadData = () => {
     apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(data => {
         setValoracion(data);
         setCargando(false);
       });
-  }, [id]);
+  };
 
   if (cargando) {
     return (
@@ -100,17 +140,37 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
             <ArrowLeftIcon className="h-6 w-6" />
             Volver a la lista
           </Link>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-indigo-700 text-center flex-1 tracking-tight drop-shadow">
-            Detalle de Valoración Adultos Lactancia
-          </h2>
+          <div className="flex flex-col items-center flex-1">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-indigo-700 text-center tracking-tight drop-shadow">
+              Detalle de Valoración Adultos Lactancia
+            </h2>
+            {valoracion.bloqueada && (
+              <div className="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200 flex items-center gap-1 mt-2">
+                <LockClosedIcon className="h-4 w-4" />
+                BLOQUEADA (INMUTABLE)
+              </div>
+            )}
+          </div>
           <button
-            onClick={() => navigate(`/editar-valoracion-ingreso-adultos-lactancia/${id}`)}
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
-            title="Editar valoración"
+            onClick={() => !valoracion.bloqueada && navigate(`/editar-valoracion-ingreso-adultos-lactancia/${id}`)}
+            disabled={valoracion.bloqueada}
+            className={`${valoracion.bloqueada ? 'bg-gray-400 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'} text-white font-bold py-2 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg`}
+            title={valoracion.bloqueada ? "No se puede editar una historia bloqueada" : "Editar valoración"}
           >
             <PencilSquareIcon className="h-6 w-6" />
-            Editar
+            {valoracion.bloqueada ? 'Solo Lectura' : 'Editar'}
           </button>
+
+          {!valoracion.bloqueada && (
+            <button
+              onClick={bloquearRegistro}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
+              title="Cerrar Historia Clínica"
+            >
+              <LockClosedIcon className="h-6 w-6" />
+              Cerrar
+            </button>
+          )}
           <button
             onClick={exportarPDF}
             className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow transition flex items-center gap-2 text-lg"
@@ -247,7 +307,7 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
             <div className="border rounded-xl p-4 bg-white shadow-sm flex flex-col items-center">
               <h4 className="font-semibold mb-2 text-indigo-600">Sesión No. 2 - Visita</h4>
               <Field label="Fecha sesión 2" value={valoracion.fechaSesion2} />
-              <Field label="Firma paciente sesión 2" value={valoracion.firmaPacienteSesion2} isImage />
+              <Field label="Firma paciente sesión 2" value={valoracion.firmaPacienteSesion2} isImage audit={valoracion.auditTrail?.firmaPacienteSesion2} />
             </div>
           </div>
           {/* Consentimiento */}
@@ -260,11 +320,11 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
           <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-2">
             <div className="flex-1 flex flex-col items-center">
               <span className="font-semibold text-gray-700 mb-1 block">Firma fisioterapeuta</span>
-              <Field label="" value={valoracion.firmaFisioterapeutaPrenatal} isImage />
+              <Field label="" value={valoracion.firmaFisioterapeutaPrenatal} isImage audit={valoracion.auditTrail?.firmaFisioterapeutaPrenatal} />
             </div>
             <div className="flex-1 flex flex-col items-center">
               <span className="font-semibold text-gray-700 mb-1 block">Firma final paciente</span>
-              <Field label="" value={valoracion.firmaPacientePrenatalFinal} isImage />
+              <Field label="" value={valoracion.firmaPacientePrenatalFinal} isImage audit={valoracion.auditTrail?.firmaPacientePrenatalFinal} />
             </div>
           </div>
         </Card>
@@ -306,17 +366,44 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Field label="Firma de la madre/paciente" value={valoracion.firmaConsentimientoLactancia} isImage />
+              <Field label="Firma de la madre/paciente" value={valoracion.firmaConsentimientoLactancia} isImage audit={valoracion.auditTrail?.firmaConsentimientoLactancia} />
               <Field label="Fecha" value={valoracion.fechaConsentimientoLactancia} />
               <Field label="Teléfono de contacto" value={valoracion.telefono} />
             </div>
             <div>
-              <Field label="Firma profesional responsable" value={valoracion.firmaProfesionalConsentimientoLactancia} isImage />
+              <Field label="Firma profesional responsable" value={valoracion.firmaProfesionalConsentimientoLactancia} isImage audit={valoracion.auditTrail?.firmaProfesionalConsentimientoLactancia} />
               <Field label="Nombre profesional" value={valoracion.nombreProfesionalConsentimientoLactancia || "Dayan Ivonne Villegas Gamboa"} />
               <Field label="Registro profesional" value={valoracion.registroProfesionalConsentimientoLactancia || "52862625"} />
             </div>
           </div>
         </Card>
+
+        {valoracion.bloqueada && valoracion.selloIntegridad && (
+          <div className="mt-4 p-4 bg-white border-2 border-green-200 rounded-2xl shadow-sm text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <LockClosedIcon className="h-5 w-5 text-green-600" />
+              <span className="font-bold text-green-700 uppercase tracking-wider">Documento Protegido e Inmutable</span>
+            </div>
+            <p className="font-mono text-[9px] text-gray-500 break-all bg-gray-50 p-2 rounded border">
+              <strong>HASH SHA-256:</strong> {valoracion.selloIntegridad}
+            </p>
+            <p className="text-[10px] text-gray-400 mt-2 uppercase italic">
+              Cerrado mediante sellado de tiempo criptográfico el {new Date(valoracion.fechaBloqueo).toLocaleString()}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
+          <button onClick={() => navigate(-1)} className="bg-gray-200 px-6 py-2 rounded-xl">Volver</button>
+          {!valoracion.bloqueada && (
+            <button onClick={bloquearRegistro} className="bg-red-500 text-white px-6 py-2 rounded-xl flex items-center gap-2">
+              <LockClosedIcon className="h-5 w-5" /> Cerrar Historia
+            </button>
+          )}
+          <button onClick={exportarPDF} className="bg-red-600 text-white px-6 py-2 rounded-xl flex items-center gap-2">
+            <ArrowDownTrayIcon className="h-5 w-5" /> Exportar PDF
+          </button>
+        </div>
       </div>
     </div>
   );

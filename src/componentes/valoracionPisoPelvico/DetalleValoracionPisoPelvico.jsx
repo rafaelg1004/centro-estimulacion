@@ -3,7 +3,8 @@ import { apiRequest } from "../../config/api";
 import { exportarValoracionPisoPelvicoAWord } from "../../utils/exportarValoracionWord";
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
-import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+import Swal from 'sweetalert2';
 
 const Card = ({ title, children }) => (
   <div className="bg-indigo-50 rounded-2xl shadow p-6 mb-8 border border-indigo-100">
@@ -12,10 +13,18 @@ const Card = ({ title, children }) => (
   </div>
 );
 
-const Field = ({ label, value }) => (
-  <div className="mb-2 flex flex-col md:flex-row">
-    <span className="font-semibold text-gray-700 md:w-64">{label}:</span>
-    <span className="text-gray-900 flex-1">{value || <span className="text-gray-400">Sin dato</span>}</span>
+const Field = ({ label, value, audit }) => (
+  <div className="mb-4 flex flex-col">
+    <div className="flex flex-col md:flex-row">
+      <span className="font-semibold text-gray-700 md:w-64">{label}:</span>
+      <span className="text-gray-900 flex-1">{value || <span className="text-gray-400">Sin dato</span>}</span>
+    </div>
+    {audit && (
+      <div className="text-[10px] text-gray-400 mt-1 md:ml-64 font-mono leading-tight">
+        Firma Electrónica - IP: {audit.ip} | {new Date(audit.fechaHora).toLocaleString()}
+        {audit.registroProfesional && <><br />Reg: {audit.registroProfesional}</>}
+      </div>
+    )}
   </div>
 );
 
@@ -24,7 +33,7 @@ const renderValue = (value) => {
   if (typeof value === 'boolean') {
     return value ? "Sí" : "No";
   }
-  
+
   if (Array.isArray(value)) {
     // Si el array es de objetos (como hijos), muestra cada uno en una tarjeta vertical y compacta en dos columnas reales
     if (value.length > 0 && typeof value[0] === "object" && value[0] !== null) {
@@ -42,11 +51,11 @@ const renderValue = (value) => {
                     <span className="font-semibold">
                       {k === "nombre" ? "Nombre" :
                         k === "fechaNacimiento" ? "Fecha Nacimiento" :
-                        k === "peso" ? "Peso" :
-                        k === "talla" ? "Talla" :
-                        k === "tipoParto" ? "Tipo Parto" :
-                        k === "semana" ? "Semana" :
-                        k.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase())
+                          k === "peso" ? "Peso" :
+                            k === "talla" ? "Talla" :
+                              k === "tipoParto" ? "Tipo Parto" :
+                                k === "semana" ? "Semana" :
+                                  k.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase())
                       }
                       :
                     </span>{" "}
@@ -66,13 +75,13 @@ const renderValue = (value) => {
       </ul>
     );
   }
-  
+
   if (typeof value === "object" && value !== null) {
     // Si es un objeto paciente con _id, nombres, etc., convertir a string seguro
     if (value._id && value.nombres) {
       return `${value.nombres} ${value.apellidos || ""}`.trim() || value._id;
     }
-    
+
     // Para otros objetos, mostrar propiedades de forma segura
     return (
       <div className="bg-gray-50 rounded p-2 mb-1 border">
@@ -84,7 +93,7 @@ const renderValue = (value) => {
       </div>
     );
   }
-  
+
   // Para valores primitivos
   return value === "" || value === undefined || value === null
     ? <span className="text-gray-400">Sin dato</span>
@@ -106,7 +115,7 @@ export default function DetalleValoracionPisoPelvico() {
         const data = await apiRequest(`/valoracion-piso-pelvico/${id}`);
         console.log('Datos de valoración cargados:', data);
         setValoracion(data);
-        
+
         if (data.paciente) {
           try {
             // Si data.paciente es un objeto, ya tenemos los datos del paciente
@@ -140,6 +149,34 @@ export default function DetalleValoracionPisoPelvico() {
 
     loadData();
   }, [id]);
+
+  const bloquearRegistro = async () => {
+    const result = await Swal.fire({
+      title: '¿Cerrar Historia Clínica?',
+      text: "Una vez bloqueada, la historia clínica será inmutable y no podrá ser editada ni eliminada.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, bloquear permanentemente',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        Swal.fire({ title: 'Bloqueando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        await apiRequest(`/valoracion-piso-pelvico/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bloqueada: true })
+        });
+        const updated = await apiRequest(`/valoracion-piso-pelvico/${id}`);
+        setValoracion(updated);
+        Swal.fire('¡Bloqueada!', 'El registro ahora es inmutable.', 'success');
+      } catch (error) {
+        Swal.fire('Error', 'No se pudo bloquear: ' + error.message, 'error');
+      }
+    }
+  };
 
   // Función para exportar a Word usando la utilidad
   const exportarAWord = () => {
@@ -406,19 +443,27 @@ export default function DetalleValoracionPisoPelvico() {
   const consentimiento = [
     { label: "Fecha consentimiento", value: valoracion.consentimientoFecha },
     { label: "Ciudad", value: valoracion.consentimientoCiudad },
-    { label: "Nombre completo", value: paciente?.nombres || valoracion.nombres  },
-    { label: "CC No.", value: paciente?.cedula || valoracion.cedula  },
+    { label: "Nombre completo", value: paciente?.nombres || valoracion.nombres },
+    { label: "CC No.", value: paciente?.cedula || valoracion.cedula },
   ];
-  
-  
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-green-100 py-10 px-2">
       <div className="max-w-5xl w-full mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-indigo-100">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-          <h2 className="text-3xl font-extrabold text-indigo-800 text-center drop-shadow">
-            Detalle Valoración Piso Pélvico
-          </h2>
+          <div className="flex flex-col items-center md:items-start">
+            <h2 className="text-3xl font-extrabold text-indigo-800 text-center drop-shadow">
+              Detalle Valoración Piso Pélvico
+            </h2>
+            {valoracion.bloqueada && (
+              <div className="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200 flex items-center gap-1 mt-2">
+                <LockClosedIcon className="h-4 w-4" />
+                BLOQUEADA
+              </div>
+            )}
+          </div>
           {paciente && (
             <div className="mt-2 md:mt-0 text-sm text-gray-600 text-center md:text-right">
               <div>
@@ -500,11 +545,11 @@ export default function DetalleValoracionPisoPelvico() {
                           <span className="font-semibold">
                             {k === "nombre" ? "Nombre" :
                               k === "fechaNacimiento" ? "Fecha Nacimiento" :
-                              k === "peso" ? "Peso" :
-                              k === "talla" ? "Talla" :
-                              k === "tipoParto" ? "Tipo Parto" :
-                              k === "semana" ? "Semana" :
-                              k.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase())
+                                k === "peso" ? "Peso" :
+                                  k === "talla" ? "Talla" :
+                                    k === "tipoParto" ? "Tipo Parto" :
+                                      k === "semana" ? "Semana" :
+                                        k.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase())
                             }
                             :
                           </span>{" "}
@@ -575,7 +620,7 @@ export default function DetalleValoracionPisoPelvico() {
           </div>
         </Card>
 
-       
+
         {/* Firmas */}
         <Card title="Firmas">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
@@ -606,7 +651,7 @@ export default function DetalleValoracionPisoPelvico() {
             )}
           </div>
         </Card>
-         {/* Consentimiento Informado */}
+        {/* Consentimiento Informado */}
         <Card title="Consentimiento Informado">
           <div className="mb-4 bg-gray-50 p-4 rounded text-justify text-sm border max-h-96 overflow-y-auto">
             <p>
@@ -639,7 +684,15 @@ export default function DetalleValoracionPisoPelvico() {
           <div className="flex flex-col items-center mt-4">
             <label className="font-semibold mb-2">Firma consentimiento:</label>
             {valoracion.consentimientoFirma ? (
-              <img src={valoracion.consentimientoFirma} alt="Firma consentimiento" className="h-12 mt-1 border" />
+              <div className="flex flex-col items-center">
+                <img src={valoracion.consentimientoFirma} alt="Firma consentimiento" className="h-16 mt-1 border bg-white rounded shadow-sm" />
+                {valoracion.auditTrail?.consentimientoFirma && (
+                  <div className="text-[10px] text-gray-400 mt-1 text-center font-mono">
+                    IP: {valoracion.auditTrail.consentimientoFirma.ip} <br />
+                    {new Date(valoracion.auditTrail.consentimientoFirma.fechaHora).toLocaleString()}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="w-48 h-12 border border-dashed border-gray-400 rounded flex items-center justify-center text-gray-400">
                 Sin firma
@@ -649,33 +702,51 @@ export default function DetalleValoracionPisoPelvico() {
         </Card>
 
 
+        {/* Sello de integridad */}
+        {valoracion.bloqueada && valoracion.selloIntegridad && (
+          <div className="mt-8 p-4 bg-white border-2 border-green-200 rounded-2xl shadow-sm text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <LockClosedIcon className="h-5 w-5 text-green-600" />
+              <span className="font-bold text-green-700 uppercase tracking-wider">Documento Protegido e Inmutable</span>
+            </div>
+            <p className="font-mono text-[9px] text-gray-500 break-all bg-gray-50 p-2 rounded border">
+              <strong>SELLO INTEGRIDAD (SHA-256):</strong> {valoracion.selloIntegridad}
+            </p>
+            <p className="text-[10px] text-gray-400 mt-2 uppercase italic">
+              Cerrado mediante sellado de tiempo criptográfico el {new Date(valoracion.fechaBloqueo).toLocaleString()}
+            </p>
+          </div>
+        )}
+
         {/* Botones de acción */}
         <div className="mt-8 text-center flex flex-col sm:flex-row justify-center gap-4">
           <Link
-            to={`/valoraciones-piso-pelvico/${valoracion._id}/editar`}
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
+            to={valoracion.bloqueada ? "#" : `/valoraciones-piso-pelvico/${valoracion._id}/editar`}
+            className={`${valoracion.bloqueada ? 'bg-gray-400 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'} text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center`}
+            onClick={(e) => valoracion.bloqueada && e.preventDefault()}
           >
             <PencilSquareIcon className="h-6 w-6" />
-            Editar
+            {valoracion.bloqueada ? 'Solo Lectura' : 'Editar'}
           </Link>
-          
-          <button
-            onClick={exportarAWord}
-            disabled={exportando}
-            className="bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
-          >
-            <ArrowDownTrayIcon className="h-6 w-6" />
-            {exportando ? 'Exportando...' : 'Exportar a Word'}
-          </button>
+
+          {!valoracion.bloqueada && (
+            <button
+              onClick={bloquearRegistro}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
+            >
+              <LockClosedIcon className="h-6 w-6" />
+              Cerrar Historia
+            </button>
+          )}
 
           <button
             onClick={exportarPDF}
             className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
           >
             <ArrowDownTrayIcon className="h-6 w-6" />
-            Exportar a PDF (Firmas)
+            Exportar PDF (Firmas)
           </button>
-          
+
           <Link
             to="/valoraciones-piso-pelvico"
             className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
@@ -685,6 +756,6 @@ export default function DetalleValoracionPisoPelvico() {
           </Link>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

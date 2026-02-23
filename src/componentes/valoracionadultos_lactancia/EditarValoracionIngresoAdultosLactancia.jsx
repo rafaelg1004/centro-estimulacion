@@ -134,11 +134,20 @@ export default function EditarValoracionIngresoAdultosLactancia() {
   useEffect(() => {
     apiRequest(`/valoracion-ingreso-adultos-lactancia/${id}`)
       .then(res => res.json())
-      .then(data => setFormulario(prev => ({
-        ...prev,
-        ...data,
-      })));
-  }, [id]);
+      .then(data => {
+        setFormulario(prev => ({
+          ...prev,
+          ...data,
+        }));
+
+        // Verificar si está bloqueada (HC Inmutable)
+        if (data.bloqueada) {
+          alert('Esta historia clínica es inmutable y no puede ser editada por normativa de salud.');
+          navigate(`/valoracion-ingreso-adultos-lactancia/${id}`);
+        }
+      })
+      .catch(err => console.error("Error al cargar valoración:", err));
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     if (e && e.target && typeof e.target.value === "boolean") {
@@ -199,7 +208,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
     try {
       // Crear una copia limpia de la valoración
       let dataToSend = { ...formulario };
-      
+
       // Remover el _id
       const { _id, ...formularioSinId } = dataToSend;
       dataToSend = formularioSinId;
@@ -212,7 +221,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
       // Lista de campos de firma
       const firmasFormulario = [
         "firmaPacientePrenatal",
-        "firmaPaciente", 
+        "firmaPaciente",
         "firmaFisioterapeuta",
         "firmaAutorizacion",
         "firmaPacienteSesion1",
@@ -225,20 +234,20 @@ export default function EditarValoracionIngresoAdultosLactancia() {
       ];
 
       console.log('=== PROCESANDO FIRMAS LACTANCIA (EDICIÓN) ===');
-      
+
       // Procesar todas las firmas
       for (const campo of firmasFormulario) {
         if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
           console.log(`Procesando firma ${campo} - es base64, necesita subirse a S3`);
-          
+
           // Si había una imagen anterior, eliminarla
-          if (valoracionOriginal[campo] && 
-              valoracionOriginal[campo].includes('amazonaws.com') &&
-              !valoracionOriginal[campo].startsWith("data:image")) {
+          if (valoracionOriginal[campo] &&
+            valoracionOriginal[campo].includes('amazonaws.com') &&
+            !valoracionOriginal[campo].startsWith("data:image")) {
             console.log(`Eliminando imagen anterior para ${campo}: ${valoracionOriginal[campo]}`);
             await eliminarImagenDeS3(valoracionOriginal[campo]);
           }
-          
+
           // Subir la nueva firma
           console.log(`Subiendo nueva imagen para ${campo}`);
           dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
@@ -255,7 +264,7 @@ export default function EditarValoracionIngresoAdultosLactancia() {
       });
 
       if (!res.ok) throw new Error("Error en la respuesta del servidor");
-      
+
       console.log('✓ Valoración actualizada exitosamente');
       navigate(`/valoracion-ingreso-adultos-lactancia/${id}`);
     } catch (error) {
@@ -406,7 +415,7 @@ async function subirFirmaAS3(firmaBase64) {
 async function eliminarImagenDeS3(imageUrl) {
   try {
     console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
-    
+
     const res = await fetch(`${API_CONFIG.BASE_URL}/api/delete-image`, {
       method: 'DELETE',
       headers: {
@@ -414,12 +423,12 @@ async function eliminarImagenDeS3(imageUrl) {
       },
       body: JSON.stringify({ imageUrl }),
     });
-    
+
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(`Error al eliminar imagen: ${errorData.error || res.statusText}`);
     }
-    
+
     const data = await res.json();
     console.log(`✓ Imagen eliminada exitosamente:`, data);
     return data;

@@ -76,7 +76,7 @@ export default function DetalleClase() {
         confirmButtonText: 'Sí, agregar',
         cancelButtonText: 'Cancelar'
       });
-      
+
       if (!result.isConfirmed) return;
     } else {
       // Si hay factura seleccionada, validar que tenga clases disponibles
@@ -86,7 +86,7 @@ export default function DetalleClase() {
         return;
       }
     }
-    
+
     await apiRequest(`/clases/${id}/agregar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -153,7 +153,7 @@ export default function DetalleClase() {
       alert("Selecciona una factura/paquete");
       return;
     }
-    
+
     const paquete = paquetesParaAsignar.find(p => p.numeroFactura === facturaAsignar);
     if (!paquete || paquete.clasesUsadas >= paquete.clasesPagadas) {
       alert("No quedan clases disponibles en este paquete/factura.");
@@ -165,14 +165,14 @@ export default function DetalleClase() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ninoId: asignarPaqueteId, numeroFactura: facturaAsignar }),
     });
-    
+
     apiRequest(`/clases/${id}`)
       .then(setClase);
-    
+
     setAsignarPaqueteId("");
     setFacturaAsignar("");
     setPaquetesParaAsignar([]);
-    
+
     Swal.fire({
       title: '¡Paquete asignado!',
       text: 'El paquete ha sido asignado correctamente al paciente.',
@@ -205,101 +205,101 @@ export default function DetalleClase() {
         </div>
         <p className="mb-2 text-indigo-500 font-semibold">Fecha: {clase.fecha}</p>
         <p className="mb-6 text-gray-700">{clase.descripcion}</p>
-        <div className="bg-indigo-50 border rounded-2xl p-6 mb-8 shadow">
-          <h3 className="font-bold text-lg text-indigo-800 mb-4">Agregar niño a la clase</h3>
-          <div className="mb-4">
-            <label className="block mb-1 font-medium text-gray-700">Buscar y seleccionar niño:</label>
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Buscar niño por nombre..."
-                value={busquedaNino}
-                onChange={e => {
-                  setBusquedaNino(e.target.value);
-                  setShowSugerencias(true);
-                }}
-                onFocus={() => setShowSugerencias(true)}
-                onBlur={() => setTimeout(() => setShowSugerencias(false), 100)}
-                className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-4 py-2 w-full transition outline-none shadow-sm bg-indigo-50"
-                autoComplete="off"
-              />
-              <select
-                value={ninoId}
-                onChange={e => {
-                  setNinoId(e.target.value);
-                  setFacturaAgregar("");
-                }}
-                className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-4 py-2 w-full transition outline-none shadow-sm mt-2 bg-indigo-50"
-                style={{ minWidth: "160px" }}
-              >
-                <option value="">Selecciona</option>
-                {ninos.map(n => (
-                  <option key={n._id} value={n._id}>{n.nombres}</option>
-                ))}
-              </select>
-              {showSugerencias && busquedaNino && ninos.length > 0 && (
-                <ul className="absolute left-0 top-full mt-1 w-full bg-white border border-indigo-300 rounded shadow-lg z-20 max-h-40 overflow-y-auto">
+        {!clase.bloqueada && (
+          <div className="bg-indigo-50 border rounded-2xl p-6 mb-8 shadow">
+            <h3 className="font-bold text-lg text-indigo-800 mb-4">Agregar niño a la clase</h3>
+            <div className="mb-4">
+              <label className="block mb-1 font-medium text-gray-700">Buscar y seleccionar niño:</label>
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  placeholder="Buscar niño por nombre..."
+                  value={busquedaNino}
+                  onChange={e => {
+                    setBusquedaNino(e.target.value);
+                    setShowSugerencias(true);
+                  }}
+                  onFocus={() => setShowSugerencias(true)}
+                  onBlur={() => setTimeout(() => setShowSugerencias(false), 100)}
+                  className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-4 py-2 w-full transition outline-none shadow-sm bg-indigo-50"
+                  autoComplete="off"
+                />
+                <select
+                  value={ninoId}
+                  onChange={e => {
+                    setNinoId(e.target.value);
+                    setFacturaAgregar("");
+                  }}
+                  className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-4 py-2 w-full transition outline-none shadow-sm mt-2 bg-indigo-50"
+                  style={{ minWidth: "160px" }}
+                >
+                  <option value="">Selecciona</option>
                   {ninos.map(n => (
-                    <li
-                      key={n._id}
-                      className="px-3 py-2 hover:bg-indigo-100 cursor-pointer transition"
-                      onMouseDown={() => {
-                        setNinoId(n._id);
-                        setBusquedaNino(n.nombres);
-                        setShowSugerencias(false);
-                        setFacturaAgregar("");
-                      }}
-                    >
-                      {n.nombres}
-                    </li>
+                    <option key={n._id} value={n._id}>{n.nombres}</option>
                   ))}
-                </ul>
-              )}
-            </div>
-            {ninoId && (
-              <select
-                value={facturaAgregar}
-                onChange={e => setFacturaAgregar(e.target.value)}
-                className="border p-2 mb-2 w-full rounded-xl mt-2 bg-green-50"
-              >
-                <option value="">Selecciona una factura/paquete</option>
-                {paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).map(p => (
-                  <option key={p._id} value={p.numeroFactura}>
-                    {p.numeroFactura} (usadas: {p.clasesUsadas}/{p.clasesPagadas})
-                  </option>
-                ))}
-              </select>
-            )}
-            {ninoId && paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).length === 0 && (
-              <div className="text-red-600 text-sm mb-2">
-                {paquetes.length === 0 
-                  ? "Este niño no tiene paquetes/facturas disponibles." 
-                  : "Todos los paquetes de este niño ya están utilizados completamente."
-                }
+                </select>
+                {showSugerencias && busquedaNino && ninos.length > 0 && (
+                  <ul className="absolute left-0 top-full mt-1 w-full bg-white border border-indigo-300 rounded shadow-lg z-20 max-h-40 overflow-y-auto">
+                    {ninos.map(n => (
+                      <li
+                        key={n._id}
+                        className="px-3 py-2 hover:bg-indigo-100 cursor-pointer transition"
+                        onMouseDown={() => {
+                          setNinoId(n._id);
+                          setBusquedaNino(n.nombres);
+                          setShowSugerencias(false);
+                          setFacturaAgregar("");
+                        }}
+                      >
+                        {n.nombres}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            )}
-            <button
-              onClick={agregarNino}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl mt-3 shadow flex items-center gap-2 text-lg transition"
-            >
-              <UserPlusIcon className="h-5 w-5" /> Agregar
-            </button>
+              {ninoId && (
+                <select
+                  value={facturaAgregar}
+                  onChange={e => setFacturaAgregar(e.target.value)}
+                  className="border p-2 mb-2 w-full rounded-xl mt-2 bg-green-50"
+                >
+                  <option value="">Selecciona una factura/paquete</option>
+                  {paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).map(p => (
+                    <option key={p._id} value={p.numeroFactura}>
+                      {p.numeroFactura} (usadas: {p.clasesUsadas}/{p.clasesPagadas})
+                    </option>
+                  ))}
+                </select>
+              )}
+              {ninoId && paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).length === 0 && (
+                <div className="text-red-600 text-sm mb-2">
+                  {paquetes.length === 0
+                    ? "Este niño no tiene paquetes/facturas disponibles."
+                    : "Todos los paquetes de este niño ya están utilizados completamente."
+                  }
+                </div>
+              )}
+              <button
+                onClick={agregarNino}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl mt-3 shadow flex items-center gap-2 text-lg transition"
+              >
+                <UserPlusIcon className="h-5 w-5" /> Agregar
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         <h3 className="font-semibold mb-2 text-indigo-700">Niños en la clase</h3>
         <ul className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           {clase.ninos.map(n => {
             const tienePaquete = n.numeroFactura && n.numeroFactura.trim() !== '';
             return (
-              <li key={n.nino._id || n.nino} className={`border rounded-2xl shadow p-4 flex flex-col gap-2 relative ${
-                tienePaquete 
-                  ? 'bg-white border-green-200' 
-                  : 'bg-red-50 border-red-300'
-              }`}>
+              <li key={n.nino._id || n.nino} className={`border rounded-2xl shadow p-4 flex flex-col gap-2 relative ${tienePaquete
+                ? 'bg-white border-green-200'
+                : 'bg-red-50 border-red-300'
+                }`}>
                 <div className="flex items-center gap-2">
-                  <span className={`font-semibold ${
-                    tienePaquete ? 'text-indigo-700' : 'text-red-700'
-                  }`}>
+                  <span className={`font-semibold ${tienePaquete ? 'text-indigo-700' : 'text-red-700'
+                    }`}>
                     {n.nino.nombres || n.nombres}
                   </span>
                   {tienePaquete ? (
@@ -313,10 +313,17 @@ export default function DetalleClase() {
                   )}
                 </div>
                 {n.firma && (
-                  <img src={n.firma} alt="firma" className="border rounded max-h-12 mt-2" />
+                  <div className="flex flex-col items-center mt-2">
+                    <img src={n.firma} alt="firma" className="border rounded max-h-12 bg-white" />
+                    {n.auditTrail && (
+                      <p className="text-[8px] text-gray-400 font-mono text-center">
+                        IP: {n.auditTrail.ip} | {new Date(n.auditTrail.fechaHora).toLocaleTimeString()}
+                      </p>
+                    )}
+                  </div>
                 )}
                 <div className="absolute top-2 right-2 flex gap-1">
-                  {!tienePaquete && (
+                  {!tienePaquete && !clase.bloqueada && (
                     <button
                       onClick={() => setAsignarPaqueteId(n.nino._id || n.nino)}
                       className="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 rounded-full p-2 shadow"
@@ -325,19 +332,21 @@ export default function DetalleClase() {
                       <CreditCardIcon className="h-5 w-5" />
                     </button>
                   )}
-                  <button
-                    onClick={() => eliminarNinoDeClase(n.nino._id || n.nino)}
-                    className="bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 shadow"
-                    title="Eliminar niño de la sesión"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                  {!clase.bloqueada && (
+                    <button
+                      onClick={() => eliminarNinoDeClase(n.nino._id || n.nino)}
+                      className="bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 shadow"
+                      title="Eliminar niño de la sesión"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  )}
                 </div>
               </li>
             );
           })}
         </ul>
-        
+
         {/* Sección para asignar paquetes */}
         {asignarPaqueteId && (
           <div className="bg-yellow-50 border border-yellow-300 rounded-2xl p-6 mb-6 shadow">
@@ -365,8 +374,8 @@ export default function DetalleClase() {
             </div>
             {paquetesParaAsignar.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).length === 0 && (
               <div className="text-red-600 text-sm mb-4">
-                {paquetesParaAsignar.length === 0 
-                  ? "Este paciente no tiene paquetes disponibles." 
+                {paquetesParaAsignar.length === 0
+                  ? "Este paciente no tiene paquetes disponibles."
                   : "Todos los paquetes de este paciente ya están utilizados completamente."
                 }
               </div>
@@ -392,42 +401,88 @@ export default function DetalleClase() {
             </div>
           </div>
         )}
-        
-        <h3 className="font-semibold mb-2 mt-6 text-indigo-700">Firma de niño</h3>
-        <div className="bg-green-50 border rounded-2xl p-6 mb-6 shadow">
-          <label className="block mb-2 font-medium text-gray-700">Selecciona un niño para firmar:</label>
-          <select
-            value={firmaNinoId}
-            onChange={e => setFirmaNinoId(e.target.value)}
-            className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-4 py-2 w-full mb-4 transition outline-none shadow-sm bg-indigo-50"
-          >
-            <option value="">Selecciona un niño para firmar</option>
-            {clase.ninos.filter(n => !n.firma).map(n => (
-              <option key={n.nino._id || n.nino} value={n.nino._id || n.nino}>
-                {n.nino.nombres || n.nombres}
-              </option>
-            ))}
-          </select>
-          <div className="border rounded bg-white mb-4">
-            <SignaturePad ref={sigRef} canvasProps={{ className: "w-full h-40" }} />
-          </div>
-          <button
-            onClick={guardarFirmaNino}
-            disabled={!firmaNinoId}
-            className={`px-4 py-2 rounded-xl flex items-center gap-2 shadow text-lg transition ${firmaNinoId ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
-          >
-            <DocumentCheckIcon className="h-5 w-5" /> Guardar Firma del Niño
-          </button>
-          {clase.ninos.filter(n => !n.firma).length === 0 && (
-            <p className="mt-3 text-sm text-green-700">✅ Todos los niños ya han firmado esta sesión.</p>
-          )}
-        </div>
+
+        {!clase.bloqueada && (
+          <>
+            <h3 className="font-semibold mb-2 mt-6 text-indigo-700">Firma de niño</h3>
+            <div className="bg-green-50 border rounded-2xl p-6 mb-6 shadow">
+              <label className="block mb-2 font-medium text-gray-700">Selecciona un niño para firmar:</label>
+              <select
+                value={firmaNinoId}
+                onChange={e => setFirmaNinoId(e.target.value)}
+                className="border border-indigo-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl px-4 py-2 w-full mb-4 transition outline-none shadow-sm bg-indigo-50"
+              >
+                <option value="">Selecciona un niño para firmar</option>
+                {clase.ninos.filter(n => !n.firma).map(n => (
+                  <option key={n.nino._id || n.nino} value={n.nino._id || n.nino}>
+                    {n.nino.nombres || n.nombres}
+                  </option>
+                ))}
+              </select>
+              <div className="border rounded bg-white mb-4">
+                <SignaturePad ref={sigRef} canvasProps={{ className: "w-full h-40" }} />
+              </div>
+              <button
+                onClick={guardarFirmaNino}
+                disabled={!firmaNinoId}
+                className={`px-4 py-2 rounded-xl flex items-center gap-2 shadow text-lg transition ${firmaNinoId ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+              >
+                <DocumentCheckIcon className="h-5 w-5" /> Guardar Firma del Niño
+              </button>
+              {clase.ninos.filter(n => !n.firma).length === 0 && (
+                <p className="mt-3 text-sm text-green-700">✅ Todos los niños ya han firmado esta sesión.</p>
+              )}
+            </div>
+          </>
+        )}
       </div>
-      <div className="max-w-2xl mx-auto mt-6 flex justify-center">
+      <div className="max-w-2xl mx-auto mt-6 flex flex-col gap-4 items-center">
+        {!clase.bloqueada && (
+          <button
+            onClick={async () => {
+              const result = await Swal.fire({
+                title: '¿Cerrar y bloquear esta clase?',
+                text: 'Una vez cerrada, la asistencia será inmutable y no se podrán agregar más niños ni modificar firmas (Ley 527).',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Sí, cerrar y bloquear',
+                cancelButtonText: 'Cancelar'
+              });
+              if (result.isConfirmed) {
+                await apiRequest(`/clases/${id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ bloqueada: true })
+                });
+                apiRequest(`/clases/${id}`).then(setClase);
+                Swal.fire('¡Bloqueada!', 'La sesión ha sido cerrada correctamente.', 'success');
+              }
+            }}
+            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center justify-center gap-2 text-lg"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            Cerrar Libro de Asistencia
+          </button>
+        )}
+
+        {clase.bloqueada && clase.selloIntegridad && (
+          <div className="w-full p-4 bg-white border border-green-200 rounded-2xl shadow-sm">
+            <p className="text-[10px] font-mono text-green-700 break-all mb-1">
+              <strong>SELLO INTEGRIDAD (SHA-256):</strong> {clase.selloIntegridad}
+            </p>
+            <p className="text-[10px] text-gray-500 italic">
+              Libro de asistencia auditado y sellado el {new Date(clase.fechaBloqueo).toLocaleString()}
+            </p>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={() => navigate("/clases")}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-xl shadow transition flex items-center justify-center gap-2 text-lg"
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-xl shadow transition flex items-center justify-center gap-2 text-lg w-full"
         >
           Volver a lista de clases
         </button>

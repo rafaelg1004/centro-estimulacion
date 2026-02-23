@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  PlusIcon, 
-  CalendarIcon, 
-  UsersIcon, 
-  TrashIcon, 
+import {
+  PlusIcon,
+  CalendarIcon,
+  UsersIcon,
+  TrashIcon,
   MagnifyingGlassIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  LockClosedIcon
 } from "@heroicons/react/24/outline";
 import { apiRequest } from "../config/api";
 import Swal from "sweetalert2";
@@ -15,13 +16,13 @@ export default function ListaSesionesMensuales() {
   const [vista, setVista] = useState("resumen"); // "resumen" o "detalle"
   const [resumenMeses, setResumenMeses] = useState([]);
   const [mesSeleccionado, setMesSeleccionado] = useState(null); // formato YYYY-MM
-  
+
   const [sesiones, setSesiones] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [cargando, setCargando] = useState(true);
-  
+
   // Paginación
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
@@ -50,7 +51,7 @@ export default function ListaSesionesMensuales() {
     setCargando(true);
     try {
       const params = new URLSearchParams();
-      
+
       if (mes) {
         // Filtro exacto por el mes seleccionado (YYYY-MM)
         // Usamos una lógica más robusta para el rango de fechas
@@ -62,7 +63,7 @@ export default function ListaSesionesMensuales() {
         if (fechaInicio) params.append("fechaInicio", fechaInicio);
         if (fechaFin) params.append("fechaFin", fechaFin);
       }
-      
+
       if (busqueda) params.append("busqueda", busqueda);
       params.append("page", page);
       params.append("limit", limite);
@@ -90,7 +91,7 @@ export default function ListaSesionesMensuales() {
   const eliminarSesion = async (id, e) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const result = await Swal.fire({
       title: '¿Estás seguro?',
       text: "Se eliminará permanentemente este reporte de sesión.",
@@ -106,7 +107,7 @@ export default function ListaSesionesMensuales() {
       try {
         await apiRequest(`/sesiones-mensuales/${id}`, { method: "DELETE" });
         Swal.fire('¡Eliminado!', 'La sesión ha sido eliminada.', 'success');
-        
+
         if (sesiones.length === 1 && pagina > 1) {
           setPagina(prev => prev - 1);
         } else {
@@ -279,24 +280,29 @@ export default function ListaSesionesMensuales() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sesiones.map(sesion => (
-                  <Link 
-                    key={sesion._id} 
+                  <Link
+                    key={sesion._id}
                     to={`/sesiones-mensuales/${sesion._id}`}
                     className="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-purple-50 overflow-hidden flex flex-col"
                   >
                     <div className="p-6 flex-1">
                       <div className="flex justify-between items-start mb-4">
                         <div className="bg-purple-100 p-3 rounded-2xl">
-                           <CalendarIcon className="h-6 w-6 text-purple-600" />
+                          <CalendarIcon className="h-6 w-6 text-purple-600" />
                         </div>
-                        <button 
-                           onClick={(e) => eliminarSesion(sesion._id, e)}
-                           className="text-gray-300 hover:text-red-500 p-1"
+                        <button
+                          onClick={(e) => eliminarSesion(sesion._id, e)}
+                          className="text-gray-300 hover:text-red-500 p-1"
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-2 truncate">{sesion.nombre}</h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-bold text-gray-800 truncate">{sesion.nombre}</h3>
+                        {sesion.bloqueada && (
+                          <LockClosedIcon className="h-5 w-5 text-green-600" title="Registro Protegido" />
+                        )}
+                      </div>
                       <div className="text-gray-500 text-sm mb-4">{sesion.fecha}</div>
                       <p className="text-gray-600 text-sm line-clamp-2 italic">
                         {sesion.descripcionGeneral || "Sin descripción..."}
@@ -332,11 +338,10 @@ export default function ListaSesionesMensuales() {
                   <button
                     key={i + 1}
                     onClick={() => setPagina(i + 1)}
-                    className={`w-10 h-10 rounded-xl font-bold transition ${
-                      pagina === i + 1
-                        ? 'bg-purple-600 text-white shadow-md'
-                        : 'text-purple-600 hover:bg-purple-50'
-                    }`}
+                    className={`w-10 h-10 rounded-xl font-bold transition ${pagina === i + 1
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-purple-600 hover:bg-purple-50'
+                      }`}
                   >
                     {i + 1}
                   </button>

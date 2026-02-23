@@ -36,11 +36,11 @@ async function retryRequest(requestFn, maxRetries = 3, baseDelay = 1000) {
       return result;
     } catch (error) {
       console.log(`🔄 Intento ${attempt} falló:`, error.message);
-      
+
       if (attempt === maxRetries) {
         throw error;
       }
-      
+
       // Backoff exponencial con jitter
       const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000;
       console.log(`⏳ Esperando ${delay.toFixed(0)}ms antes del siguiente intento...`);
@@ -53,22 +53,22 @@ async function retryRequest(requestFn, maxRetries = 3, baseDelay = 1000) {
 async function sendToBackendMobileOptimized(url, data, options = {}) {
   console.log('🔧 Iniciando envío optimizado para Chrome móvil...');
   console.log('📱 Dispositivo detectado:', isMobileChrome() ? 'Chrome Móvil' : 'Otro');
-  
+
   // Preparar headers
-  const headers = isMobileChrome() 
+  const headers = isMobileChrome()
     ? { ...MOBILE_CHROME_HEADERS, ...options.headers }
     : { 'Content-Type': 'application/json', ...options.headers };
-  
+
   // Función de envío base
   const makeRequest = async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
     }, isMobileChrome() ? 45000 : 10000); // Timeout más largo para móvil
-    
+
     try {
       console.log('📤 Enviando request a:', url);
-      
+
       const fetchOptions = {
         method: options.method || 'POST',
         headers,
@@ -80,36 +80,36 @@ async function sendToBackendMobileOptimized(url, data, options = {}) {
           credentials: 'same-origin'
         })
       };
-      
+
       // Solo agregar body si no es GET
       if (options.method !== 'GET') {
         console.log('📊 Tamaño del payload:', new Blob([JSON.stringify(data)]).size, 'bytes');
         fetchOptions.body = JSON.stringify(data);
       }
-      
+
       const response = await fetch(url, fetchOptions);
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const result = await response.json();
       console.log('✅ Respuesta exitosa recibida');
       return result;
-      
+
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       if (error.name === 'AbortError') {
         throw new Error('⏰ Timeout - La solicitud tardó demasiado. Intenta cerrar otras pestañas.');
       }
-      
+
       throw error;
     }
   };
-  
+
   // Ejecutar con retry para Chrome móvil
   if (isMobileChrome()) {
     return await retryRequest(makeRequest, 3, 2000);
@@ -121,7 +121,7 @@ async function sendToBackendMobileOptimized(url, data, options = {}) {
 // Limpieza de datos específica para móvil
 function cleanFormDataForMobile(data) {
   const cleaned = JSON.parse(JSON.stringify(data));
-  
+
   // Eliminar campos undefined/null que pueden causar problemas en móvil
   function removeEmptyFields(obj) {
     if (obj === null || obj === undefined) return;
@@ -133,15 +133,15 @@ function cleanFormDataForMobile(data) {
       }
     });
   }
-  
+
   removeEmptyFields(cleaned);
-  
+
   // Validar arrays críticos
   if (cleaned.sesiones && !Array.isArray(cleaned.sesiones)) {
     console.warn('⚠️ Sesiones no es un array, convirtiendo...');
     cleaned.sesiones = [];
   }
-  
+
   return cleaned;
 }
 // ========== FIN SOLUCIÓN CHROME MÓVIL ==========
@@ -184,17 +184,17 @@ export default function EditarValoracion() {
   // Función helper para obtener datos del paciente (modelo nuevo o antiguo)
   const obtenerDatoPaciente = (valoracion, campo) => {
     if (!valoracion) return null;
-    
+
     // Primero intentar con el modelo nuevo (valoracion.paciente)
     if (valoracion.paciente && valoracion.paciente[campo] !== undefined) {
       return valoracion.paciente[campo];
     }
-    
+
     // Si no existe, intentar con el modelo antiguo (directamente en valoracion)
     if (valoracion[campo] !== undefined) {
       return valoracion[campo];
     }
-    
+
     // Si no existe en ninguno, devolver null
     return null;
   };
@@ -228,20 +228,27 @@ export default function EditarValoracion() {
       connectionType: navigator.connection?.effectiveType || 'no disponible',
       timestamp: new Date().toISOString()
     };
-    
+
     console.log('📱 Información del dispositivo:', deviceInfo);
-    
+
     // OPTIMIZACIÓN: Cargar SOLO la valoración específica, no todas
     console.log('🚀 OPTIMIZACIÓN: Cargando solo valoración específica ID:', id);
     const startTime = performance.now();
-    
+
     // Usar endpoint optimizado que solo devuelve UNA valoración
     apiRequest(`/valoraciones/${id}`)
       .then(data => {
         const loadTime = performance.now() - startTime;
         console.log(`✅ Valoración cargada en ${loadTime.toFixed(0)}ms`);
         console.log('📊 Tamaño de la valoración:', JSON.stringify(data).length, 'caracteres');
-        
+
+        // Verificar si la valoración ya está bloqueada (HC Inmutable)
+        if (data.bloqueada) {
+          alert('Esta historia clínica está bloqueada y no puede ser editada por normativa de salud.');
+          navigate(`/valoraciones/${id}`);
+          return;
+        }
+
         // Crear una versión unificada con datos del paciente accesibles directamente
         const valoracionUnificada = {
           ...data,
@@ -286,7 +293,7 @@ export default function EditarValoracion() {
           mesFirma: data.mesFirma || "",
           anioFirma: data.anioFirma || ""
         };
-        
+
         console.log('🔄 Datos unificados del paciente aplicados');
         setValoracion(valoracionUnificada);
         setCargando(false);
@@ -295,7 +302,7 @@ export default function EditarValoracion() {
         console.error('❌ Error cargando valoración:', error);
         const loadTime = performance.now() - startTime;
         console.log(`💥 Error después de ${loadTime.toFixed(0)}ms`);
-        
+
         // Mostrar error específico para usuarios
         alert('Error al cargar la valoración. Intenta recargar la página.');
         setCargando(false);
@@ -318,7 +325,7 @@ export default function EditarValoracion() {
     if (isMobileChrome()) {
       console.log('📱 CHROME MÓVIL DETECTADO - Usando optimizaciones especiales');
       setCargando(true);
-      
+
       // Verificar conexión
       if (!navigator.onLine) {
         alert('❌ Sin conexión a internet. Verifica tu conexión e intenta nuevamente.');
@@ -337,7 +344,7 @@ export default function EditarValoracion() {
       // Obtener la valoración original una sola vez para comparar
       console.log('Obteniendo valoración original de la BD...');
       const valoracionOriginal = await apiRequest(`/valoraciones/${id}`);
-      
+
       console.log('Valoración original de la BD:', valoracionOriginal);
 
       // Subir todas las firmas del formulario principal y actualizar dataToSend
@@ -346,14 +353,14 @@ export default function EditarValoracion() {
         console.log(`\n--- Procesando campo: ${campo} ---`);
         console.log(`Valor actual: ${dataToSend[campo] ? dataToSend[campo].substring(0, 50) + '...' : 'null'}`);
         console.log(`Valor original: ${valoracionOriginal[campo] ? valoracionOriginal[campo].substring(0, 50) + '...' : 'null'}`);
-        
+
         if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
           console.log(`✓ ${campo} es base64, necesita subirse a S3`);
-          
+
           // Si había una imagen anterior guardada, eliminarla
-          if (valoracionOriginal[campo] && 
-              valoracionOriginal[campo].includes('amazonaws.com') &&
-              !valoracionOriginal[campo].startsWith("data:image")) {
+          if (valoracionOriginal[campo] &&
+            valoracionOriginal[campo].includes('amazonaws.com') &&
+            !valoracionOriginal[campo].startsWith("data:image")) {
             console.log(`✓ Hay imagen anterior en S3 para ${campo}: ${valoracionOriginal[campo]}`);
             console.log(`Eliminando imagen anterior...`);
             const resultadoEliminacion = await eliminarImagenDeS3(valoracionOriginal[campo]);
@@ -363,7 +370,7 @@ export default function EditarValoracion() {
           } else {
             console.log(`✗ No hay imagen anterior en ${campo} para eliminar`);
           }
-          
+
           // Subir la nueva firma y reemplazar en dataToSend
           console.log(`Subiendo nueva imagen para ${campo}...`);
           const nuevaUrl = await subirFirmaAS3(dataToSend[campo]);
@@ -380,14 +387,14 @@ export default function EditarValoracion() {
         console.log(`\n--- Procesando campo consentimiento: ${campo} ---`);
         console.log(`Valor actual: ${dataToSend[campo] ? dataToSend[campo].substring(0, 50) + '...' : 'null'}`);
         console.log(`Valor original: ${valoracionOriginal[campo] ? valoracionOriginal[campo].substring(0, 50) + '...' : 'null'}`);
-        
+
         if (dataToSend[campo] && dataToSend[campo].startsWith("data:image")) {
           console.log(`✓ ${campo} es base64, necesita subirse a S3`);
-          
+
           // Si había una imagen anterior guardada, eliminarla
-          if (valoracionOriginal[campo] && 
-              valoracionOriginal[campo].includes('amazonaws.com') &&
-              !valoracionOriginal[campo].startsWith("data:image")) {
+          if (valoracionOriginal[campo] &&
+            valoracionOriginal[campo].includes('amazonaws.com') &&
+            !valoracionOriginal[campo].startsWith("data:image")) {
             console.log(`✓ Hay imagen anterior en S3 para ${campo}: ${valoracionOriginal[campo]}`);
             console.log(`Eliminando imagen anterior...`);
             const resultadoEliminacion = await eliminarImagenDeS3(valoracionOriginal[campo]);
@@ -397,7 +404,7 @@ export default function EditarValoracion() {
           } else {
             console.log(`✗ No hay imagen anterior en ${campo} para eliminar`);
           }
-          
+
           // Subir la nueva firma y reemplazar en dataToSend
           console.log(`Subiendo nueva imagen para ${campo}...`);
           const nuevaUrl = await subirFirmaAS3(dataToSend[campo]);
@@ -430,7 +437,7 @@ export default function EditarValoracion() {
       navigate(`/valoraciones/${id}`);
     } catch (error) {
       console.error('Error al guardar la valoración:', error);
-      
+
       // Mensajes específicos para Chrome móvil
       if (isMobileChrome()) {
         if (error.message.includes('Timeout')) {
@@ -443,7 +450,7 @@ export default function EditarValoracion() {
       } else {
         alert('Error al guardar los cambios. Por favor, inténtalo de nuevo.');
       }
-      
+
       setCargando(false);
     }
   };
@@ -671,13 +678,13 @@ async function subirFirmaAS3(firmaBase64) {
 async function eliminarImagenDeS3(imageUrl) {
   try {
     console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
-    
+
     const result = await sendToBackendMobileOptimized(
       '/api/delete-image',
       { imageUrl },
       { method: 'DELETE' }
     );
-    
+
     console.log(`✓ Imagen eliminada exitosamente:`, result);
     return result;
   } catch (error) {

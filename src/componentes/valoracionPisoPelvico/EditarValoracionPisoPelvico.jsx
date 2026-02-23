@@ -44,7 +44,7 @@ async function subirFirmaAS3(firmaBase64) {
 async function eliminarImagenDeS3(imageUrl) {
   try {
     console.log(`Intentando eliminar imagen de S3: ${imageUrl}`);
-    
+
     const res = await fetch(`${API_CONFIG.BASE_URL}/api/delete-image`, {
       method: 'DELETE',
       headers: {
@@ -52,12 +52,12 @@ async function eliminarImagenDeS3(imageUrl) {
       },
       body: JSON.stringify({ imageUrl }),
     });
-    
+
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(`Error al eliminar imagen: ${errorData.error || res.statusText}`);
     }
-    
+
     const data = await res.json();
     console.log(`✓ Imagen eliminada exitosamente:`, data);
     return data;
@@ -522,7 +522,7 @@ export default function EditarValoracionPisoPelvico() {
     apiRequest(`/valoracion-piso-pelvico/${id}`)
       .then(async data => {
         console.log('Datos de valoración cargados:', data);
-        
+
         // Si data.paciente es un ID, trae los datos completos del paciente adulto
         if (data.paciente && typeof data.paciente === "string") {
           console.log('Cargando datos del paciente con ID:', data.paciente);
@@ -553,6 +553,17 @@ export default function EditarValoracionPisoPelvico() {
           console.log('No se encontraron datos del paciente');
           setFormulario({ ...FORMULARIO_INICIAL, ...data });
         }
+
+        // Verificar si está bloqueada (HC Inmutable)
+        if (data.bloqueada) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Registro Bloqueado',
+            text: 'Esta historia clínica es inmutable y no puede ser editada por normativa de salud.',
+            confirmButtonColor: '#6366f1'
+          });
+          navigate(`/valoraciones-piso-pelvico/${id}`);
+        }
       })
       .catch(error => {
         console.error('Error cargando valoración:', error);
@@ -571,11 +582,11 @@ export default function EditarValoracionPisoPelvico() {
     try {
       console.log('Procesando formulario antes de actualizar...');
       const dataToSend = { ...formulario };
-      
+
       // Lista de campos que pueden contener firmas/imágenes
       const camposFirmas = [
         'firmaPaciente',
-        'firmaFisioterapeuta', 
+        'firmaFisioterapeuta',
         'firmaAutorizacion',
         'consentimientoFirma'
       ];
@@ -595,13 +606,13 @@ export default function EditarValoracionPisoPelvico() {
           // Si es base64 (data:image), subirla a S3
           if (dataToSend[campo].startsWith('data:image')) {
             console.log(`Subiendo ${campo} a S3...`);
-            
+
             // Eliminar firma anterior si existe y es URL de S3
             if (valoracionActual[campo] && valoracionActual[campo].includes('amazonaws.com')) {
               console.log(`Eliminando ${campo} anterior de S3: ${valoracionActual[campo]}`);
               await eliminarImagenDeS3(valoracionActual[campo]);
             }
-            
+
             // Subir nueva firma
             dataToSend[campo] = await subirFirmaAS3(dataToSend[campo]);
             console.log(`✓ ${campo} subida a S3: ${dataToSend[campo]}`);
@@ -621,7 +632,7 @@ export default function EditarValoracionPisoPelvico() {
           body: JSON.stringify(dataToSend),
         }
       );
-      
+
       // Si llega aquí sin error, la petición fue exitosa
       console.log('✅ Valoración actualizada exitosamente:', data);
       await Swal.fire("¡Actualizado!", "La valoración fue actualizada exitosamente.", "success");

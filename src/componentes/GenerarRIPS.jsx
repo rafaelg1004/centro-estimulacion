@@ -10,7 +10,7 @@ const GenerarRIPS = () => {
     const date = new Date();
     const firstDayPrevMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
     const lastDayPrevMonth = new Date(date.getFullYear(), date.getMonth(), 0);
-    
+
     return {
       inicio: firstDayPrevMonth.toISOString().split('T')[0],
       fin: lastDayPrevMonth.toISOString().split('T')[0]
@@ -107,7 +107,7 @@ const GenerarRIPS = () => {
     if (!resultado?.data?.rips) return;
 
     const dataStr = JSON.stringify(resultado.data.rips, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
 
     const invoiceName = facturaData.sinFactura ? 'SIN_FACTURA' : facturaData.numFactura;
     const exportFileDefaultName = `RIPS_${invoiceName}_${new Date().toISOString().split('T')[0]}.json`;
@@ -122,7 +122,7 @@ const GenerarRIPS = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
-          Generar RIPS - Resolución 1036 de 2022
+          Generar RIPS - Resolución 2275 de 2023 (JSON)
         </h2>
         <button
           onClick={() => navigate('/')}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiRequest } from "../../config/api";
 
 import { Link } from "react-router-dom";
+import { LockClosedIcon } from "@heroicons/react/24/solid";
 import Spinner from "../ui/Spinner";
 
 export default function ListaValoracionesPisoPelvico() {
@@ -26,7 +27,7 @@ export default function ListaValoracionesPisoPelvico() {
   // Función helper para obtener el nombre del paciente de forma segura
   const obtenerNombrePaciente = (paciente) => {
     if (!paciente) return "Sin referencia";
-    
+
     // Si es un objeto poblado
     if (typeof paciente === 'object' && paciente !== null) {
       // Intentar obtener nombres + apellidos
@@ -46,13 +47,13 @@ export default function ListaValoracionesPisoPelvico() {
       // Último recurso: convertir a string
       return "Paciente sin nombre";
     }
-    
+
     // Si es un string (ID), usar el cache de pacientes
     if (typeof paciente === 'string') {
       const nombreCache = pacientes[paciente];
       return nombreCache || `ID: ${paciente}`;
     }
-    
+
     // Para cualquier otro tipo, convertir a string de forma segura
     return "Sin referencia";
   };
@@ -68,7 +69,7 @@ export default function ListaValoracionesPisoPelvico() {
   // Función helper para obtener el motivo de consulta de forma segura
   const obtenerMotivoConsultaSeguro = (motivoConsulta) => {
     if (!motivoConsulta) return "Sin motivo especificado";
-    
+
     const motivo = String(motivoConsulta);
     return motivo.length > 50 ? `${motivo.substring(0, 50)}...` : motivo;
   };
@@ -122,9 +123,9 @@ export default function ListaValoracionesPisoPelvico() {
     // Buscar nombres de pacientes adultos (solo si no están poblados)
     const ids = Array.isArray(valoraciones)
       ? [...new Set(valoraciones
-          .map(v => v.paciente)
-          .filter(p => p && typeof p === 'string') // Solo IDs string, no objetos poblados
-        )]
+        .map(v => v.paciente)
+        .filter(p => p && typeof p === 'string') // Solo IDs string, no objetos poblados
+      )]
       : [];
     const nuevosPacientes = {};
     await Promise.all(
@@ -158,7 +159,7 @@ export default function ListaValoracionesPisoPelvico() {
   const eliminarValoracion = async (id) => {
     try {
       console.log('Intentando eliminar valoración con ID:', id);
-      
+
       // Verificar que el ID esté en la lista actual
       const valoracionExiste = valoraciones.find(v => v._id === id);
       if (!valoracionExiste) {
@@ -167,32 +168,32 @@ export default function ListaValoracionesPisoPelvico() {
         setTimeout(() => setMensaje(""), 4000);
         return;
       }
-      
+
       // Eliminar la valoración del backend (esto también debería eliminar las imágenes S3)
       const resultado = await apiRequest(`/valoracion-piso-pelvico/${id}`, {
         method: "DELETE",
       });
-      
+
       // Actualizar la lista local inmediatamente
       setValoraciones(valoraciones.filter(v => v._id !== id));
-      
+
       // Mostrar mensaje con información de imágenes eliminadas
       const mensajeCompleto = resultado.imagenesEliminadas && resultado.imagenesEliminadas > 0
         ? `Valoración eliminada correctamente. ${resultado.imagenesEliminadas} imagen(es) eliminada(s) de S3.`
         : "Valoración eliminada correctamente";
-        
+
       setMensaje(mensajeCompleto);
       setTimeout(() => setMensaje(""), 4000);
-      
+
       // Refrescar la lista desde el servidor para asegurar sincronización
       setTimeout(() => {
         buscarValoraciones();
       }, 1000);
-      
+
     } catch (error) {
       console.error('Error al eliminar valoración:', error);
       let mensajeError = "No se pudo eliminar la valoración";
-      
+
       if (error.message.includes('404')) {
         mensajeError = "La valoración no existe o ya fue eliminada. Actualizando lista...";
         // Refrescar la lista cuando hay un 404
@@ -202,7 +203,7 @@ export default function ListaValoracionesPisoPelvico() {
       } else if (error.message.includes('500')) {
         mensajeError = "Error del servidor al eliminar la valoración";
       }
-      
+
       setMensaje(mensajeError);
       setTimeout(() => setMensaje(""), 4000);
     }
@@ -226,13 +227,13 @@ export default function ListaValoracionesPisoPelvico() {
           </div>
         )}
         <h2 className="text-3xl font-bold mb-6 text-indigo-700 text-center">Valoraciones Piso Pélvico</h2>
-        
+
         <div className="mb-4 text-center">
           <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3 inline-block">
             💡 <strong>Nota:</strong> Las valoraciones de piso pélvico se crean desde la ficha de cada paciente adulto.
           </p>
         </div>
-        
+
         <div className="bg-indigo-50 rounded-xl p-4 mb-6">
           <h4 className="font-semibold text-indigo-700 mb-3">Filtros de búsqueda</h4>
           <div className="flex flex-col gap-3">
@@ -266,26 +267,26 @@ export default function ListaValoracionesPisoPelvico() {
                 />
               </div>
             </div>
-                         <div className="flex justify-center gap-2">
-               <button
-                 onClick={() => buscarValoraciones(1)}
-                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
-               >
-                 Buscar
-               </button>
-               <button
-                 onClick={() => {
-                   setBusqueda("");
-                   setFechaInicio("");
-                   setFechaFin("");
-                   
-                   setTimeout(() => buscarValoraciones(1), 100);
-                 }}
-                 className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
-               >
-                 Limpiar
-               </button>
-             </div>
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={() => buscarValoraciones(1)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow transition"
+              >
+                Buscar
+              </button>
+              <button
+                onClick={() => {
+                  setBusqueda("");
+                  setFechaInicio("");
+                  setFechaFin("");
+
+                  setTimeout(() => buscarValoraciones(1), 100);
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-xl transition"
+              >
+                Limpiar
+              </button>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto rounded shadow">
@@ -305,103 +306,106 @@ export default function ListaValoracionesPisoPelvico() {
                     <Spinner />
                   </td>
                 </tr>
-                             ) : lista.length === 0 ? (
-                 <tr>
-                   <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
-                     No hay valoraciones registradas.
-                   </td>
-                 </tr>
-               ) : (
-                 <>
-                   <tr>
-                     <td colSpan={4} className="px-4 py-3 text-center">
-                                            <p className="text-sm text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg p-2 inline-block">
-                       📋 Página {paginacion.pagina} de {paginacion.totalPaginas} - Mostrando {lista.length} de {paginacion.total} valoraciones
-                     </p>
-                     </td>
-                   </tr>
-                                       {lista.map((v, idx) => {
-                  // Validar datos antes de renderizar
-                  const { paciente, fecha, motivoConsulta } = validarDatosRenderizado(v);
-                  
-                  return (
-                    <tr
-                      key={v._id}
-                      className={idx % 2 === 0 ? "bg-indigo-50 hover:bg-indigo-100" : "bg-white hover:bg-indigo-50"}
-                    >
-                      <td className="px-4 py-2 border-b border-indigo-100 font-medium">
-                        {paciente}
-                      </td>
-                      <td className="px-4 py-2 border-b border-indigo-100">
-                        {fecha}
-                      </td>
-                      <td className="px-4 py-2 border-b border-indigo-100">
-                        <span className="text-sm text-gray-700">
-                          {motivoConsulta}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 border-b border-indigo-100 text-center">
-                        <Link
-                          to={`/valoraciones-piso-pelvico/${v._id}`}
-                          className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-xl transition font-semibold shadow mr-1 text-sm"
-                        >
-                          Ver
-                        </Link>
-                        <Link
-                          to={`/valoraciones-piso-pelvico/${v._id}/editar`}
-                          className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-xl transition font-semibold shadow mr-1 text-sm"
-                        >
-                          Editar
-                        </Link>
-                        <button
-                          onClick={() => setConfirmarId(v._id)}
-                          className="inline-block bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-xl font-semibold shadow transition text-sm"
-                          title="Eliminar Valoración"
-                        >
-                          Eliminar
-                        </button>
-                                           </td>
-                   </tr>
-                 );
-               })}
-               </>
-             )}
+              ) : lista.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
+                    No hay valoraciones registradas.
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  <tr>
+                    <td colSpan={4} className="px-4 py-3 text-center">
+                      <p className="text-sm text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg p-2 inline-block">
+                        📋 Página {paginacion.pagina} de {paginacion.totalPaginas} - Mostrando {lista.length} de {paginacion.total} valoraciones
+                      </p>
+                    </td>
+                  </tr>
+                  {lista.map((v, idx) => {
+                    // Validar datos antes de renderizar
+                    const { paciente, fecha, motivoConsulta } = validarDatosRenderizado(v);
+
+                    return (
+                      <tr
+                        key={v._id}
+                        className={idx % 2 === 0 ? "bg-indigo-50 hover:bg-indigo-100" : "bg-white hover:bg-indigo-50"}
+                      >
+                        <td className="px-4 py-2 border-b border-indigo-100 font-medium">
+                          <div className="flex items-center gap-2">
+                            {paciente}
+                            {v.bloqueada && (
+                              <LockClosedIcon className="h-4 w-4 text-green-600" title="Registro Protegido" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 border-b border-indigo-100">
+                          {fecha}
+                        </td>
+                        <td className="px-4 py-2 border-b border-indigo-100">
+                          <span className="text-sm text-gray-700">
+                            {motivoConsulta}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 border-b border-indigo-100 text-center">
+                          <Link
+                            to={`/valoraciones-piso-pelvico/${v._id}`}
+                            className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-xl transition font-semibold shadow mr-1 text-sm"
+                          >
+                            Ver
+                          </Link>
+                          <Link
+                            to={`/valoraciones-piso-pelvico/${v._id}/editar`}
+                            className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-xl transition font-semibold shadow mr-1 text-sm"
+                          >
+                            Editar
+                          </Link>
+                          <button
+                            onClick={() => setConfirmarId(v._id)}
+                            className="inline-block bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-xl font-semibold shadow transition text-sm"
+                            title="Eliminar Valoración"
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </>
+              )}
             </tbody>
-                     </table>
-         </div>
-         
-         {/* Controles de paginación */}
-         {paginacion.totalPaginas > 1 && (
-           <div className="mt-6 flex justify-center items-center gap-2">
-             <button
-               onClick={() => cambiarPagina(paginacion.pagina - 1)}
-               disabled={!paginacion.tieneAnterior}
-               className={`px-3 py-2 rounded-lg font-medium transition ${
-                 paginacion.tieneAnterior
-                   ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-               }`}
-             >
-               ← Anterior
-             </button>
-             
-             <span className="px-4 py-2 text-sm text-gray-600">
-               Página {paginacion.pagina} de {paginacion.totalPaginas}
-             </span>
-             
-             <button
-               onClick={() => cambiarPagina(paginacion.pagina + 1)}
-               disabled={!paginacion.tieneSiguiente}
-               className={`px-3 py-2 rounded-lg font-medium transition ${
-                 paginacion.tieneSiguiente
-                   ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-               }`}
-             >
-               Siguiente →
-             </button>
-           </div>
-         )}
+          </table>
+        </div>
+
+        {/* Controles de paginación */}
+        {paginacion.totalPaginas > 1 && (
+          <div className="mt-6 flex justify-center items-center gap-2">
+            <button
+              onClick={() => cambiarPagina(paginacion.pagina - 1)}
+              disabled={!paginacion.tieneAnterior}
+              className={`px-3 py-2 rounded-lg font-medium transition ${paginacion.tieneAnterior
+                ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+            >
+              ← Anterior
+            </button>
+
+            <span className="px-4 py-2 text-sm text-gray-600">
+              Página {paginacion.pagina} de {paginacion.totalPaginas}
+            </span>
+
+            <button
+              onClick={() => cambiarPagina(paginacion.pagina + 1)}
+              disabled={!paginacion.tieneSiguiente}
+              className={`px-3 py-2 rounded-lg font-medium transition ${paginacion.tieneSiguiente
+                ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+            >
+              Siguiente →
+            </button>
+          </div>
+        )}
         {/* Modal de confirmación */}
         {confirmarId && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">

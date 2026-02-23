@@ -27,12 +27,12 @@ const obtenerDatoPaciente = (valoracion, campo) => {
   if (valoracion.paciente && valoracion.paciente[campo] !== undefined) {
     return valoracion.paciente[campo];
   }
-  
+
   // Si no existe, intentar con el modelo antiguo (directamente en valoracion)
   if (valoracion[campo] !== undefined) {
     return valoracion[campo];
   }
-  
+
   // Si no existe en ninguno, devolver null
   return null;
 };
@@ -47,10 +47,10 @@ const DetalleValoracion = () => {
     try {
       console.log('🔄 Iniciando exportación a Word...');
       console.log('📊 Datos de valoración para exportar:', valoracion);
-      
+
       // Usar nuestra función de exportación a Word
       await exportarValoracionPisoPelvicoAWord(valoracion);
-      
+
       console.log('✅ Exportación a Word completada exitosamente');
     } catch (error) {
       console.error('❌ Error al exportar a Word:', error);
@@ -105,6 +105,48 @@ const DetalleValoracion = () => {
     }
   };
 
+  const bloquearValoracion = async () => {
+    const result = await Swal.fire({
+      title: '¿Cerrar Historia Clínica?',
+      text: "Una vez bloqueada, la historia clínica será inmutable y no podrá ser editada ni eliminada, cumpliendo con la normativa de salud vigente.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, bloquear permanentemente',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        Swal.fire({
+          title: 'Bloqueando registro...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+
+        await apiRequest(`/valoraciones/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bloqueada: true })
+        });
+
+        // Recargar datos
+        const updatedData = await apiRequest(`/valoraciones/${id}`);
+        setValoracion(updatedData);
+
+        Swal.fire(
+          '¡Bloqueada!',
+          'El registro de historia clínica ahora es inmutable.',
+          'success'
+        );
+      } catch (error) {
+        console.error('Error bloqueando valoración:', error);
+        Swal.fire('Error', 'No se pudo bloquear el registro: ' + error.message, 'error');
+      }
+    }
+  };
+
   useEffect(() => {
     apiRequest(`/valoraciones/${id}`)
       .then((data) => setValoracion(data))
@@ -131,7 +173,16 @@ const DetalleValoracion = () => {
           </div>
         </header>
 
-        <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center drop-shadow">Detalle de Valoración</h2>
+
+        <h2 className="text-2xl font-bold text-indigo-700 mb-2 text-center drop-shadow">Detalle de Valoración</h2>
+        {valoracion.bloqueada && (
+          <div className="flex justify-center mb-6">
+            <span className="bg-red-100 text-red-800 text-sm font-bold px-4 py-1.5 rounded-full border border-red-200 flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-red-600 animate-pulse"></span>
+              HISTORIA CLÍNICA BLOQUEADA (INMUTABLE)
+            </span>
+          </div>
+        )}
 
         {/* INFORMACIÓN DE LA VALORACIÓN */}
         <section className="mb-8 bg-purple-50 rounded-xl p-4 shadow">
@@ -169,7 +220,7 @@ const DetalleValoracion = () => {
           </div>
         </section>
 
-      
+
         {/* DATOS FAMILIARES */}
         <section className="mb-8 bg-pink-50 rounded-xl p-4 shadow">
           <h3 className="text-lg font-semibold text-pink-600 border-b pb-1 mb-2">Datos Familiares</h3>
@@ -214,11 +265,11 @@ const DetalleValoracion = () => {
         <section className="mb-8 bg-indigo-50 rounded-xl p-4 shadow">
           <h3 className="text-lg font-semibold text-indigo-600 border-b pb-1 mb-2">Motivo de Consulta</h3>
           <p>
-            {valoracion.motivoDeConsulta === 'estimulacion' ? 
+            {valoracion.motivoDeConsulta === 'estimulacion' ?
               "Iniciar programa de estimulación adecuada" :
-            valoracion.motivoDeConsulta === 'fisioterapia' ?
-              "Iniciar sesiones de fisioterapia pediátrica" :
-              valoracion.motivoDeConsulta || 'No especificado'
+              valoracion.motivoDeConsulta === 'fisioterapia' ?
+                "Iniciar sesiones de fisioterapia pediátrica" :
+                valoracion.motivoDeConsulta || 'No especificado'
             }
           </p>
         </section>
@@ -252,7 +303,7 @@ const DetalleValoracion = () => {
         {/* DESARROLLO ONTOLÓGICO */}
         <section className="mb-8 bg-indigo-50 rounded-xl p-4 shadow">
           <h3 className="text-lg font-semibold text-indigo-600 border-b pb-1 mb-4">Desarrollo Ontológico</h3>
-          
+
           <div className="mb-6">
             <h4 className="text-md font-semibold text-indigo-500 mb-3">Motricidad Gruesa</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -411,28 +462,28 @@ const DetalleValoracion = () => {
         {/* DIAGNÓSTICO Y PLAN DE TRATAMIENTO */}
         <section className="mb-8 bg-indigo-50 rounded-xl p-4 shadow">
           <h3 className="text-lg font-semibold text-indigo-600 border-b pb-1 mb-4">Diagnóstico y Plan de Tratamiento</h3>
-          
+
           <div className="space-y-4">
             <div>
               <p className="font-semibold text-indigo-700">Diagnóstico Fisioterapéutico:</p>
               <p className="text-sm text-gray-700 mt-1">
-                {valoracion.diagnosticoFisioterapeutico === 'opcion1' ? 
+                {valoracion.diagnosticoFisioterapeutico === 'opcion1' ?
                   "Paciente con adecuado desarrollo neuromotor acorde a su edad cronológica, con adquisición oportuna de los hitos del desarrollo en las áreas de motricidad gruesa, motricidad fina, lenguaje y socioemocional." :
-                valoracion.diagnosticoFisioterapeutico === 'opcion2' ?
-                  "Se evidencia un retraso en el desarrollo neuromotor en relación con la edad cronológica del niño(a), observándose la ausencia o inmadurez en hitos esperados. Este retraso puede estar asociado a falta de estimulación." :
-                  valoracion.diagnosticoFisioterapeutico || "No especificado"
+                  valoracion.diagnosticoFisioterapeutico === 'opcion2' ?
+                    "Se evidencia un retraso en el desarrollo neuromotor en relación con la edad cronológica del niño(a), observándose la ausencia o inmadurez en hitos esperados. Este retraso puede estar asociado a falta de estimulación." :
+                    valoracion.diagnosticoFisioterapeutico || "No especificado"
                 }
               </p>
             </div>
-            
+
             <div>
               <p className="font-semibold text-indigo-700">Plan de Tratamiento:</p>
               <p className="text-sm text-gray-700 mt-1">
-                {valoracion.planTratamiento === 'opcion1' ? 
+                {valoracion.planTratamiento === 'opcion1' ?
                   "Se propone iniciar un proceso de estimulación adecuada con el objetivo de favorecer el desarrollo integral del niño(a), fortaleciendo áreas como la motricidad, el lenguaje, la interacción social y la exploración sensorial." :
-                valoracion.planTratamiento === 'opcion2' ?
-                  "Se propone iniciar un proceso de estimulación adecuada con el objetivo de favorecer el desarrollo integral del niño(a), fortaleciendo áreas como la motricidad, el lenguaje, la interacción social y la exploración sensorial. Se trabajará con sesiones grupales estructuradas y orientación a la familia, además de sesiones personalizadas." :
-                  valoracion.planTratamiento || "No especificado"
+                  valoracion.planTratamiento === 'opcion2' ?
+                    "Se propone iniciar un proceso de estimulación adecuada con el objetivo de favorecer el desarrollo integral del niño(a), fortaleciendo áreas como la motricidad, el lenguaje, la interacción social y la exploración sensorial. Se trabajará con sesiones grupales estructuradas y orientación a la familia, además de sesiones personalizadas." :
+                    valoracion.planTratamiento || "No especificado"
                 }
               </p>
             </div>
@@ -447,29 +498,33 @@ const DetalleValoracion = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {valoracion.firmaProfesional && (
-              <div>
+              <div className="flex flex-col items-center md:items-start">
                 <p className="text-sm font-semibold text-gray-800 mb-1">Firma del Profesional</p>
                 <p className="text-sm text-gray-600">Nombre: {valoracion.nombreFisioterapeuta}</p>
                 <p className="text-sm text-gray-600 mb-2">Cédula: {valoracion.cedulaFisioterapeuta}</p>
-                <img src={valoracion.firmaProfesional} alt="Firma Profesional" className="border rounded h-24" />
+                <img src={valoracion.firmaProfesional} alt="Firma Profesional" className="border rounded h-24 bg-white" />
+                {valoracion.auditTrail?.firmaProfesional && (
+                  <div className="text-[10px] text-gray-400 mt-1 max-w-[200px] text-center md:text-left font-mono">
+                    IP: {valoracion.auditTrail.firmaProfesional.ip} <br />
+                    Reg: {valoracion.auditTrail.firmaProfesional.registroProfesional} <br />
+                    {new Date(valoracion.auditTrail.firmaProfesional.fechaHora).toLocaleString()}
+                  </div>
+                )}
               </div>
             )}
 
             {valoracion.firmaRepresentante && (
-              <div>
+              <div className="flex flex-col items-center md:items-start">
                 <p className="text-sm font-semibold text-gray-800 mb-1">Firma del Representante</p>
                 <p className="text-sm text-gray-600">Nombre: {valoracion.nombreAcudiente}</p>
                 <p className="text-sm text-gray-600 mb-2">Cédula: {valoracion.cedulaAcudiente}</p>
-                <img src={valoracion.firmaRepresentante} alt="Firma Representante" className="border rounded h-24" />
-              </div>
-            )}
-
-            {valoracion.firmaAcudiente && (
-              <div>
-                <p className="text-sm font-semibold text-gray-800 mb-1">Firma del Acudiente</p>
-                <p className="text-sm text-gray-600">Nombre: {valoracion.nombreAcudiente}</p>
-                <p className="text-sm text-gray-600 mb-2">Cédula: {valoracion.cedulaAutorizacion}</p>
-                <img src={valoracion.firmaAcudiente} alt="Firma Acudiente" className="border rounded h-24" />
+                <img src={valoracion.firmaRepresentante} alt="Firma Representante" className="border rounded h-24 bg-white" />
+                {valoracion.auditTrail?.firmaRepresentante && (
+                  <div className="text-[10px] text-gray-400 mt-1 max-w-[200px] text-center md:text-left font-mono">
+                    IP: {valoracion.auditTrail.firmaRepresentante.ip} <br />
+                    {new Date(valoracion.auditTrail.firmaRepresentante.fechaHora).toLocaleString()}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -492,9 +547,14 @@ const DetalleValoracion = () => {
               </div>
 
               {valoracion.firmaAutorizacion && (
-                <div>
+                <div className="flex flex-col items-center md:items-start">
                   <p className="text-sm text-gray-700 font-medium">Firma del representante:</p>
-                  <img src={valoracion.firmaAutorizacion} alt="Firma Autorización" className="border mt-1 h-24" />
+                  <img src={valoracion.firmaAutorizacion} alt="Firma Autorización" className="border mt-1 h-24 bg-white" />
+                  {valoracion.auditTrail?.firmaAutorizacion && (
+                    <div className="text-[9px] text-gray-400 mt-1 font-mono">
+                      IP: {valoracion.auditTrail.firmaAutorizacion.ip} | {new Date(valoracion.auditTrail.firmaAutorizacion.fechaHora).toLocaleString()}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -503,9 +563,9 @@ const DetalleValoracion = () => {
 
         {/* Consentimiento Informado (Paso 8) */}
         <div className="detalle-section border p-4 rounded-xl my-8 shadow bg-indigo-50">
-          <h3 className="text-lg font-bold text-indigo-700 mb-4">CONSTANCIA DE CONSENTIMIENTO INFORMADO</h3>
-          <p className="mb-2">
-            Yo <span className="font-semibold border-b border-indigo-400 px-2 bg-gray-100">{valoracion.consentimiento_nombreAcudiente}</span>
+          <h3 className="text-lg font-bold text-indigo-700 mb-4 text-center">CONSTANCIA DE CONSENTIMIENTO INFORMADO</h3>
+          <p className="text-sm leading-relaxed text-justify mb-4">
+            Yo <span className="font-semibold border-b border-indigo-400 px-2 bg-gray-50">{valoracion.consentimiento_nombreAcudiente}</span>
             {" "}mayor de edad e Identificado con c.c.{" "}
             <span className="font-semibold border-b border-indigo-400 px-2">{valoracion.consentimiento_ccAcudiente}</span>
             {" "}de{" "}
@@ -518,41 +578,57 @@ const DetalleValoracion = () => {
             <span className="font-semibold border-b border-indigo-400 px-2">{valoracion.consentimiento_fecha}</span>
             {" "}por la Fisioterapeuta Dayan Ivonne Villegas Gamboa, sobre el programa de Estimulación Adecuada de D'Mamitas&Babies, el cual tiene el objetivo de contribuir con el desarrollo integral de mi hijo/a abordando las dimensiones del desarrollo motor, cognitivo, sensorial, lenguaje y socialización.
           </p>
-          <p className="mb-2">
-            Durante la atención se pueden generar riesgos como lesiones osteomusculares, caída o golpes por traslados y desplazamientos, irritación o ansiedad.
+          <p className="text-sm leading-relaxed text-justify mb-4 font-semibold">
+            IMPORTANTE: Durante la atención se pueden generar riesgos como lesiones osteomusculares, caída o golpes por traslados y desplazamientos, irritación o ansiedad.
           </p>
-          <p className="mb-2">
-            Se me ha dado la oportunidad de preguntar y aclarar las dudas generadas sobre la atención en el servicio, por lo que he recibido la información a satisfacción sobre la atención prestada. Además, se me explicó la importancia de acompañar permanentemente a mi hijo/a durante el tiempo de la sesión y de lo importante que es la continuidad en el proceso.
+          <p className="text-sm leading-relaxed text-justify mb-4">
+            Se me ha dado la oportunidad de preguntar y aclarar las dudas generadas sobre la atención en el servicio, por lo que he recibido la información a satisfacción sobre la atención prestada. Además, se me explicó la importancia de acompañar permanentemente a mi hijo/a durante el tiempo de la sesión y de lo importante que es la continuidad en el proceso. Por lo anterior doy mi consentimiento libre e informado.
           </p>
-          <p className="mb-2">
-            Por lo anterior doy constancia de haber sido informado a satisfacción y doy mi consentimiento para que se me expliquen los procedimientos propios de este tipo de atención, entendiendo y aceptando los posibles riesgos de complicaciones que estos pueden implicar.
-          </p>
-          <div className="flex flex-col md:flex-row justify-between mt-8 gap-8">
+
+          <div className="flex flex-col md:flex-row justify-around mt-8 gap-8">
             <div className="flex flex-col items-center">
-              <span className="font-semibold mb-2">Firma del Acudiente o Representante legal</span>
+              <span className="text-xs font-bold text-gray-500 mb-2 uppercase">Firma del Acudiente / Representante</span>
               {valoracion.consentimiento_firmaAcudiente && (
-                <img
-                  src={valoracion.consentimiento_firmaAcudiente}
-                  alt="Firma Acudiente"
-                  className="border border-indigo-400 rounded bg-white mb-2"
-                  style={{ width: 220, height: 80 }}
-                />
+                <div className="flex flex-col items-center">
+                  <img
+                    src={valoracion.consentimiento_firmaAcudiente}
+                    alt="Firma Acudiente"
+                    className="border border-indigo-300 rounded bg-white"
+                    style={{ width: 220, height: 80, objectFit: 'contain' }}
+                  />
+                  {valoracion.auditTrail?.consentimiento_firmaAcudiente && (
+                    <div className="text-[10px] text-gray-400 mt-1 font-mono text-center">
+                      IP: {valoracion.auditTrail.consentimiento_firmaAcudiente.ip} <br />
+                      {new Date(valoracion.auditTrail.consentimiento_firmaAcudiente.fechaHora).toLocaleString()}
+                    </div>
+                  )}
+                </div>
               )}
-              <span className="font-semibold border-b border-indigo-400 px-2 mt-2">{valoracion.consentimiento_ccFirmaAcudiente}</span>
-              <span className="text-xs text-gray-700">C.C.</span>
+              <span className="font-semibold border-b border-indigo-400 px-2 mt-2 text-sm">{valoracion.consentimiento_ccFirmaAcudiente}</span>
+              <span className="text-[10px] text-gray-500">IDENTIFICACIÓN</span>
             </div>
+
             <div className="flex flex-col items-center">
-              <span className="font-semibold mb-2">Firma del Fisioterapeuta</span>
+              <span className="text-xs font-bold text-gray-500 mb-2 uppercase">Firma Fisioterapeuta Tratante</span>
               {valoracion.consentimiento_firmaFisio && (
-                <img
-                  src={valoracion.consentimiento_firmaFisio}
-                  alt="Firma Fisioterapeuta"
-                  className="border border-indigo-400 rounded bg-white mb-2"
-                  style={{ width: 220, height: 80 }}
-                />
+                <div className="flex flex-col items-center">
+                  <img
+                    src={valoracion.consentimiento_firmaFisio}
+                    alt="Firma Fisioterapeuta"
+                    className="border border-indigo-300 rounded bg-white"
+                    style={{ width: 220, height: 80, objectFit: 'contain' }}
+                  />
+                  {valoracion.auditTrail?.consentimiento_firmaFisio && (
+                    <div className="text-[10px] text-gray-400 mt-1 font-mono text-center">
+                      IP: {valoracion.auditTrail.consentimiento_firmaFisio.ip} <br />
+                      Reg: {valoracion.auditTrail.consentimiento_firmaFisio.registroProfesional} <br />
+                      {new Date(valoracion.auditTrail.consentimiento_firmaFisio.fechaHora).toLocaleString()}
+                    </div>
+                  )}
+                </div>
               )}
-              <span className="font-semibold border-b border-indigo-400 px-2 mt-2">{valoracion.cedulaFisioterapeuta}</span>
-              <span className="text-xs text-gray-700">C.C.</span>
+              <span className="font-semibold border-b border-indigo-400 px-2 mt-2 text-sm">{valoracion.cedulaFisioterapeuta}</span>
+              <span className="text-[10px] text-gray-500">REGISTRO MÉDICO</span>
             </div>
           </div>
         </div>
@@ -574,20 +650,55 @@ const DetalleValoracion = () => {
           </button>
           <button
             onClick={() => navigate(`/valoraciones/editar/${id}`)}
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg"
+            disabled={valoracion.bloqueada}
+            className={`${valoracion.bloqueada ? 'bg-gray-400 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'} text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg`}
+            title={valoracion.bloqueada ? "No se puede editar una historia bloqueada" : "Editar valoración"}
           >
             <PencilSquareIcon className="h-6 w-6" />
-            Editar valoración
+            {valoracion.bloqueada ? 'Lectura Protegida' : 'Editar valoración'}
           </button>
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg"
-          >
-            <HomeIcon className="h-6 w-6" />
-            Volver al inicio
-          </button>
+          {!valoracion.bloqueada && (
+            <button
+              onClick={bloquearValoracion}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+              </svg>
+              Cerrar Historia
+            </button>
+          )}
         </div>
+
+        {valoracion.bloqueada && valoracion.selloIntegridad && (
+          <div className="mt-8 p-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-500 font-mono">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-green-600 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.944 4.068 10.938 9.52 12.334a.75.75 0 0 0 .46 0c5.451-1.396 9.52-6.39 9.52-12.334 0-1.36-.21-2.674-.601-3.91a.75.75 0 0 0-.722-.515 11.209 11.209 0 0 1-7.877-3.08Zm-1.545 14.167 4.1-4.1a.75.75 0 1 0-1.06-1.06l-3.57 3.57-1.57-1.57a.75.75 0 0 0-1.06 1.06l2.1 2.1a.75.75 0 0 0 1.06 0Z" clipRule="evenodd" />
+                  </svg>
+                  SELLO DE INTEGRIDAD:
+                </span>
+                <span className="break-all">{valoracion.selloIntegridad}</span>
+              </div>
+              <div className="whitespace-nowrap italic">
+                Cerrada el: {new Date(valoracion.fechaBloqueo).toLocaleString()}
+              </div>
+            </div>
+            <p className="text-[9px] text-gray-400 mt-2 text-center uppercase">
+              Este documento ha sido sellado criptográficamente y es inmutable bajo la Ley 527 de 1999.
+            </p>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg"
+        >
+          <HomeIcon className="h-6 w-6" />
+          Volver al inicio
+        </button>
       </div>
     </div>
   );

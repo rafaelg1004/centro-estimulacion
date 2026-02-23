@@ -3,7 +3,8 @@ import { apiRequest } from "../../config/api";
 
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
-import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+import Swal from 'sweetalert2';
 
 const Card = ({ title, children }) => (
   <div className="bg-indigo-50 rounded-2xl shadow p-6 mb-8 border border-indigo-100">
@@ -57,8 +58,37 @@ export default function DetalleConsentimientoPerinatal() {
           });
         }
         setConsentimiento(data);
-      });
+      })
+      .catch(err => console.error("Error cargando consentimiento:", err));
   }, [id]);
+
+  const bloquearRegistro = async () => {
+    const result = await Swal.fire({
+      title: '¿Cerrar Historia Clínica?',
+      text: "Una vez bloqueada, la historia clínica será inmutable y no podrá ser editada ni eliminada.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, bloquear permanentemente',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        Swal.fire({ title: 'Bloqueando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        await apiRequest(`/consentimiento-perinatal/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bloqueada: true })
+        });
+        const updated = await apiRequest(`/consentimiento-perinatal/${id}`);
+        setConsentimiento(updated);
+        Swal.fire('¡Bloqueada!', 'El registro ahora es inmutable.', 'success');
+      } catch (error) {
+        Swal.fire('Error', 'No se pudo bloquear: ' + error.message, 'error');
+      }
+    }
+  };
 
   if (!consentimiento) return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100">
@@ -69,10 +99,23 @@ export default function DetalleConsentimientoPerinatal() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100 py-10 px-2">
       <div className="max-w-5xl w-full mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-indigo-100">
-        <h2 className="text-3xl font-extrabold mb-8 text-indigo-800 text-center drop-shadow">
-          Detalle Consentimiento Perinatal
-        </h2>
-        
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8 px-4">
+          <div className="flex flex-col items-center md:items-start">
+            <h2 className="text-3xl font-extrabold text-indigo-800 drop-shadow">
+              Detalle Consentimiento Perinatal
+            </h2>
+            {consentimiento.bloqueada && (
+              <div className="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full border border-red-200 flex items-center gap-1 mt-2">
+                <LockClosedIcon className="h-4 w-4" />
+                BLOQUEADA (INMUTABLE)
+              </div>
+            )}
+          </div>
+          <div className="mt-4 md:mt-0">
+            {/* Espacio para badge o info adicional */}
+          </div>
+        </div>
+
         {/* Paso 1 */}
         <Card title="Paso 1: Datos del Paciente">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
@@ -282,33 +325,40 @@ export default function DetalleConsentimientoPerinatal() {
         {/* Paso 7 - Solo mostrar si tiene firmas de educación */}
         {(consentimiento.firmaPacienteGeneral || consentimiento.firmaFisioterapeutaGeneral) && (
           <Card title="Paso 7: Consentimiento Educación para el Nacimiento">
-          <div className="mb-2 text-gray-700 border-l-4 border-indigo-300 pl-4 bg-indigo-50 rounded">
-            Usted va a iniciar nuestro Programa de Educación para el Nacimiento que
-            consta de 7 sesiones teórico-prácticas para los padres y 1 sesión para
-            los abuelos, descritas a continuación. De igual manera incluye una visita
-            postparto inmediato en clínica (según disponibilidad) y otra visita
-            durante los siguientes 15 días de postparto, la pareja decide en qué
-            momento programarla y se lleva a cabo según disponibilidad.
-            <br /><br />
-            <strong>Nota:</strong> Luego de estas visitas podrán tener acceso a nuevas
-            asesorías con un valor especial de $60.000 cada una. Estas asesorías
-            pueden ser acerca de banco de leche, extracción y conservación,
-            obstrucciones, mastitis, brotes de crecimiento entre otras.
-            <br /><br />
-            Estas sesiones teórico-prácticas se llevan a cabo los días miércoles 6
-            pm, con disponibilidad de dos horas. Se estará enviando mensaje de
-            confirmación, así que agradecemos su oportuna respuesta.
-            <br /><br />
-            Yo <span className="font-semibold underline">{consentimiento.paciente?.nombres || "____________________"}</span> identificada con Cédula de Ciudadanía <span className="font-semibold underline">{consentimiento.paciente?.cedula || "_____________"}</span> he entendido con claridad la explicación que me ha dado la Fisioterapeuta Dayan Ivonne Villegas Gamboa en las líneas anteriores. Por lo cual comprendo los beneficios y riesgos. Así mismo, me considero conforme y satisfecha con la información que se me ha suministrado comprendiendo de manera global todo lo que conlleva hacer parte de este programa. Por lo que a través de la presente, doy mi consentimiento expreso para que el tratamiento sea llevado a cabo.
-          </div>
-          <div className="mt-4 text-sm text-gray-600">
-            <p><strong>Sesiones programadas:</strong> {(consentimiento.sesiones || []).length} sesiones de educación para el nacimiento</p>
-          </div>
+            <div className="mb-2 text-gray-700 border-l-4 border-indigo-300 pl-4 bg-indigo-50 rounded">
+              Usted va a iniciar nuestro Programa de Educación para el Nacimiento que
+              consta de 7 sesiones teórico-prácticas para los padres y 1 sesión para
+              los abuelos, descritas a continuación. De igual manera incluye una visita
+              postparto inmediato en clínica (según disponibilidad) y otra visita
+              durante los siguientes 15 días de postparto, la pareja decide en qué
+              momento programarla y se lleva a cabo según disponibilidad.
+              <br /><br />
+              <strong>Nota:</strong> Luego de estas visitas podrán tener acceso a nuevas
+              asesorías con un valor especial de $60.000 cada una. Estas asesorías
+              pueden ser acerca de banco de leche, extracción y conservación,
+              obstrucciones, mastitis, brotes de crecimiento entre otras.
+              <br /><br />
+              Estas sesiones teórico-prácticas se llevan a cabo los días miércoles 6
+              pm, con disponibilidad de dos horas. Se estará enviando mensaje de
+              confirmación, así que agradecemos su oportuna respuesta.
+              <br /><br />
+              Yo <span className="font-semibold underline">{consentimiento.paciente?.nombres || "____________________"}</span> identificada con Cédula de Ciudadanía <span className="font-semibold underline">{consentimiento.paciente?.cedula || "_____________"}</span> he entendido con claridad la explicación que me ha dado la Fisioterapeuta Dayan Ivonne Villegas Gamboa en las líneas anteriores. Por lo cual comprendo los beneficios y riesgos. Así mismo, me considero conforme y satisfecha con la información que se me ha suministrado comprendiendo de manera global todo lo que conlleva hacer parte de este programa. Por lo que a través de la presente, doy mi consentimiento expreso para que el tratamiento sea llevado a cabo.
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              <p><strong>Sesiones programadas:</strong> {(consentimiento.sesiones || []).length} sesiones de educación para el nacimiento</p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <strong>Firma Paciente General:</strong>
                 {consentimiento.firmaPacienteGeneral ? (
-                  <img src={consentimiento.firmaPacienteGeneral} alt="Firma paciente general" className="h-12 mt-1 border" />
+                  <div className="flex flex-col">
+                    <img src={consentimiento.firmaPacienteGeneral} alt="Firma paciente general" className="h-12 mt-1 border bg-white" />
+                    {consentimiento.auditTrail?.firmaPacienteGeneral && (
+                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
+                        IP: {consentimiento.auditTrail.firmaPacienteGeneral.ip} | {new Date(consentimiento.auditTrail.firmaPacienteGeneral.fechaHora).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-gray-400 text-sm mt-1">Sin firma</div>
                 )}
@@ -316,7 +366,14 @@ export default function DetalleConsentimientoPerinatal() {
               <div>
                 <strong>Firma Fisioterapeuta General:</strong>
                 {consentimiento.firmaFisioterapeutaGeneral ? (
-                  <img src={consentimiento.firmaFisioterapeutaGeneral} alt="Firma fisioterapeuta general" className="h-12 mt-1 border" />
+                  <div className="flex flex-col">
+                    <img src={consentimiento.firmaFisioterapeutaGeneral} alt="Firma fisioterapeuta general" className="h-12 mt-1 border bg-white" />
+                    {consentimiento.auditTrail?.firmaFisioterapeutaGeneral && (
+                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
+                        IP: {consentimiento.auditTrail.firmaFisioterapeutaGeneral.ip} | Reg: {consentimiento.auditTrail.firmaFisioterapeutaGeneral.registroProfesional}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-gray-400 text-sm mt-1">Sin firma</div>
                 )}
@@ -335,7 +392,14 @@ export default function DetalleConsentimientoPerinatal() {
               <div>
                 <strong>Firma Paciente (Físico):</strong>
                 {consentimiento.firmaPacienteFisico ? (
-                  <img src={consentimiento.firmaPacienteFisico} alt="Firma paciente físico" className="h-12 mt-1 border" />
+                  <div className="flex flex-col">
+                    <img src={consentimiento.firmaPacienteFisico} alt="Firma paciente físico" className="h-12 mt-1 border bg-white" />
+                    {consentimiento.auditTrail?.firmaPacienteFisico && (
+                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
+                        IP: {consentimiento.auditTrail.firmaPacienteFisico.ip} | {new Date(consentimiento.auditTrail.firmaPacienteFisico.fechaHora).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-gray-400 text-sm mt-1">Sin firma</div>
                 )}
@@ -343,7 +407,14 @@ export default function DetalleConsentimientoPerinatal() {
               <div>
                 <strong>Firma Fisioterapeuta (Físico):</strong>
                 {consentimiento.firmaFisioterapeutaFisico ? (
-                  <img src={consentimiento.firmaFisioterapeutaFisico} alt="Firma fisioterapeuta físico" className="h-12 mt-1 border" />
+                  <div className="flex flex-col">
+                    <img src={consentimiento.firmaFisioterapeutaFisico} alt="Firma fisioterapeuta físico" className="h-12 mt-1 border bg-white" />
+                    {consentimiento.auditTrail?.firmaFisioterapeutaFisico && (
+                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
+                        IP: {consentimiento.auditTrail.firmaFisioterapeutaFisico.ip} | Reg: {consentimiento.auditTrail.firmaFisioterapeutaFisico.registroProfesional}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-gray-400 text-sm mt-1">Sin firma</div>
                 )}
@@ -355,23 +426,30 @@ export default function DetalleConsentimientoPerinatal() {
         {/* Paso 8 - Solo mostrar si tiene firmas intensivo */}
         {(consentimiento.firmaPacienteEducacion || consentimiento.firmaFisioterapeutaEducacion) && (
           <Card title="Paso 8: Consentimiento Educación Intensivo">
-          <div className="mb-2 text-gray-700 border-l-4 border-purple-300 pl-4 bg-purple-50 rounded">
-            Usted va a iniciar nuestro Programa de Educación para el Nacimiento Intensivo que consta de 3 sesiones teórico-prácticas para los padres, descritas a continuación.
-            <br /><br />
-            <strong>Nota:</strong> Adicional a este servicio manejamos asesoría en Lactancia la cual consiste en dos visitas en clínica y en casa, después del nacimiento del bebé. Este servicio tiene costo de $120.000 y se programa idealmente con tiempo para contar con la disponibilidad.
-            <br /><br />
-            Estas sesiones teórico-prácticas se llevan a cabo según programación y disponibilidad.
-            <br /><br />
-            Yo <span className="font-semibold underline">{consentimiento.paciente?.nombres || "____________________"}</span> identificada con Cédula de Ciudadanía <span className="font-semibold underline">{consentimiento.paciente?.cedula || "_____________"}</span> he entendido con claridad la explicación que me ha dado la Fisioterapeuta Dayan Ivonne Villegas Gamboa en las líneas anteriores. Por lo cual comprendo los beneficios y riesgos. Así mismo, me considero conforme y satisfecha con la información que se me ha suministrado comprendiendo de manera global todo lo que conlleva hacer parte de este programa. Por lo que a través de la presente, doy mi consentimiento expreso para que el tratamiento sea llevado a cabo.
-          </div>
-          <div className="mt-4 text-sm text-gray-600">
-            <p><strong>Sesiones programadas:</strong> {(consentimiento.sesionesIntensivo || []).length} sesiones intensivas</p>
-          </div>
+            <div className="mb-2 text-gray-700 border-l-4 border-purple-300 pl-4 bg-purple-50 rounded">
+              Usted va a iniciar nuestro Programa de Educación para el Nacimiento Intensivo que consta de 3 sesiones teórico-prácticas para los padres, descritas a continuación.
+              <br /><br />
+              <strong>Nota:</strong> Adicional a este servicio manejamos asesoría en Lactancia la cual consiste en dos visitas en clínica y en casa, después del nacimiento del bebé. Este servicio tiene costo de $120.000 y se programa idealmente con tiempo para contar con la disponibilidad.
+              <br /><br />
+              Estas sesiones teórico-prácticas se llevan a cabo según programación y disponibilidad.
+              <br /><br />
+              Yo <span className="font-semibold underline">{consentimiento.paciente?.nombres || "____________________"}</span> identificada con Cédula de Ciudadanía <span className="font-semibold underline">{consentimiento.paciente?.cedula || "_____________"}</span> he entendido con claridad la explicación que me ha dado la Fisioterapeuta Dayan Ivonne Villegas Gamboa en las líneas anteriores. Por lo cual comprendo los beneficios y riesgos. Así mismo, me considero conforme y satisfecha con la información que se me ha suministrado comprendiendo de manera global todo lo que conlleva hacer parte de este programa. Por lo que a través de la presente, doy mi consentimiento expreso para que el tratamiento sea llevado a cabo.
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              <p><strong>Sesiones programadas:</strong> {(consentimiento.sesionesIntensivo || []).length} sesiones intensivas</p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <strong>Firma Paciente (Intensivo):</strong>
                 {consentimiento.firmaPacienteEducacion ? (
-                  <img src={consentimiento.firmaPacienteEducacion} alt="Firma paciente intensivo" className="h-12 mt-1 border" />
+                  <div className="flex flex-col">
+                    <img src={consentimiento.firmaPacienteEducacion} alt="Firma paciente intensivo" className="h-12 mt-1 border bg-white" />
+                    {consentimiento.auditTrail?.firmaPacienteEducacion && (
+                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
+                        IP: {consentimiento.auditTrail.firmaPacienteEducacion.ip} | {new Date(consentimiento.auditTrail.firmaPacienteEducacion.fechaHora).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-gray-400 text-sm mt-1">Sin firma</div>
                 )}
@@ -379,7 +457,14 @@ export default function DetalleConsentimientoPerinatal() {
               <div>
                 <strong>Firma Fisioterapeuta (Intensivo):</strong>
                 {consentimiento.firmaFisioterapeutaEducacion ? (
-                  <img src={consentimiento.firmaFisioterapeutaEducacion} alt="Firma fisioterapeuta intensivo" className="h-12 mt-1 border" />
+                  <div className="flex flex-col">
+                    <img src={consentimiento.firmaFisioterapeutaEducacion} alt="Firma fisioterapeuta intensivo" className="h-12 mt-1 border bg-white" />
+                    {consentimiento.auditTrail?.firmaFisioterapeutaEducacion && (
+                      <div className="text-[10px] text-gray-400 mt-1 font-mono">
+                        IP: {consentimiento.auditTrail.firmaFisioterapeutaEducacion.ip} | Reg: {consentimiento.auditTrail.firmaFisioterapeutaEducacion.registroProfesional}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-gray-400 text-sm mt-1">Sin firma</div>
                 )}
@@ -388,15 +473,48 @@ export default function DetalleConsentimientoPerinatal() {
           </Card>
         )}
 
+        {consentimiento.bloqueada && consentimiento.selloIntegridad && (
+          <div className="mt-8 p-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-500 font-mono">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-green-600 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.944 4.068 10.938 9.52 12.334a.75.75 0 0 0 .46 0c5.451-1.396 9.52-6.39 9.52-12.334 0-1.36-.21-2.674-.601-3.91a.75.75 0 0 0-.722-.515 11.209 11.209 0 0 1-7.877-3.08Zm-1.545 14.167 4.1-4.1a.75.75 0 1 0-1.06-1.06l-3.57 3.57-1.57-1.57a.75.75 0 0 0-1.06 1.06l2.1 2.1a.75.75 0 0 0 1.06 0Z" clipRule="evenodd" />
+                  </svg>
+                  SELLO DE INTEGRIDAD:
+                </span>
+                <span className="break-all">{consentimiento.selloIntegridad}</span>
+              </div>
+              <div className="whitespace-nowrap italic">
+                Cerrada el: {new Date(consentimiento.fechaBloqueo).toLocaleString()}
+              </div>
+            </div>
+            <p className="text-[9px] text-gray-400 mt-2 text-center uppercase">
+              Este documento ha sido sellado criptográficamente y es inmutable bajo la Ley 527 de 1999.
+            </p>
+          </div>
+        )}
+
         {/* Botones de acción */}
         <div className="mt-8 text-center flex flex-col sm:flex-row justify-center gap-4">
           <Link
-            to={`/consentimientos-perinatales/${consentimiento._id}/editar`}
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
+            to={consentimiento.bloqueada ? "#" : `/consentimientos-perinatales/${consentimiento._id}/editar`}
+            className={`${consentimiento.bloqueada ? 'bg-gray-400 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500'} text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center`}
+            onClick={(e) => consentimiento.bloqueada && e.preventDefault()}
           >
             <PencilSquareIcon className="h-6 w-6" />
-            Editar
+            {consentimiento.bloqueada ? 'Solo Lectura' : 'Editar'}
           </Link>
+
+          {!consentimiento.bloqueada && (
+            <button
+              onClick={bloquearRegistro}
+              className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-xl shadow transition flex items-center gap-2 text-lg justify-center"
+            >
+              <LockClosedIcon className="h-6 w-6" />
+              Cerrar Historia
+            </button>
+          )}
 
           <button
             onClick={exportarPDF}
