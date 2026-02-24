@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "baseline-browser-mapping": "^2.9.13",
     "caniuse-lite": "^1.0.30001763",
+    "date-fns": "^4.1.0",
     "docx": "^9.5.1",
     "file-saver": "^2.0.5",
     "react": "^18.2.0",

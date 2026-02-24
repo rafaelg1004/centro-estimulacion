@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiRequest } from "../../config/api";
+import { apiRequest, apiDownload } from "../../config/api";
 
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../ui/Spinner";
@@ -26,14 +26,12 @@ export default function DetalleConsentimientoPerinatal() {
 
   const exportarPDF = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/valoraciones/reporte/exportar-pdf/${id}?type=perinatal`, {
+      const blob = await apiDownload(`/valoraciones/reporte/exportar-pdf/${id}?type=perinatal`, {
         method: 'GET',
-        headers: { 'Accept': 'application/pdf' },
+        headers: {
+          'Accept': 'application/pdf',
+        },
       });
-
-      if (!response.ok) throw new Error('Error al generar el PDF');
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

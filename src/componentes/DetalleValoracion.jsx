@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./DetalleValoracion.css";
 import logo from "../assents/LOGO.png";
 import { ArrowDownTrayIcon, PencilSquareIcon, HomeIcon } from "@heroicons/react/24/solid";
-import { apiRequest } from "../config/api";
+import { apiRequest, apiDownload } from "../config/api";
 import { exportarValoracionPisoPelvicoAWord } from "../utils/exportarValoracionWord";
 import Swal from 'sweetalert2';
 
@@ -69,16 +69,12 @@ const DetalleValoracion = () => {
         }
       });
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/valoraciones/reporte/exportar-pdf/${id}?type=nino`, {
+      const blob = await apiDownload(`/valoraciones/reporte/exportar-pdf/${id}?type=nino`, {
         method: 'GET',
         headers: {
           'Accept': 'application/pdf',
         },
       });
-
-      if (!response.ok) throw new Error('Error al generar el PDF');
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

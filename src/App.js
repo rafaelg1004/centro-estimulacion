@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
-import RegistroPaciente from "./componentes/RegistroPaciente";
+import RegistroPacienteUnificado from "./componentes/RegistroPacienteUnificado";
 import VerRegistros from "./componentes/VerRegistros";
-import ValoracionIngreso from "./componentes/ValoracionIngreso";
+import NuevaValoracionUnificada from "./componentes/NuevaValoracionUnificada";
 import ListaValoraciones from './componentes/ListaValoraciones';
 import DetalleValoracion from './componentes/DetalleValoracion';
 import Login from "./componentes/login";
@@ -19,16 +19,13 @@ import EditarValoracion from "./componentes/EditarValoracion";
 import EditarPaciente from "./componentes/EditarPaciente";
 import DetallePacienteAdulto from "./componentes/DetallePacienteAdulto";
 
-import RegistrarPacienteAdulto from "./componentes/RegistrarPacienteAdulto"; // Para adultos
 import EditarPacienteAdulto from "./componentes/EditarPacienteAdulto";
 import ValoracionIngresoAdultosLactancia from "./componentes/valoracionadultos_lactancia/ValoracionIngresoAdultosLactancia";
-import ListaValoracionesIngresoAdultosLactancia from "./componentes/ListaValoracionesIngresoAdultosLactancia";
 import DetalleValoracionIngresoAdultosLactancia from "./componentes/DetalleValoracionIngresoAdultosLactancia";
 
 import EditarValoracionIngresoAdultosLactancia from "./componentes/valoracionadultos_lactancia/EditarValoracionIngresoAdultosLactancia";
 //import ValoracionIngresoAdultosGeneral from "./componentes/valoracionadultos_general/ValoracionIngresoAdultosGeneral";
 import ValoracionIngresoProgramaPerinatal from "./componentes/valoracionperinatal/ValoracionIngresoProgramaPerinatal";
-import ListaConsentimientosPerinatales from "./componentes/valoracionperinatal/ListaConsentimientosPerinatales";
 import DetalleConsentimientoPerinatal from "./componentes/valoracionperinatal/DetalleConsentimientoPerinatal";
 import EditarConsentimientoPerinatal from "./componentes/valoracionperinatal/EditarConsentimientoPerinatal";
 import ListaSesionesPerinatal from "./componentes/valoracionperinatal/ListaSesionesPerinatal";
@@ -36,7 +33,6 @@ import EditarClase from "./componentes/EditarClase";
 import "./componentes/logout.css";
 import Swal from "sweetalert2";
 import ValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/ValoracionPisoPelvico";
-import ListaValoracionesPisoPelvico from "./componentes/valoracionPisoPelvico/ListaValoracionesPisoPelvico";
 import DetalleValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/DetalleValoracionPisoPelvico";
 import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/EditarValoracionPisoPelvico";
 import APIStatusIndicator from "./componentes/APIStatusIndicator";
@@ -118,7 +114,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
           </svg>
           <span className="text-xl font-bold text-red-600 animate-fade">Cerrando sesión...</span>
         </div>
-       
+
       </div>
     );
   }
@@ -127,7 +123,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
     <div className="flex min-h-screen">
       {/* Indicador de estado de API (solo en desarrollo) */}
       {process.env.NODE_ENV === 'development' && <APIStatusIndicator />}
-      
+
       {/* Botón hamburguesa solo en móvil */}
       {usuario && (
         <button
@@ -210,75 +206,24 @@ function RutasAutenticadas({ usuario, setUsuario }) {
                 <DocumentTextIcon className="h-5 w-5" />
                 Generar RIPS
               </Link>
-              <div>
-                <button
-                  type="button"
-                  className="w-full bg-pink-200 hover:bg-pink-300 text-pink-800 font-bold py-2 px-4 rounded transition text-center flex justify-between items-center shadow"
-                  onClick={() => setSubmenuValoraciones(v => !v)}
-                >
-                  Lista de Valoraciones
-                  <span>{submenuValoraciones ? "▲" : "▼"}</span>
-                </button>
-                {submenuValoraciones && (
-                  <div className="ml-4 flex flex-col gap-2 mt-2">
-                    <Link
-                      to="/valoraciones"
-                      className="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-semibold py-2 px-4 rounded transition text-left shadow flex items-center gap-2"
-                      onClick={() => {
-                        setSidebarOpen(false);
-                        setSubmenuValoraciones(false);
-                      }}
-                    >
-                      <ClipboardDocumentCheckIcon className="h-5 w-5" />
-                      Valoración Inicial
-                    </Link>
-                    <Link
-                      to="/valoraciones-adultos-lactancia"
-                      className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-2 px-4 rounded transition text-left shadow flex items-center gap-2"
-                      onClick={() => {
-                        setSidebarOpen(false);
-                        setSubmenuValoraciones(false);
-                      }}
-                    >
-                      <ClipboardIcon className="h-5 w-5" />
-                      Valoración de Ingreso Asesoría en Lactancia
-                    </Link>
-                    <Link
-                      to="/consentimientos-perinatales"
-                      className="bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded transition text-left shadow flex items-center gap-2"
-                      onClick={() => {
-                        setSidebarOpen(false);
-                        setSubmenuValoraciones(false);
-                      }}
-                    >
-                      <DocumentTextIcon className="h-5 w-5" />
-                      Consentimientos Perinatales
-                    </Link>
-                 
-                    <Link
-                      to="/valoraciones-piso-pelvico"
-                      className="bg-pink-100 hover:bg-pink-200 text-pink-700 font-semibold py-2 px-4 rounded transition text-left shadow flex items-center gap-2"
-                      onClick={() => {
-                        setSidebarOpen(false);
-                        setSubmenuValoraciones(false);
-                      }}
-                    >
-                      <ClipboardDocumentCheckIcon className="h-5 w-5" />
-                      Valoraciones Piso Pélvico
-                    </Link>
-                  </div>
-                )}
-              </div>
+              <Link
+                to="/valoraciones"
+                className="bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <ClipboardDocumentCheckIcon className="h-5 w-5" />
+                Historia Clínica
+              </Link>
             </nav>
           </div>
           <div className="mt-8 space-y-2">
             {/* Información del usuario */}
             <div className="text-center text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
-         
+
               <div className="text-xs capitalize">
                 {userRole === 'fisioterapeuta' ? 'Fisioterapeuta' :
-                 userRole === 'auxiliar' ? 'Auxiliar' :
-                 userRole === 'administracion' ? 'Administración' : userRole}
+                  userRole === 'auxiliar' ? 'Auxiliar' :
+                    userRole === 'administracion' ? 'Administración' : userRole}
               </div>
             </div>
 
@@ -325,8 +270,8 @@ function RutasAutenticadas({ usuario, setUsuario }) {
       {/* Contenido principal */}
       <main
         className={`flex-1 bg-gray-50 min-h-screen transition-all duration-300
-          ${usuario && sidebarOpen 
-            ? "md:ml-56" 
+          ${usuario && sidebarOpen
+            ? "md:ml-56"
             : "flex items-center justify-center"
           }
         `}
@@ -334,12 +279,13 @@ function RutasAutenticadas({ usuario, setUsuario }) {
         <div className={usuario && !sidebarOpen ? "w-full max-w-8xl mx-auto px-2" : "w-full"}>
           <Routes>
             <Route path="/registrar-usuario" element={<RegistroUsuario />} />
-          
+
             <Route path="/registros" element={<VerRegistros />} />
-            <Route path="/valoracion" element={<ValoracionIngreso />} />
+            <Route path="/valoracion" element={<NuevaValoracionUnificada />} />
             <Route path="/valoraciones" element={<ListaValoraciones />} />
+            <Route path="/detalle-valoracion/:id" element={<DetalleValoracion />} />
             <Route path="/valoraciones/:id" element={<DetalleValoracion />} />
-            <Route path="/registro" element={<RegistroPaciente />} />
+            <Route path="/registro" element={<RegistroPacienteUnificado />} />
             <Route path="/pacientes" element={<ListaPacientes />} />
             <Route path="/pacientes/:id" element={<DetallePaciente />} />
             <Route path="/clases/nueva" element={<CrearClase />} />
@@ -349,23 +295,26 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/" element={<Home />} />
             <Route path="/valoraciones/editar/:id" element={<EditarValoracion />} />
             <Route path="/pacientes/editar/:id" element={<EditarPaciente />} />
-            <Route path="/registrar-paciente-nino" element={<RegistroPaciente />} />
-            <Route path="/registrar-paciente-adulto" element={<RegistrarPacienteAdulto  />} />
-            <Route path="/pacientes-adultos" element={<ListaPacientes tipo="adulto" />} />
-            <Route path="/pacientes-adultos/:id" element={<DetallePacienteAdulto />} />
-            <Route path="/pacientes-adultos/editar/:id" element={<EditarPacienteAdulto />} />
+            <Route path="/registrar-paciente-nino" element={<RegistroPacienteUnificado />} />
+            <Route path="/registrar-paciente-adulto" element={<RegistroPacienteUnificado />} />
+            <Route path="/pacientes-adultos" element={<ListaPacientes />} />
+            <Route path="/pacientes-adultos/:id" element={<DetallePaciente />} />
+            <Route path="/pacientes-adultos/editar/:id" element={<EditarPaciente />} />
             <Route path="/valoracion-adultos/nueva/:id" element={<ValoracionIngresoAdultosLactancia />}
             />
-            <Route path="/valoraciones-adultos-lactancia" element={<ListaValoracionesIngresoAdultosLactancia />} />
+            {/* RUTAS LACTANCIA (Ahora renderiza mediante ListaValoracionesUnificada) */}
+            <Route path="/valoraciones-adultos-lactancia" element={<ListaValoraciones />} />
             <Route path="/valoracion-ingreso-adultos-lactancia/:id" element={<DetalleValoracionIngresoAdultosLactancia />} />
             <Route path="/valoraciones-adultos-lactancia/:id" element={<DetalleValoracionIngresoAdultosLactancia />} />
             <Route path="/editar-valoracion-ingreso-adultos-lactancia/:id" element={<EditarValoracionIngresoAdultosLactancia />} />
             <Route path="/valoracion-ingreso-programa-perinatal/:id" element={<ValoracionIngresoProgramaPerinatal />} />
-            <Route path="/consentimientos-perinatales" element={<ListaConsentimientosPerinatales />} />
+            {/* RUTAS PERINATALES (Ahora renderiza mediante ListaValoracionesUnificada) */}
+            <Route path="/consentimientos-perinatales" element={<ListaValoraciones />} />
             <Route path="/consentimientos-perinatales/:id" element={<DetalleConsentimientoPerinatal />} />
             <Route path="/consentimientos-perinatales/:id/editar" element={<EditarConsentimientoPerinatal />} />
             <Route path="/clases/editar/:id" element={<EditarClase />} />
-            <Route path="/valoraciones-piso-pelvico" element={<ListaValoracionesPisoPelvico />} />
+            {/* RUTAS PISO PÉLVICO */}
+            <Route path="/valoraciones-piso-pelvico" element={<ListaValoraciones />} />
             <Route path="/valoracion-piso-pelvico/:id" element={<ValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id" element={<DetalleValoracionPisoPelvico />} />
             <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />

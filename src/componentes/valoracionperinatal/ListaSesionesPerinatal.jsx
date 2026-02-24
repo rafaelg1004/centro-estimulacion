@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest } from "../../config/api";
-import { ArrowLeftIcon, CheckCircleIcon, ClockIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, CheckCircleIcon, ClockIcon, PencilSquareIcon, LockClosedIcon } from "@heroicons/react/24/solid";
 import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
 
 export default function ListaSesionesPerinatal() {

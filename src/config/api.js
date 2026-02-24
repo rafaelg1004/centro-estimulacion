@@ -8,13 +8,14 @@
 // Configuración base de la API
 export const API_CONFIG = {
   // URLs según entorno - En producción usa rutas relativas (mismo servidor)
-  BASE_URL: process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:5000' // Backend local con puerto 5000
-    : '', // Producción: mismo servidor EC2, sin URL base
+  // Usar siempre el puerto del backend mientras estemos en localhost
+  BASE_URL: window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : '',
 
   // Timeouts por entorno
   TIMEOUT: process.env.NODE_ENV === 'production' ? 30000 : 10000,
-  
+
   // Headers comunes
   HEADERS: {
     'Content-Type': 'application/json',
@@ -40,19 +41,19 @@ export const apiRequest = async (endpoint, options = {}) => {
   };
 
   console.log(`🌐 ${config.method || 'GET'} ${url}`);
-  
+
   try {
     const response = await fetch(url, config);
-    
+
     // Verificar el content-type de la respuesta
     const contentType = response.headers.get('content-type');
     console.log(`📄 Content-Type: ${contentType}`);
-    
+
     if (!response.ok) {
       // Si la respuesta no es ok, intentar obtener el error
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       let errorData = null;
-      
+
       if (contentType && contentType.includes('application/json')) {
         try {
           errorData = await response.json();
@@ -64,35 +65,61 @@ export const apiRequest = async (endpoint, options = {}) => {
         // Si no es JSON, obtener el texto completo para debugging
         const errorText = await response.text();
         console.error('❌ Respuesta no-JSON del servidor:', errorText.substring(0, 200) + '...');
-        
+
         if (errorText.includes('<!DOCTYPE')) {
           errorMessage = `El servidor devolvió HTML en lugar de JSON. Verifica que el backend esté corriendo en ${API_CONFIG.BASE_URL}`;
         }
       }
-      
+
       // Crear un error que incluya los datos del backend
       const error = new Error(errorMessage);
       error.response = { data: errorData, status: response.status };
       throw error;
     }
-    
+
     // Verificar que la respuesta exitosa sea JSON
     if (!contentType || !contentType.includes('application/json')) {
       const responseText = await response.text();
       console.error('❌ Respuesta exitosa no es JSON:', responseText.substring(0, 200));
       throw new Error('El servidor no devolvió JSON válido');
     }
-    
+
     return await response.json();
-    
+
   } catch (error) {
     // Mejorar el manejo de errores de red
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       console.error(`❌ Error de conectividad: No se puede conectar a ${url}`);
       throw new Error(`No se puede conectar al servidor. Verifica que el backend esté corriendo en ${API_CONFIG.BASE_URL}`);
     }
-    
+
     console.error(`❌ Error en ${endpoint}:`, error.message);
+    throw error;
+  }
+};
+
+// Función helper para descargar archivos (PDF, Excel, etc.)
+export const apiDownload = async (endpoint, options = {}) => {
+  const url = `${API_CONFIG.BASE_URL}/api${endpoint}`;
+  const token = sessionStorage.getItem("token");
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+  const config = {
+    headers: { ...authHeaders }, // Solo se adjunta auth, content-type puede variar
+    ...options,
+    ...(options.headers && {
+      headers: { ...authHeaders, ...options.headers }
+    })
+  };
+
+  try {
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return await response.blob();
+  } catch (error) {
+    console.error(`❌ Error descargando archivo de ${endpoint}:`, error.message);
     throw error;
   }
 };
@@ -137,40 +164,43 @@ export const logAPIConfig = () => {
 export const testAPIConnection = async () => {
   console.log('🔍 === PROBANDO CONECTIVIDAD DE API ===');
   logAPIConfig();
-  
+
   try {
     // Probar una ruta simple como health check
     const testUrl = `${API_CONFIG.BASE_URL}/api/pacientes`;
     console.log(`🌐 Probando: ${testUrl}`);
-    
+
+    // Si hay un token activo, adjuntarlo para evitar llenar los logs del servidor con "intento sin token"
+    const token = sessionStorage.getItem("token");
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
     const response = await fetch(testUrl, {
       method: 'GET',
-      headers: API_CONFIG.HEADERS
+      headers: { ...API_CONFIG.HEADERS, ...authHeaders }
     });
-    
+
     console.log(`📊 Status: ${response.status} ${response.statusText}`);
     console.log(`📄 Content-Type: ${response.headers.get('content-type')}`);
-    
-    if (response.ok) {
+
+    // Una respuesta 401 o 403 significa que el servidor está vivo pero no tenemos token válido, lo cual también es conexión exitosa
+    if (response.ok || response.status === 401 || response.status === 403) {
       console.log('✅ Conectividad exitosa!');
-      const data = await response.json();
-      console.log(`📋 Datos recibidos: ${Array.isArray(data) ? data.length + ' elementos' : typeof data}`);
       return true;
     } else {
-      console.log('❌ Error en la respuesta del servidor');
+      console.log('❌ Error en la respuesta del servidor:', response.status);
       return false;
     }
-    
+
   } catch (error) {
     console.error('❌ Error de conectividad:', error.message);
-    
+
     if (error.message.includes('fetch')) {
       console.log('💡 Sugerencias:');
       console.log('   1. Verifica que el backend esté corriendo');
       console.log('   2. Verifica que esté en el puerto correcto (4000)');
       console.log('   3. Verifica que no haya problemas de CORS');
     }
-    
+
     return false;
   }
 };

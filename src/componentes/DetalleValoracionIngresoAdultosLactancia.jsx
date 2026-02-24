@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { PencilSquareIcon, ArrowLeftIcon, ArrowDownTrayIcon, LockClosedIcon } from "@heroicons/react/24/solid";
 import Swal from 'sweetalert2';
-import { apiRequest } from "../config/api";
+import { apiRequest, apiDownload } from "../config/api";
 
 const Card = ({ title, children }) => (
   <div className="bg-indigo-50 rounded-2xl shadow p-6 mb-8 border border-indigo-100">
@@ -51,15 +51,10 @@ export default function DetalleValoracionIngresoAdultosLactancia() {
         didOpen: () => Swal.showLoading()
       });
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${apiUrl}/valoraciones/reporte/exportar-pdf/${id}?type=lactancia`, {
+      const blob = await apiDownload(`/valoraciones/reporte/exportar-pdf/${id}?type=lactancia`, {
         method: 'GET',
         headers: { 'Accept': 'application/pdf' },
       });
-
-      if (!response.ok) throw new Error('Error al generar PDF');
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

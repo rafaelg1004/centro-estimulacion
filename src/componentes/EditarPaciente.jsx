@@ -12,440 +12,198 @@ const EPS_LIST = [
   "EPS Servicio Occidental de Salud (SOS)", "EPS Familiar de Colombia", "EPM Salud"
 ];
 
-export default function EditarPaciente() {
+export default function EdicionHistoriaClinica() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [paciente, setPaciente] = useState(null);
-  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     apiRequest(`/pacientes/${id}`)
-      .then(setPaciente);
+      .then(data => {
+        // Asegurar que existan objetos anidados
+        setPaciente({
+          ...data,
+          datosContacto: data.datosContacto || {},
+          datosAdicionales: data.datosAdicionales || {}
+        });
+      })
+      .catch(() => setError("Error al cargar la historia clínica"));
   }, [id]);
 
-  const handleChange = e => {
+  const isNino = paciente && ['RC', 'TI', 'MS', 'AS', 'CD', 'CN', 'SC'].includes(paciente.tipoDocumentoIdentificacion);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    let nuevosDatos = { ...paciente, [name]: value };
-
-    // Calcular edad en meses automáticamente al cambiar la fecha de nacimiento
-    if (name === "fechaNacimiento" && value) {
-      const fechaNac = new Date(value);
-      const hoy = new Date();
-      let meses =
-        (hoy.getFullYear() - fechaNac.getFullYear()) * 12 +
-        (hoy.getMonth() - fechaNac.getMonth());
-      if (hoy.getDate() < fechaNac.getDate()) {
-        meses -= 1;
-      }
-      nuevosDatos.edad = meses >= 0 ? meses.toString() : "";
-    }
-
-    setPaciente(nuevosDatos);
+    setPaciente(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleGuardar = async () => {
-    setError("");
-    // Validar que todos los campos estén llenos
-    for (const key in paciente) {
-      if (
-        paciente.hasOwnProperty(key) &&
-        (paciente[key] === undefined ||
-          paciente[key] === null ||
-          (typeof paciente[key] === "string" && paciente[key].trim() === ""))
-      ) {
-        setError("Por favor, complete todos los campos.");
-        return;
-      }
-    }
+  const handleGuardar = async (e) => {
+    if (e) e.preventDefault();
+    setIsSubmitting(true);
     try {
       await apiRequest(`/pacientes/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(paciente),
       });
       await Swal.fire({
         icon: "success",
-        title: "¡Actualizado!",
-        text: "El paciente fue actualizado correctamente.",
-        confirmButtonColor: "#6366f1"
+        title: "Historia Clínica Actualizada",
+        timer: 1500,
+        showConfirmButton: false
       });
       navigate(`/pacientes/${id}`);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (!paciente) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-green-100">
-      <div className="flex flex-col items-center">
-        <div className="w-16 h-16 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <span className="text-indigo-700 font-bold text-lg">Cargando información...</span>
-      </div>
-    </div>
-  );
+  if (!paciente) return <div className="p-20 text-center font-bold text-indigo-600 animate-pulse">Cargando Historia Clínica...</div>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-green-100 py-10 px-2">
-      <form
-        onSubmit={e => e.preventDefault()}
-        className="w-full max-w-3xl bg-white bg-opacity-90 p-10 rounded-3xl shadow-2xl border border-indigo-100 space-y-8"
-      >
-        <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 text-center drop-shadow tracking-wide">
-          Editar Paciente Niño
-        </h2>
-
-        {/* DATOS DEL NIÑO */}
-        <div>
-          <h3 className="text-lg font-bold text-indigo-600 mb-2">Datos del niño</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="nombres">
-                Nombres y Apellidos
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="nombres"
-                name="nombres"
-                value={paciente.nombres || ""}
-                onChange={handleChange}
-                placeholder="Nombres y Apellidos"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="registroCivil">
-                Registro Civil
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="registroCivil"
-                name="registroCivil"
-                value={paciente.registroCivil || ""}
-                onChange={handleChange}
-                placeholder="Registro Civil"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="genero">
-                Género
-              </label>
-              <select
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="genero"
-                name="genero"
-                value={paciente.genero || ""}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccione</option>
-                <option value="Femenino">Femenino</option>
-                <option value="Masculino">Masculino</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="lugarNacimiento">
-                Lugar de Nacimiento
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="lugarNacimiento"
-                name="lugarNacimiento"
-                value={paciente.lugarNacimiento || ""}
-                onChange={handleChange}
-                placeholder="Lugar de Nacimiento"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="fechaNacimiento">
-                Fecha de Nacimiento
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="fechaNacimiento"
-                name="fechaNacimiento"
-                type="date"
-                value={paciente.fechaNacimiento || ""}
-                onChange={handleChange}
-                placeholder="Fecha de Nacimiento"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="edad">
-                Edad (en meses)
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="edad"
-                name="edad"
-                value={paciente.edad || ""}
-                onChange={handleChange}
-                placeholder="Edad"
-                type="number"
-                readOnly
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="peso">
-                Peso <span className="text-gray-500 text-xs">(kg)</span>
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="peso"
-                name="peso"
-                value={paciente.peso || ""}
-                onChange={handleChange}
-                placeholder="Peso en kg"
-                type="number"
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="talla">
-                Talla <span className="text-gray-500 text-xs">(cm)</span>
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="talla"
-                name="talla"
-                value={paciente.talla || ""}
-                onChange={handleChange}
-                placeholder="Talla en cm"
-                type="number"
-                min="0"
-                step="0.1"
-              />
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-pink-50 py-10 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-indigo-100">
+        <div className="bg-indigo-600 p-6 text-white text-center">
+          <h2 className="text-2xl font-bold uppercase tracking-widest">Edición de Historia Clínica Digital</h2>
+          <p className="text-indigo-100 text-sm opacity-80 italic">Modificando expediente de {paciente.nombres} {paciente.apellidos}</p>
         </div>
 
-        {/* DATOS DE CONTACTO */}
-        <div>
-          <h3 className="text-lg font-bold text-indigo-600 mb-2 mt-6">Datos de contacto</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="direccion">
-                Dirección
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="direccion"
-                name="direccion"
-                value={paciente.direccion || ""}
-                onChange={handleChange}
-                placeholder="Dirección"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="telefono">
-                Teléfono
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="telefono"
-                name="telefono"
-                value={paciente.telefono || ""}
-                onChange={handleChange}
-                placeholder="Teléfono"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="celular">
-                Celular
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="celular"
-                name="celular"
-                value={paciente.celular || ""}
-                onChange={handleChange}
-                placeholder="Celular"
-              />
-            </div>
-          </div>
-        </div>
+        <form onSubmit={handleGuardar} className="p-8 space-y-10">
 
-        {/* DATOS DE PEDIATRA Y ASEGURADORA */}
-        <div>
-          <h3 className="text-lg font-bold text-indigo-600 mb-2 mt-6">Pediatra y aseguradora</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="pediatra">
-                Pediatra
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="pediatra"
-                name="pediatra"
-                value={paciente.pediatra || ""}
-                onChange={handleChange}
-                placeholder="Pediatra"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="aseguradora">
-                Aseguradora
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="aseguradora"
-                name="aseguradora"
-                value={paciente.aseguradora || ""}
-                onChange={handleChange}
-                placeholder="Aseguradora"
-                list="aseguradora-list"
-                autoComplete="off"
-              />
-              <datalist id="aseguradora-list">
-                {EPS_LIST.map(eps => (
-                  <option key={eps} value={eps} />
-                ))}
-              </datalist>
-            </div>
-          </div>
-        </div>
-
-        {/* DATOS DE LA MADRE */}
-        <div>
-          <h3 className="text-lg font-bold text-indigo-600 mb-2 mt-6">Datos de la madre</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="nombreMadre">
-                Nombre de la Madre
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="nombreMadre"
-                name="nombreMadre"
-                value={paciente.nombreMadre || ""}
-                onChange={handleChange}
-                placeholder="Nombre de la Madre"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="edadMadre">
-                Edad de la Madre
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="edadMadre"
-                name="edadMadre"
-                value={paciente.edadMadre || ""}
-                onChange={handleChange}
-                placeholder="Edad de la Madre"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="ocupacionMadre">
-                Ocupación de la Madre
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="ocupacionMadre"
-                name="ocupacionMadre"
-                value={paciente.ocupacionMadre || ""}
-                onChange={handleChange}
-                placeholder="Ocupación de la Madre"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* DATOS DEL PADRE */}
-        <div>
-          <h3 className="text-lg font-bold text-indigo-600 mb-2 mt-6">Datos del padre</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="nombrePadre">
-                Nombre del Padre
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="nombrePadre"
-                name="nombrePadre"
-                value={paciente.nombrePadre || ""}
-                onChange={handleChange}
-                placeholder="Nombre del Padre"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="edadPadre">
-                Edad del Padre
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="edadPadre"
-                name="edadPadre"
-                value={paciente.edadPadre || ""}
-                onChange={handleChange}
-                placeholder="Edad del Padre"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="ocupacionPadre">
-                Ocupación del Padre
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-400 outline-none text-base bg-indigo-50 shadow-sm"
-                id="ocupacionPadre"
-                name="ocupacionPadre"
-                value={paciente.ocupacionPadre || ""}
-                onChange={handleChange}
-                placeholder="Ocupación del Padre"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-center gap-4 mt-8">
-          <button
-            type="button"
-            className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-md transition hover:bg-green-700"
-            onClick={() => setMostrarConfirmar(true)}
-          >
-            Guardar cambios
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="bg-gray-300 hover:bg-gray-400 text-black px-8 py-3 rounded-xl font-bold text-lg shadow-md transition"
-          >
-            Cancelar
-          </button>
-        </div>
-        {error && <div className="text-red-600 text-center">{error}</div>}
-
-        {/* Modal de confirmación */}
-        {mostrarConfirmar && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-            <div className="bg-white border border-indigo-300 text-indigo-800 px-8 py-8 rounded-2xl shadow-lg flex flex-col items-center gap-6 max-w-md w-full">
-              <span className="font-bold text-lg">
-                ¿Deseas guardar los cambios del paciente niño?
-              </span>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => {
-                    setMostrarConfirmar(false);
-                    handleGuardar();
-                  }}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-xl font-bold"
-                >
-                  Sí, guardar
-                </button>
-                <button
-                  onClick={() => setMostrarConfirmar(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-black px-6 py-2 rounded-xl font-bold"
-                >
-                  Cancelar
-                </button>
+          {/* SECCIÓN 1: IDENTIFICACIÓN BÁSICA */}
+          <section>
+            <h3 className="text-indigo-700 font-black border-b-2 border-indigo-100 mb-6 flex items-center gap-2">
+              🆔 IDENTIFICACIÓN Y DATOS BÁSICOS
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="col-span-1 md:col-span-3 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-400">Nombres</label>
+                  <input name="nombres" value={paciente.nombres || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400">Apellidos</label>
+                  <input name="apellidos" value={paciente.apellidos || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Tipo Doc</label>
+                <input value={paciente.tipoDocumentoIdentificacion || ''} disabled className="w-full bg-gray-50 border-b-2 border-gray-200 p-2 text-gray-400" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Número</label>
+                <input name="numDocumentoIdentificacion" value={paciente.numDocumentoIdentificacion || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Género</label>
+                <select name="codSexo" value={paciente.codSexo || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition">
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                  <option value="O">Otro</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Fecha Nacimiento</label>
+                <input type="date" name="fechaNacimiento" value={paciente.fechaNacimiento?.split('T')[0] || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Edad ({isNino ? 'meses' : 'años'})</label>
+                <input name="edad" value={paciente.edad || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Aseguradora</label>
+                <input name="aseguradora" value={paciente.aseguradora || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
               </div>
             </div>
+          </section>
+
+          {/* SECCIÓN 2: CAMPOS ESPECÍFICOS (PEDIATRÍA O ADULTO) */}
+          <section className={`p-6 rounded-2xl ${isNino ? 'bg-indigo-50 border border-indigo-100' : 'bg-pink-50 border border-pink-100'}`}>
+            <h3 className={`${isNino ? 'text-indigo-700' : 'text-pink-700'} font-black mb-6 uppercase text-sm tracking-tighter`}>
+              {isNino ? '🍼 Información Pediátrica Detallada' : '🤱 Información Programas Perinatales / Piso Pélvico'}
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {isNino ? (
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">Nombre de la Madre</label>
+                    <input name="nombreMadre" value={paciente.nombreMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">Nombre del Padre</label>
+                    <input name="nombrePadre" value={paciente.nombrePadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">Pediatra Tratante</label>
+                    <input name="pediatra" value={paciente.pediatra || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">Peso (kg)</label>
+                    <input name="peso" value={paciente.peso || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">Talla (cm)</label>
+                    <input name="talla" value={paciente.talla || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-pink-400">Estado Civil</label>
+                    <input name="estadoCivil" value={paciente.estadoCivil || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-pink-400">Ocupación</label>
+                    <input name="ocupacion" value={paciente.ocupacion || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-pink-400">Acompañante</label>
+                    <input name="acompanante" value={paciente.acompanante || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div className="md:col-span-3 grid grid-cols-3 gap-4 border-t border-pink-100 pt-4">
+                    <div>
+                      <label className="text-xs font-bold text-pink-400 italic">FUM (Ult Menstruación)</label>
+                      <input type="date" name="fum" value={paciente.fum || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-pink-400 italic">Semanas Gestación</label>
+                      <input name="semanasGestacion" value={paciente.semanasGestacion || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-pink-400 italic">Fecha Prob Parto</label>
+                      <input type="date" name="fechaProbableParto" value={paciente.fechaProbableParto || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* BOTONES ACCIÓN */}
+          <div className="flex justify-end gap-4 border-t border-gray-100 pt-8">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="text-gray-400 font-bold hover:text-gray-600 px-6 py-3 transition"
+            >
+              DESCARTAR
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-indigo-600 hover:bg-black text-white px-10 py-3 rounded-full font-black tracking-widest text-xs shadow-xl transition-all disabled:opacity-50"
+            >
+              {isSubmitting ? 'GUARDANDO...' : 'ACTUALIZAR HISTORIA CLÍNICA'}
+            </button>
           </div>
-        )}
-      </form>
+
+          {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center font-bold text-sm border border-red-100 animate-shake">{error}</div>}
+        </form>
+      </div>
     </div>
   );
 }
