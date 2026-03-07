@@ -17,24 +17,8 @@ import RegistrarPaquete from "./componentes/RegistrarPaquete";
 import Home from "./componentes/Home";
 import EditarValoracion from "./componentes/EditarValoracion";
 import EditarPaciente from "./componentes/EditarPaciente";
-import DetallePacienteAdulto from "./componentes/DetallePacienteAdulto";
 
-import EditarPacienteAdulto from "./componentes/EditarPacienteAdulto";
-import ValoracionIngresoAdultosLactancia from "./componentes/valoracionadultos_lactancia/ValoracionIngresoAdultosLactancia";
-import DetalleValoracionIngresoAdultosLactancia from "./componentes/DetalleValoracionIngresoAdultosLactancia";
 
-import EditarValoracionIngresoAdultosLactancia from "./componentes/valoracionadultos_lactancia/EditarValoracionIngresoAdultosLactancia";
-//import ValoracionIngresoAdultosGeneral from "./componentes/valoracionadultos_general/ValoracionIngresoAdultosGeneral";
-import ValoracionIngresoProgramaPerinatal from "./componentes/valoracionperinatal/ValoracionIngresoProgramaPerinatal";
-import DetalleConsentimientoPerinatal from "./componentes/valoracionperinatal/DetalleConsentimientoPerinatal";
-import EditarConsentimientoPerinatal from "./componentes/valoracionperinatal/EditarConsentimientoPerinatal";
-import ListaSesionesPerinatal from "./componentes/valoracionperinatal/ListaSesionesPerinatal";
-import EditarClase from "./componentes/EditarClase";
-import "./componentes/logout.css";
-import Swal from "sweetalert2";
-import ValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/ValoracionPisoPelvico";
-import DetalleValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/DetalleValoracionPisoPelvico";
-import EditarValoracionPisoPelvico from "./componentes/valoracionPisoPelvico/EditarValoracionPisoPelvico";
 import APIStatusIndicator from "./componentes/APIStatusIndicator";
 import ReportePaquetes from "./componentes/ReportePaquetes";
 import EditarPaquete from "./componentes/EditarPaquete";
@@ -43,6 +27,9 @@ import GestionUsuarios from "./componentes/GestionUsuarios";
 import ListaSesionesMensuales from "./componentes/ListaSesionesMensuales";
 import CrearSesionMensual from "./componentes/CrearSesionMensual";
 import DetalleSesionMensual from "./componentes/DetalleSesionMensual";
+import ListaSesionesPerinatal from "./componentes/valoracionperinatal/ListaSesionesPerinatal";
+import EditarClase from "./componentes/EditarClase";
+import Swal from "sweetalert2";
 
 
 import {
@@ -56,7 +43,6 @@ import {
 
 
   ClipboardDocumentCheckIcon,
-  ClipboardIcon,
   DocumentTextIcon,
   ChartBarIcon,
 
@@ -93,7 +79,6 @@ function App() {
 function RutasAutenticadas({ usuario, setUsuario }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [submenuValoraciones, setSubmenuValoraciones] = useState(false); // <--- NUEVO
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const navigate = useNavigate();
 
@@ -281,43 +266,27 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/registrar-usuario" element={<RegistroUsuario />} />
 
             <Route path="/registros" element={<VerRegistros />} />
-            <Route path="/valoracion" element={<NuevaValoracionUnificada />} />
+            {/* --- HISTORIA CLÍNICA UNIFICADA --- */}
+            {/* --- HISTORIA CLÍNICA UNIFICADA --- */}
             <Route path="/valoraciones" element={<ListaValoraciones />} />
-            <Route path="/detalle-valoracion/:id" element={<DetalleValoracion />} />
             <Route path="/valoraciones/:id" element={<DetalleValoracion />} />
+            <Route path="/valoraciones/editar/:id" element={<EditarValoracion />} />
+            <Route path="/valoracion" element={<NuevaValoracionUnificada />} />
+
+            {/* --- PACIENTES Y REGISTRO --- */}
             <Route path="/registro" element={<RegistroPacienteUnificado />} />
             <Route path="/pacientes" element={<ListaPacientes />} />
             <Route path="/pacientes/:id" element={<DetallePaciente />} />
-            <Route path="/clases/nueva" element={<CrearClase />} />
-            <Route path="/clases" element={<ListaClases />} />
-            <Route path="/clases/:id" element={<DetalleClase />} />
-            <Route path="/paquetes/nuevo/:id" element={<RegistrarPaquete />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/valoraciones/editar/:id" element={<EditarValoracion />} />
             <Route path="/pacientes/editar/:id" element={<EditarPaciente />} />
-            <Route path="/registrar-paciente-nino" element={<RegistroPacienteUnificado />} />
-            <Route path="/registrar-paciente-adulto" element={<RegistroPacienteUnificado />} />
-            <Route path="/pacientes-adultos" element={<ListaPacientes />} />
-            <Route path="/pacientes-adultos/:id" element={<DetallePaciente />} />
-            <Route path="/pacientes-adultos/editar/:id" element={<EditarPaciente />} />
-            <Route path="/valoracion-adultos/nueva/:id" element={<ValoracionIngresoAdultosLactancia />}
-            />
-            {/* RUTAS LACTANCIA (Ahora renderiza mediante ListaValoracionesUnificada) */}
-            <Route path="/valoraciones-adultos-lactancia" element={<ListaValoraciones />} />
-            <Route path="/valoracion-ingreso-adultos-lactancia/:id" element={<DetalleValoracionIngresoAdultosLactancia />} />
-            <Route path="/valoraciones-adultos-lactancia/:id" element={<DetalleValoracionIngresoAdultosLactancia />} />
-            <Route path="/editar-valoracion-ingreso-adultos-lactancia/:id" element={<EditarValoracionIngresoAdultosLactancia />} />
-            <Route path="/valoracion-ingreso-programa-perinatal/:id" element={<ValoracionIngresoProgramaPerinatal />} />
-            {/* RUTAS PERINATALES (Ahora renderiza mediante ListaValoracionesUnificada) */}
-            <Route path="/consentimientos-perinatales" element={<ListaValoraciones />} />
-            <Route path="/consentimientos-perinatales/:id" element={<DetalleConsentimientoPerinatal />} />
-            <Route path="/consentimientos-perinatales/:id/editar" element={<EditarConsentimientoPerinatal />} />
+
+            {/* --- CLASES Y SESIONES --- */}
+            <Route path="/" element={<Home />} />
+            <Route path="/clases" element={<ListaClases />} />
+            <Route path="/clases/nueva" element={<CrearClase />} />
+            <Route path="/clases/:id" element={<DetalleClase />} />
             <Route path="/clases/editar/:id" element={<EditarClase />} />
-            {/* RUTAS PISO PÉLVICO */}
-            <Route path="/valoraciones-piso-pelvico" element={<ListaValoraciones />} />
-            <Route path="/valoracion-piso-pelvico/:id" element={<ValoracionPisoPelvico />} />
-            <Route path="/valoraciones-piso-pelvico/:id" element={<DetalleValoracionPisoPelvico />} />
-            <Route path="/valoraciones-piso-pelvico/:id/editar" element={<EditarValoracionPisoPelvico />} />
+            <Route path="/paquetes/nuevo/:id" element={<RegistrarPaquete />} />
+            <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
             <Route path="/pacientes/:id/sesiones-perinatal" element={<ListaSesionesPerinatal />} />
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
             <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />

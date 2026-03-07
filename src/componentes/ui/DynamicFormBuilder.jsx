@@ -1,43 +1,58 @@
 import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
-import { apiRequest } from "../../config/api";
+import { apiRequest, API_CONFIG } from "../../config/api";
 import { useNavigate } from "react-router-dom";
 import SignaturePad from "react-signature-canvas";
 
-export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginado = false }) {
+export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginado = false, initialData = null }) {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({});
     const [errores, setErrores] = useState("");
     const [guardando, setGuardando] = useState(false);
     const [pasoActual, setPasoActual] = useState(0);
+    const [submitLocked, setSubmitLocked] = useState(false);
+
+    const isEdit = !!initialData;
 
     // Referencias para las firmas (Canvas)
     const signatureRefs = useRef({});
 
-    // Inicializar estado según el esquema (recorriendo todas las secciones)
+    // Cargar datos (initial o default)
     useEffect(() => {
-        const defaultData = {};
-        esquema.secciones.forEach((seccion) => {
-            seccion.campos.forEach((campo) => {
-                defaultData[campo.nombre] = campo.valorPorDefecto || (campo.tipo === "select" && campo.opciones.length ? "" : "");
-                // Agrupar firmas
-                if (campo.tipo === "firma") {
-                    signatureRefs.current[campo.nombre] = React.createRef();
-                }
+        if (isEdit) {
+            // Cuando editamos, intentamos aplanar los datos anidados para el formulario
+            const flatData = {};
+            const flatten = (obj, prefix = '') => {
+                Object.keys(obj).forEach(key => {
+                    const value = obj[key];
+                    const fullKey = prefix ? `${prefix}.${key}` : key;
+                    if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date) && !String(value).startsWith('data:image') && !String(value).startsWith('http')) {
+                        flatten(value, fullKey);
+                    } else {
+                        flatData[fullKey] = value;
+                    }
+                });
+            };
+            flatten(initialData);
+            setFormData(flatData);
+        } else {
+            const defaultData = {};
+            esquema.secciones.forEach((seccion) => {
+                seccion.campos.forEach((campo) => {
+                    defaultData[campo.nombre] = campo.valorPorDefecto || (campo.tipo === "select" && campo.opciones?.length ? "" : "");
+                    if (campo.tipo === "firma") {
+                        signatureRefs.current[campo.nombre] = React.createRef();
+                    }
+                });
             });
-        });
-        setFormData(defaultData);
-    }, [esquema]);
+            setFormData(defaultData);
+        }
+    }, [esquema, initialData, isEdit]);
 
-    const handleChange = (e, autoCalcula) => {
+    const handleChange = (e) => {
         const { name, type, checked, value } = e.target;
         const finalValue = type === "checkbox" ? checked : value;
-
-        setFormData((prev) => {
-            let newState = { ...prev, [name]: finalValue };
-            // Aquí podrías procesar `autoCalcula` si hiciera falta
-            return newState;
-        });
+        setFormData((prev) => ({ ...prev, [name]: finalValue }));
     };
 
     const handleClearSignature = (nombre) => {
@@ -78,7 +93,11 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
     };
 
     const siguientePaso = () => {
-        if (validarPasoActual()) setPasoActual(p => Math.min(esquema.secciones.length - 1, p + 1));
+        if (validarPasoActual()) {
+            setPasoActual(p => Math.min(esquema.secciones.length - 1, p + 1));
+            setSubmitLocked(true);
+            setTimeout(() => setSubmitLocked(false), 500); // Bloqueo anti doble click
+        }
     };
 
     const anteriorPaso = () => {
@@ -86,18 +105,79 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+        if (guardando || submitLocked) return;
         if (isPaginado && !validarPasoActual()) return;
 
         try {
+            console.log("🛠️ INICIANDO GUARDADO DE FORMULARIO DYNAMIC");
             setGuardando(true);
-            // Extraemos el paciente seleccionado si el componente anfitrión lo inyectó, o lo enviamos directo.
-            await apiRequest(esquema.endpoint, {
-                method: "POST",
-                body: JSON.stringify(formData)
+
+            // 1. Convertir y subir cualquier imagen base64 a S3
+            const finalFormData = { ...formData };
+            for (const key in finalFormData) {
+                console.log(`🔎 Revisando campo: ${key}`);
+                if (typeof finalFormData[key] === 'string' && finalFormData[key].startsWith('data:image')) {
+                    console.log(`⚠️ Firma Base64 detectada en el campo: ${key}. Iniciando subida a S3...`);
+                    try {
+                        const base64Data = finalFormData[key];
+                        const blob = await fetch(base64Data).then(r => r.blob());
+                        const formDataUpload = new FormData();
+                        formDataUpload.append('imagen', blob, `firma-${Date.now()}.png`);
+
+                        const token = sessionStorage.getItem("token");
+                        const uploadResponse = await fetch(`${API_CONFIG.BASE_URL}/api/upload`, {
+                            method: 'POST',
+                            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                            body: formDataUpload
+                        });
+
+                        console.log(`📥 Respuesta de subida para ${key}: status ${uploadResponse.status}`);
+
+                        if (!uploadResponse.ok) {
+                            const errResp = await uploadResponse.text();
+                            console.error(`❌ Error en respuesta de S3:`, errResp);
+                            throw new Error("Error al subir imagen");
+                        }
+
+                        const uploadData = await uploadResponse.json();
+                        console.log(`✅ Firma subida a S3 correctamente, URL obtenida:`, uploadData.url);
+                        finalFormData[key] = uploadData.url; // Reemplazar base64 con URL S3
+                    } catch (uploadReqErr) {
+                        console.error("❌ Fallo subida firma:", uploadReqErr);
+                        Swal.fire("Error", "No se pudo subir una de las firmas. Intente de nuevo.", "error");
+                        setGuardando(false);
+                        return;
+                    }
+                }
+            }
+            console.log("🏁 Proceso de escaneo de firmas Base64 terminado.");
+
+            // "Unflatten" dot notation keys into nested objects for the backend
+            const unflattenedData = {};
+            Object.keys(finalFormData).forEach(key => {
+                const parts = key.split('.');
+                let current = unflattenedData;
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    if (i === parts.length - 1) {
+                        current[part] = finalFormData[key];
+                    } else {
+                        current[part] = current[part] || {};
+                        current = current[part];
+                    }
+                }
             });
 
-            Swal.fire("¡Guardado!", `${esquema.titulo} guardado con éxito.`, "success");
+            const method = isEdit ? "PUT" : "POST";
+            const endpoint = isEdit ? `${esquema.endpoint}/${initialData._id}` : esquema.endpoint;
+
+            await apiRequest(endpoint, {
+                method,
+                body: JSON.stringify(unflattenedData)
+            });
+
+            Swal.fire("¡Éxito!", `${esquema.titulo} ${isEdit ? 'actualizado' : 'guardado'} correctamente.`, "success");
             if (onSubmitSuccess) {
                 onSubmitSuccess();
             } else if (esquema.redireccion) {
@@ -193,10 +273,15 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                         id={campo.nombre}
                         name={campo.nombre}
                         type={campo.tipo}
-                        value={formData[campo.nombre] || ""}
+                        value={
+                            campo.tipo === 'datetime-local' && formData[campo.nombre]
+                                ? String(formData[campo.nombre]).substring(0, 16)
+                                : (formData[campo.nombre] || "")
+                        }
                         onChange={handleChange}
                         required={campo.requerido}
                         readOnly={campo.lecsolo}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                         className={`px-4 py-3 rounded-xl border ${campo.lecsolo ? 'bg-gray-100' : 'bg-white'} border-indigo-200 focus:ring-2 focus:ring-indigo-300 w-full`}
                         placeholder={campo.placeholder}
                     />
@@ -245,7 +330,7 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                                     Siguiente
                                 </button>
                             ) : (
-                                <button type="submit" disabled={guardando} className="px-6 py-2 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700">
+                                <button type="submit" disabled={guardando || submitLocked} className="px-6 py-2 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-all">
                                     {guardando ? "Guardando..." : "Finalizar y Guardar"}
                                 </button>
                             )}
@@ -253,7 +338,7 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                     ) : (
                         <div className="flex gap-4 w-full justify-center">
                             <button type="button" onClick={() => navigate(esquema.redireccion)} className="px-8 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold">Cancelar</button>
-                            <button type="submit" disabled={guardando} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold">
+                            <button type="submit" disabled={guardando || submitLocked} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all">
                                 {guardando ? "Guardando..." : "Guardar"}
                             </button>
                         </div>

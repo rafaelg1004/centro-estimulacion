@@ -1,7 +1,7 @@
 export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
     titulo: "Programa Perinatal Integrado",
-    endpoint: "/consentimiento-perinatal", // Vía proxy
-    redireccion: "/consentimientos-perinatales",
+    endpoint: "/valoraciones",
+    redireccion: "/valoraciones",
     secciones: [
         {
             titulo: "Información General e Ingreso",
@@ -14,12 +14,14 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
                 { nombre: "fechaInicioAtencion", etiqueta: "Fecha de Ingreso al Programa", tipo: "datetime-local", requerido: true },
                 {
                     nombre: "finalidadTecnologiaSalud", etiqueta: "Finalidad", tipo: "select", opciones: [
-                        { valor: "10", etiqueta: "Promoción de la Salud" }
+                        { valor: "10", etiqueta: "Promoción de la Salud" },
+                        { valor: "44", etiqueta: "Rehabilitación" }
                     ], requerido: true, valorPorDefecto: "10"
                 },
                 {
                     nombre: "causaMotivoAtencion", etiqueta: "Causa Externa", tipo: "select", opciones: [
-                        { valor: "22", etiqueta: "Manejo del embarazo normal / preventivo" }
+                        { valor: "22", etiqueta: "Manejo del embarazo normal / preventivo" },
+                        { valor: "21", etiqueta: "Enfermedad general" }
                     ], requerido: true, valorPorDefecto: "22"
                 },
                 { nombre: "codDiagnosticoPrincipal", etiqueta: "Código Diagnóstico (CIE-10)", tipo: "text", requerido: true, placeholder: "Ej. Z349 - Supervisión de embarazo normal" }
@@ -29,17 +31,41 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
             titulo: "Anamnesis del Programa",
             campos: [
                 { nombre: "motivoConsulta", etiqueta: "Motivo de participar en el programa", tipo: "textarea", requerido: true },
-                { nombre: "enfermedadActual", etiqueta: "Anotaciones Clínicas de Ingreso", tipo: "textarea", requerido: true },
+                { nombre: "enfermedadActual", etiqueta: "Anotaciones Clínicas de Ingreso", tipo: "textarea" },
+            ]
+        },
+        {
+            titulo: "Signos Vitales",
+            campos: [
+                { nombre: "signosVitales.ta", etiqueta: "Tensión Arterial (mmHg)", tipo: "text" },
+                { nombre: "signosVitales.fr", etiqueta: "Frecuencia Respiratoria", tipo: "text" },
+                { nombre: "signosVitales.fc", etiqueta: "Frecuencia Cardíaca", tipo: "text" },
+                { nombre: "signosVitales.temperatura", etiqueta: "Temperatura (°C)", tipo: "text" },
+                { nombre: "signosVitales.pesoPrevio", etiqueta: "Peso Previo (kg)", tipo: "text" },
+                { nombre: "signosVitales.pesoActual", etiqueta: "Peso Actual (kg)", tipo: "text" },
+                { nombre: "signosVitales.talla", etiqueta: "Talla (cm)", tipo: "text" },
+                { nombre: "signosVitales.imc", etiqueta: "IMC", tipo: "text" },
+            ]
+        },
+        {
+            titulo: "Antecedentes Generales",
+            campos: [
+                { nombre: "antecedentes.patologicos", etiqueta: "Patologías Base (HTA, Diabetes, etc.)", tipo: "textarea" },
+                { nombre: "antecedentes.quirurgicos", etiqueta: "Quirúrgicos", tipo: "textarea" },
+                { nombre: "antecedentes.farmacologicos", etiqueta: "Medicamentos Actuales", tipo: "textarea" },
+                { nombre: "antecedentes.traumaticos", etiqueta: "Traumáticos", tipo: "textarea" },
+                { nombre: "antecedentes.familiares", etiqueta: "Antecedentes Familiares", tipo: "textarea" },
             ]
         },
         {
             titulo: "Condiciones Obstétricas",
             campos: [
-                { nombre: "antecedentes.ginecoObstetricos.embarazoAltoRiesgo", etiqueta: "¿Es un embarazo de alto riesgo?", tipo: "select", opciones: ["Sí", "No"], requerido: true },
-                { nombre: "antecedentes.ginecoObstetricos.historiaAborto", etiqueta: "Historia de Abortos prevíos", tipo: "text", placeholder: "Ej. Ninguno, 1" },
-
-                { nombre: "antecedentes.patologicos", etiqueta: "Patologías Base (HTA, Diabetes, etc.)", tipo: "textarea", requerido: true },
-                { nombre: "antecedentes.farmacologicos", etiqueta: "Medicamentos Actuales", tipo: "textarea" },
+                { nombre: "antecedentes.ginecoObstetricos.embarazoAltoRiesgo", etiqueta: "¿Es un embarazo de alto riesgo?", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "antecedentes.ginecoObstetricos.diabetesNoControlada", etiqueta: "Diabetes No Controlada", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "antecedentes.ginecoObstetricos.historiaAborto", etiqueta: "Historia de Abortos previos", tipo: "text", placeholder: "Ej. Ninguno, 1" },
+                { nombre: "antecedentes.ginecoObstetricos.semanasGestacion", etiqueta: "Semanas de Gestación", tipo: "text" },
+                { nombre: "antecedentes.ginecoObstetricos.fum", etiqueta: "Fecha Última Menstruación (FUM)", tipo: "text" },
+                { nombre: "antecedentes.ginecoObstetricos.tipoParto", etiqueta: "Tipo de Parto Previo", tipo: "text" },
             ]
         },
         {
@@ -53,14 +79,14 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
         {
             titulo: "Términos, Condiciones y Firmas Electrónicas",
             campos: [
-                { nombre: "terminos_acepto", etiqueta: "Acepto voluntariamente el ingreso al programa de ejercicios perinatales eximiendo de riesgos inherentes al Centro DMamitas.", tipo: "checkbox", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Paciente Maternar", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de Consentimiento", tipo: "firma", requerido: true },
+                { nombre: "terminos_acepto", etiqueta: "Acepto voluntariamente el ingreso al programa de ejercicios perinatales eximiendo de riesgos inherentes al Centro DMamitas.", tipo: "checkbox" },
+                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Paciente Maternar", tipo: "text" },
+                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text" },
+                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de Consentimiento", tipo: "firma" },
 
-                { nombre: "firmas.profesional.nombre", etiqueta: "Certificación Fisioterapeuta - Nombre", tipo: "text", requerido: true, valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa" },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", requerido: true, valorPorDefecto: "52862625 - Reg. Salud Departamental" },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional Asistente", tipo: "firma", requerido: true },
+                { nombre: "firmas.profesional.nombre", etiqueta: "Certificación Fisioterapeuta - Nombre", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa" },
+                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental" },
+                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional Asistente", tipo: "firma" },
             ]
         }
     ]

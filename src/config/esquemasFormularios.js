@@ -17,19 +17,26 @@ export const ESQUEMA_PACIENTE_NINO = {
         {
             titulo: "Datos del niño",
             campos: [
-                { nombre: "nombres", etiqueta: "Nombres y Apellidos", tipo: "text", requerido: true },
+                { nombre: "esAdulto", etiqueta: "Adulto", tipo: "text", lecsolo: true, valorPorDefecto: false, oculto: true },
+                { nombre: "nombres", etiqueta: "Nombres", tipo: "text", requerido: true },
+                { nombre: "apellidos", etiqueta: "Apellidos", tipo: "text", requerido: true },
                 {
-                    nombre: "tipoDocumento", etiqueta: "Tipo de Documento", tipo: "select", opciones: [
+                    nombre: "tipoDocumentoIdentificacion", etiqueta: "Tipo de Documento", tipo: "select", opciones: [
                         { valor: "RC", etiqueta: "Registro Civil (RC)" },
                         { valor: "TI", etiqueta: "Tarjeta de Identidad (TI)" },
-                        { valor: "MS", etiqueta: "Menor sin Identificación (MS)" }
+                        { valor: "MS", etiqueta: "Menor sin Identificación (MS)" },
+                        { valor: "CC", etiqueta: "Cédula de Ciudadanía (CC)" }
                     ], requerido: true
                 },
-                { nombre: "registroCivil", etiqueta: "Número de Documento", tipo: "text", requerido: true },
-                { nombre: "genero", etiqueta: "Género", tipo: "select", opciones: ["Masculino", "Femenino", "Otro"], requerido: true },
+                { nombre: "numDocumentoIdentificacion", etiqueta: "Número de Documento", tipo: "text", requerido: true },
+                {
+                    nombre: "codSexo", etiqueta: "Sexo (RIPS)", tipo: "select", opciones: [
+                        { valor: "M", etiqueta: "Masculino" },
+                        { valor: "F", etiqueta: "Femenino" }
+                    ], requerido: true
+                },
                 { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "text", requerido: true },
-                { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true, autoCalcula: ["edad_meses"] },
-                { nombre: "edad", etiqueta: "Edad (en meses)", tipo: "number", lecsolo: true, placeholder: "Automático" }, // El formBuilder o el form host debe encargarse de calcular
+                { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true },
                 { nombre: "peso", etiqueta: "Peso (kg)", tipo: "number", paso: "0.01", min: "0", requerido: true },
                 { nombre: "talla", etiqueta: "Talla (cm)", tipo: "number", paso: "0.1", min: "0", requerido: true },
             ]
@@ -70,18 +77,32 @@ export const ESQUEMA_PACIENTE_NINO = {
 
 export const ESQUEMA_PACIENTE_ADULTO = {
     titulo: "Registrar Paciente Adulto (Mamá)",
-    endpoint: "/pacientes-adultos",
+    endpoint: "/pacientes",
     redireccion: "/pacientes",
     secciones: [
         {
             titulo: "Datos Personales",
             campos: [
-                { nombre: "nombres", etiqueta: "Nombres y Apellidos", tipo: "text", requerido: true },
-                { nombre: "cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text", requerido: true },
-                { nombre: "genero", etiqueta: "Género", tipo: "select", opciones: ["Femenino", "Masculino", "Otro"], requerido: true },
+                { nombre: "esAdulto", etiqueta: "Adulto", tipo: "text", lecsolo: true, valorPorDefecto: true, oculto: true },
+                { nombre: "nombres", etiqueta: "Nombres", tipo: "text", requerido: true },
+                { nombre: "apellidos", etiqueta: "Apellidos", tipo: "text", requerido: true },
+                {
+                    nombre: "tipoDocumentoIdentificacion", etiqueta: "Tipo de Documento", tipo: "select", opciones: [
+                        { valor: "CC", etiqueta: "Cédula de Ciudadanía (CC)" },
+                        { valor: "CE", etiqueta: "Cédula de Extranjería (CE)" },
+                        { valor: "PA", etiqueta: "Pasaporte (PA)" },
+                        { valor: "PT", etiqueta: "Permiso por Protección Temporal (PT)" }
+                    ], requerido: true
+                },
+                { nombre: "numDocumentoIdentificacion", etiqueta: "Número de Documento", tipo: "text", requerido: true },
+                {
+                    nombre: "codSexo", etiqueta: "Sexo (RIPS)", tipo: "select", opciones: [
+                        { valor: "M", etiqueta: "Masculino" },
+                        { valor: "F", etiqueta: "Femenino" }
+                    ], requerido: true
+                },
                 { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "text", requerido: true },
-                { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true, autoCalcula: ["edad_anos"] },
-                { nombre: "edad", etiqueta: "Edad", tipo: "number", lecsolo: true, placeholder: "Automático" },
+                { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true },
                 { nombre: "estadoCivil", etiqueta: "Estado Civil", tipo: "text", requerido: true },
                 { nombre: "ocupacion", etiqueta: "Ocupación", tipo: "text", requerido: true },
                 { nombre: "nivelEducativo", etiqueta: "Nivel Educativo", tipo: "text", requerido: true },
@@ -113,28 +134,18 @@ export const ESQUEMA_PACIENTE_ADULTO = {
                     ],
                     requerido: true
                 },
-                // Dependencias (condicionales)
                 {
                     nombre: "fum",
                     etiqueta: "FUM (Fecha de Última Menstruación)",
                     tipo: "date",
-                    dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" },
-                    autoCalcula: ["embarazo"]
+                    dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" }
                 },
                 {
                     nombre: "semanasGestacion",
                     etiqueta: "Semanas de gestación",
                     tipo: "text",
-                    lecsolo: true,
                     dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" }
-                },
-                {
-                    nombre: "fechaProbableParto",
-                    etiqueta: "Fecha probable de parto",
-                    tipo: "date",
-                    lecsolo: true,
-                    dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" }
-                },
+                }
             ]
         }
     ]

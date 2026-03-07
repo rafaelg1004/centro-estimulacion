@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import TablaDinamica from "./ui/TablaDinamica";
-import { format } from "date-fns";
 
 export default function ListaPacientesUnificada() {
   // Columnas inteligentes para todos los pacientes
@@ -16,13 +15,20 @@ export default function ListaPacientesUnificada() {
       )
     },
     {
-      header: "Identificación CLN",
-      accessor: "tipo",
+      header: "Clasificación / Programa",
+      accessor: "esAdulto",
       format: (val, row) => {
-        const isNino = ['RC', 'TI', 'MS', 'AS', 'CD', 'CN', 'SC'].includes(row.tipoDocumentoIdentificacion);
+        if (!val) {
+          return (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter bg-indigo-50 text-indigo-600 border border-indigo-100">
+              🧒 Pediátrico
+            </span>
+          );
+        }
+        const esMaterna = row.semanasGestacion || row.fum || row.estadoEmbarazo;
         return (
-          <span className={`px - 2 py - 0.5 rounded - full text - [10px] font - black uppercase tracking - tighter ${isNino ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-pink-50 text-pink-600 border border-pink-100'} `}>
-            {isNino ? '🧒 Pediátrico' : '🤰 Materno'}
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${esMaterna ? 'bg-pink-50 text-pink-600 border border-pink-100' : 'bg-gray-50 text-gray-600 border border-gray-100'}`}>
+            {esMaterna ? '🤰 Materna' : '👤 Adulto'}
           </span>
         );
       }
@@ -30,10 +36,7 @@ export default function ListaPacientesUnificada() {
     {
       header: "Edad",
       accessor: "edad",
-      format: (val, row) => {
-        const isNino = ['RC', 'TI', 'MS', 'AS', 'CD', 'CN', 'SC'].includes(row.tipoDocumentoIdentificacion);
-        return `${val} ${isNino ? 'meses' : 'años'} `;
-      }
+      format: (val, row) => `${val} ${!row.esAdulto ? 'meses' : 'años'}`
     },
     { header: "Género", accessor: "genero", format: (val, row) => row.codSexo || val || 'N/A' },
     {

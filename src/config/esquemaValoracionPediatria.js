@@ -31,8 +31,8 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
         {
             titulo: "Anamnesis",
             campos: [
-                { nombre: "motivoConsulta", etiqueta: "Motivo de Consulta (Textual del paciente)", tipo: "textarea", requerido: true },
-                { nombre: "enfermedadActual", etiqueta: "Enfermedad Actual / Evolución", tipo: "textarea", requerido: true },
+                { nombre: "motivoConsulta", etiqueta: "Motivo de Consulta", tipo: "textarea", requerido: true },
+                { nombre: "enfermedadActual", etiqueta: "Enfermedad Actual / Evolución", tipo: "textarea" },
             ]
         },
         {
@@ -47,38 +47,59 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
             ]
         },
         {
-            titulo: "Hitos del Desarrollo Pediátrico",
+            titulo: "Antecedentes",
             campos: [
-                { nombre: "moduloPediatria.desarrolloMotor.sostieneCabeza", etiqueta: "¿Sostiene la cabeza?", tipo: "select", opciones: ["Sí", "No", "En proceso"] },
-                { nombre: "moduloPediatria.desarrolloMotor.seSientaSinApoyo", etiqueta: "¿Se sienta sin apoyo?", tipo: "select", opciones: ["Sí", "No", "En proceso"] },
-                { nombre: "moduloPediatria.desarrolloMotor.gateo", etiqueta: "¿Gatea?", tipo: "select", opciones: ["Sí", "No", "En proceso"] },
-                { nombre: "moduloPediatria.desarrolloMotor.marcha", etiqueta: "¿Camina solo?", tipo: "select", opciones: ["Sí", "No", "En proceso"] },
-
-                { nombre: "moduloPediatria.lenguaje.balbucea", etiqueta: "Balbucea/Vocaliza", tipo: "select", opciones: ["Sí", "No", "En proceso"] },
-                { nombre: "moduloPediatria.lenguaje.diceMamaPapa", etiqueta: "Dice Mamá/Papá", tipo: "select", opciones: ["Sí", "No", "En proceso"] },
-
-                { nombre: "moduloPediatria.conclusion.actividadesSugeridasCasa", etiqueta: "Sugerencias de actividades en casa", tipo: "textarea" },
+                { nombre: "antecedentes.prenatales", etiqueta: "Antecedentes Prenatales", tipo: "textarea" },
+                { nombre: "antecedentes.tipoParto", etiqueta: "Tipo de Parto", tipo: "text" },
+                { nombre: "antecedentes.tiempoGestacion", etiqueta: "Tiempo de Gestación", tipo: "text" },
+                { nombre: "antecedentes.lactancia", etiqueta: "Lactancia", tipo: "text" },
+                { nombre: "antecedentes.patologicos", etiqueta: "Patológicos", tipo: "textarea" },
+                { nombre: "antecedentes.quirurgicos", etiqueta: "Quirúrgicos", tipo: "textarea" },
+                { nombre: "antecedentes.farmacologicos", etiqueta: "Farmacológicos", tipo: "textarea" },
+                { nombre: "antecedentes.traumaticos", etiqueta: "Traumáticos", tipo: "textarea" },
+                { nombre: "antecedentes.familiares", etiqueta: "Familiares", tipo: "textarea" },
+            ]
+        },
+        {
+            titulo: "Desarrollo Motor",
+            campos: [
+                { nombre: "moduloPediatria.desarrolloMotor.sostieneCabeza", etiqueta: "Control Cefálico", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloMotor.seVoltea", etiqueta: "Rolados", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloMotor.seSientaSinApoyo", etiqueta: "Sedestación", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloMotor.gateo", etiqueta: "Gateo", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloMotor.sePoneDePie", etiqueta: "Bipedestación", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloMotor.marcha", etiqueta: "Marcha", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloMotor.correSalta", etiqueta: "Corre/Salta", tipo: "text" },
+            ]
+        },
+        {
+            titulo: "Examen Físico",
+            campos: [
+                { nombre: "examenFisico.postura", etiqueta: "Postura", tipo: "textarea" },
+                { nombre: "examenFisico.marcha", etiqueta: "Desplazamientos", tipo: "textarea" },
+                { nombre: "examenFisico.tonoMuscular", etiqueta: "Tono Muscular", tipo: "textarea" },
+                { nombre: "examenFisico.controlMotor", etiqueta: "Control Motor", tipo: "textarea" },
+                { nombre: "examenFisico.perfilSensorial", etiqueta: "Perfil Sensorial", tipo: "textarea" },
+                { nombre: "examenFisico.tejidoTegumentario", etiqueta: "Tejido Tegumentario", tipo: "textarea" },
+                { nombre: "examenFisico.reflejos", etiqueta: "Reflejos", tipo: "textarea" },
             ]
         },
         {
             titulo: "Diagnóstico y Plan de Tratamiento",
             campos: [
-                { nombre: "examenFisico.postura", etiqueta: "Postura", tipo: "textarea", requerido: true },
-                { nombre: "examenFisico.tonoMuscular", etiqueta: "Tono Muscular", tipo: "textarea", requerido: true },
                 { nombre: "diagnosticoFisioterapeutico", etiqueta: "Diagnóstico Fisioterapéutico", tipo: "textarea", requerido: true },
                 { nombre: "planTratamiento", etiqueta: "Plan de Manejo / Tratamiento", tipo: "textarea", requerido: true },
             ]
         },
         {
-            titulo: "Firmas Legales y Cierre (Ley 527 de 1999)",
+            titulo: "Firmas Legales",
             campos: [
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre del Acudiente", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento del Acudiente", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma del Acudiente", tipo: "firma", requerido: true },
-
-                { nombre: "firmas.profesional.nombre", etiqueta: "Nombre del Fisioterapeuta", tipo: "text", requerido: true, valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa" },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", requerido: true, valorPorDefecto: "52862625 - Reg. Salud Departamental" },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma", requerido: true },
+                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre del Acudiente", tipo: "text" },
+                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento del Acudiente", tipo: "text" },
+                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma del Acudiente", tipo: "firma" },
+                { nombre: "firmas.profesional.nombre", etiqueta: "Nombre del Fisioterapeuta", tipo: "text" },
+                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text" },
+                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma" },
             ]
         }
     ]

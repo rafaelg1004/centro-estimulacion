@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   UserPlusIcon,
@@ -6,10 +6,9 @@ import {
   PencilSquareIcon,
   ArrowLeftIcon,
   CheckIcon,
-  XMarkIcon,
   LockClosedIcon
 } from "@heroicons/react/24/solid";
-import FirmaCanvas from "./valoraciondeingreso/FirmaCanvas";
+import FirmaCanvas from "./ui/FirmaCanvas";
 import Swal from "sweetalert2";
 import { apiRequest } from "../config/api";
 
@@ -24,7 +23,7 @@ export default function DetalleSesionMensual() {
   const [guardando, setGuardando] = useState(false);
 
   // Cargar datos de la sesión
-  const cargarSesion = async () => {
+  const cargarSesion = useCallback(async () => {
     try {
       const data = await apiRequest(`/sesiones-mensuales/${id}`);
       setSesion(data);
@@ -33,11 +32,11 @@ export default function DetalleSesionMensual() {
     } finally {
       setCargando(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     cargarSesion();
-  }, [id]);
+  }, [cargarSesion]);
 
   // Buscar pacientes para agregar
   useEffect(() => {

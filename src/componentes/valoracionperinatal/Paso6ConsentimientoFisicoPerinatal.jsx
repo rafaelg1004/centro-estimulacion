@@ -1,11 +1,11 @@
 import React from "react";
-import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
+import FirmaCanvas from "../ui/FirmaCanvas";
 
 export default function Paso6ConsentimientoFisicoPerinatal({ formulario, handleChange, setFirma, anterior, onSubmit, siguiente, tipoPrograma, paciente }) {
   // Mostrar Guardar si es fisico o si es ambos en el paso 8 (físico)
   const mostrarGuardar = tipoPrograma === "fisico" || (tipoPrograma === "ambos" && !siguiente);
   const mostrarSiguiente = tipoPrograma === "ambos" && siguiente;
-  
+
   return (
     <div>
       <h3 className="text-lg font-bold text-indigo-700 mb-4 text-center">CONSENTIMIENTO INFORMADO ACONDICIONAMIENTO FISICO</h3>

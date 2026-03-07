@@ -1,5 +1,5 @@
 import React from "react";
-import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
+import FirmaCanvas from "../ui/FirmaCanvas";
 import Swal from "sweetalert2";
 
 export default function Paso8ConsentimientoEducacionIntensivoPerinatal({ formulario, handleChange, setFirma, anterior, onSubmit, tipoPrograma, paciente }) {
@@ -31,8 +31,8 @@ export default function Paso8ConsentimientoEducacionIntensivoPerinatal({ formula
       </div>
       {process.env.NODE_ENV === 'development' && (
         <div className="mb-4 p-2 bg-red-100 text-xs">
-          Debug Paso 8 - firmaPacienteEducacion: {formulario.firmaPacienteEducacion ? 'TIENE FIRMA' : 'VACIO'}<br/>
-          Valor real: {formulario.firmaPacienteEducacion || 'undefined/null/empty'}<br/>
+          Debug Paso 8 - firmaPacienteEducacion: {formulario.firmaPacienteEducacion ? 'TIENE FIRMA' : 'VACIO'}<br />
+          Valor real: {formulario.firmaPacienteEducacion || 'undefined/null/empty'}<br />
           firmaPacienteGeneral: {formulario.firmaPacienteGeneral ? 'TIENE FIRMA' : 'VACIO'}
         </div>
       )}

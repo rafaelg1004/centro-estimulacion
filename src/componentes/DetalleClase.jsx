@@ -143,7 +143,7 @@ export default function DetalleClase() {
 
   const getFacturaDeNino = (ninoId) => {
     const n = clase.ninos.find(n =>
-      (n.paciente?._id || n.paciente) === ninoId
+      (n.nino?._id || n.nino) === ninoId
     );
     return n?.numeroFactura || "";
   };
@@ -293,14 +293,14 @@ export default function DetalleClase() {
           {clase.ninos.map(n => {
             const tienePaquete = n.numeroFactura && n.numeroFactura.trim() !== '';
             return (
-              <li key={n.paciente?._id || n.paciente} className={`border rounded-2xl shadow p-4 flex flex-col gap-2 relative ${tienePaquete
+              <li key={n.nino?._id || n.nino} className={`border rounded-2xl shadow p-4 flex flex-col gap-2 relative ${tienePaquete
                 ? 'bg-white border-green-200'
                 : 'bg-red-50 border-red-300'
                 }`}>
                 <div className="flex items-center gap-2">
                   <span className={`font-semibold ${tienePaquete ? 'text-indigo-700' : 'text-red-700'
                     }`}>
-                    {n.paciente?.nombres || n.nombres}
+                    {n.nino?.nombres || n.nombres}
                   </span>
                   {tienePaquete ? (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded ml-2">
@@ -325,7 +325,7 @@ export default function DetalleClase() {
                 <div className="absolute top-2 right-2 flex gap-1">
                   {!tienePaquete && !clase.bloqueada && (
                     <button
-                      onClick={() => setAsignarPaqueteId(n.paciente?._id || n.paciente)}
+                      onClick={() => setAsignarPaqueteId(n.nino?._id || n.nino)}
                       className="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 rounded-full p-2 shadow"
                       title="Asignar paquete"
                     >
@@ -334,7 +334,7 @@ export default function DetalleClase() {
                   )}
                   {!clase.bloqueada && (
                     <button
-                      onClick={() => eliminarNinoDeClase(n.paciente?._id || n.paciente)}
+                      onClick={() => eliminarNinoDeClase(n.nino?._id || n.nino)}
                       className="bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 shadow"
                       title="Eliminar niño de la sesión"
                     >
@@ -354,7 +354,7 @@ export default function DetalleClase() {
             <div className="mb-4">
               <label className="block mb-2 font-medium text-gray-700">Paciente seleccionado:</label>
               <p className="text-yellow-700 font-semibold">
-                {clase.ninos.find(n => (n.paciente?._id || n.paciente) === asignarPaqueteId)?.paciente?.nombres || clase.ninos.find(n => (n.paciente?._id || n.paciente) === asignarPaqueteId)?.nombres}
+                {clase.ninos.find(n => (n.nino?._id || n.nino) === asignarPaqueteId)?.nino?.nombres || clase.ninos.find(n => (n.nino?._id || n.nino) === asignarPaqueteId)?.nombres}
               </p>
             </div>
             <div className="mb-4">
@@ -414,8 +414,8 @@ export default function DetalleClase() {
               >
                 <option value="">Selecciona un niño para firmar</option>
                 {clase.ninos.filter(n => !n.firma).map(n => (
-                  <option key={n.paciente?._id || n.paciente} value={n.paciente?._id || n.paciente}>
-                    {n.paciente?.nombres || n.nombres}
+                  <option key={n.nino?._id || n.nino} value={n.nino?._id || n.nino}>
+                    {n.nino?.nombres || n.nombres}
                   </option>
                 ))}
               </select>

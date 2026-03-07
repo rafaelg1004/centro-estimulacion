@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, TrashIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { ClipboardDocumentListIcon, ArrowLeftIcon, PencilSquareIcon, CreditCardIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
 import Swal from 'sweetalert2';
 
@@ -8,10 +8,7 @@ export default function DetallePacienteUnificado() {
   const { id } = useParams();
   const [paciente, setPaciente] = useState(null);
   const [error, setError] = useState("");
-  const [paquetes, setPaquetes] = useState([]);
-  const [clases, setClases] = useState([]);
   const [valoraciones, setValoraciones] = useState([]); // Historial de valoraciones unificado
-  const [pagina, setPagina] = useState(0);
   const [showValuationModal, setShowValuationModal] = useState(false);
   const navigate = useNavigate();
 
@@ -21,104 +18,11 @@ export default function DetallePacienteUnificado() {
       .then(data => setPaciente(data))
       .catch(() => setError("No se pudo cargar la historia clínica"));
 
-    // Cargar paquetes y clases (más relevante para niños, pero unificado)
-    apiRequest(`/pagoPaquete/por-nino/${id}`).then(setPaquetes).catch(() => []);
-    apiRequest(`/clases/paciente/${id}`).then(setClases).catch(() => []);
-
     // Cargar historial de valoraciones (unificado en /valoraciones)
     apiRequest(`/valoraciones/paciente/${id}`).then(setValoraciones).catch(() => []);
   }, [id]);
 
-  const eliminarFactura = async (paquete) => {
-    const result = await Swal.fire({
-      title: '¿Eliminar paquete?',
-      text: `¿Estás seguro de eliminar el paquete ${paquete.numeroFactura}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    });
 
-    if (result.isConfirmed) {
-      try {
-        await apiRequest(`/pagoPaquete/${paquete._id}`, { method: 'DELETE' });
-
-        Swal.fire({
-          title: '¡Eliminado!',
-          text: 'El paquete ha sido eliminado correctamente.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false
-        });
-
-        setPaquetes(paquetes.filter(p => p._id !== paquete._id));
-      } catch (error) {
-        console.error('Error al eliminar paquete:', error);
-
-        // Intentar parsear el mensaje de error del backend
-        let errorMessage = 'No se pudo eliminar el paquete. Inténtalo de nuevo.';
-        let errorData = null;
-
-        // Verificar diferentes formatos de error
-        if (error.response && error.response.data) {
-          errorData = error.response.data;
-        } else if (error.message && error.message.includes('{')) {
-          try {
-            errorData = JSON.parse(error.message.substring(error.message.indexOf('{')));
-          } catch (e) {
-            // Si no se puede parsear, usar el mensaje original
-          }
-        }
-
-        if (errorData && errorData.clasesAfectadas) {
-          Swal.fire({
-            title: 'No se puede eliminar',
-            html: `
-              <div style="text-align: left;">
-                <p><strong>Motivo:</strong> Esta factura está siendo usada en ${errorData.clasesAfectadas} sesión(es):</p>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                  ${errorData.nombresClases.split(', ').map(clase => `<li>${clase}</li>`).join('')}
-                </ul>
-                <p><strong>Qué hacer:</strong></p>
-                <ol style="margin: 10px 0; padding-left: 20px;">
-                  <li>Ve a la sección "Lista de Sesiones"</li>
-                  <li>Busca cada sesión mencionada arriba</li>
-                  <li>Elimina al paciente de la lista de inscritos</li>
-                  <li>Luego podrás eliminar esta factura</li>
-                </ol>
-              </div>
-            `,
-            icon: 'warning',
-            confirmButtonText: 'Entendido',
-            width: '500px'
-          });
-        } else if (errorData && errorData.mensaje) {
-          Swal.fire({
-            title: 'No se puede eliminar',
-            text: errorData.mensaje,
-            icon: 'error',
-            confirmButtonText: 'Entendido'
-          });
-        } else if (error.message && error.message.includes('siendo usada en sesiones')) {
-          Swal.fire({
-            title: 'No se puede eliminar',
-            text: 'Esta factura está siendo usada en clases activas. Primero debe eliminar al paciente de las sesiones donde está inscrito.',
-            icon: 'error',
-            confirmButtonText: 'Entendido'
-          });
-        } else {
-          Swal.fire({
-            title: 'Error',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'Cerrar'
-          });
-        }
-      }
-    }
-  };
 
   const descargarRDA = async () => {
     try {
@@ -169,13 +73,27 @@ export default function DetallePacienteUnificado() {
     </div>
   );
 
-  // Paginación de clases
-  const clasesPorPagina = 5;
-  const totalPaginas = Math.ceil(clases.length / clasesPorPagina);
-  const inicio = pagina * clasesPorPagina;
-  const clasesAMostrar = clases.slice(inicio, inicio + clasesPorPagina);
 
-  const isNino = ['RC', 'TI', 'MS', 'AS', 'CD', 'CN', 'SC'].includes(paciente.tipoDocumentoIdentificacion || paciente.tipoDocumento);
+
+  const isNino = !paciente.esAdulto;
+
+  const calcularEdad = (fechaNac) => {
+    if (!fechaNac) return '';
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNac);
+    if (isNaN(nacimiento.getTime())) return '';
+
+    if (isNino) {
+      const meses = (hoy.getFullYear() - nacimiento.getFullYear()) * 12 + (hoy.getMonth() - nacimiento.getMonth());
+      return (meses >= 0 ? meses : 0);
+    } else {
+      let edadAños = hoy.getFullYear() - nacimiento.getFullYear();
+      if (hoy.getMonth() < nacimiento.getMonth() || (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())) {
+        edadAños--;
+      }
+      return (edadAños >= 0 ? edadAños : 0);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100 py-10 px-2">
@@ -208,7 +126,7 @@ export default function DetallePacienteUnificado() {
             <div className="space-y-1 text-sm">
               <p><span className="font-bold">Nombres:</span> {paciente.nombres} {paciente.apellidos}</p>
               <p><span className="font-bold">Doc:</span> {paciente.tipoDocumentoIdentificacion} {paciente.numDocumentoIdentificacion}</p>
-              <p><span className="font-bold">Edad:</span> {paciente.edad} {isNino ? 'meses' : 'años'}</p>
+              <p><span className="font-bold">Edad:</span> {calcularEdad(paciente.fechaNacimiento)} {isNino ? 'meses' : 'años'}</p>
               <p><span className="font-bold">Género:</span> {paciente.codSexo === 'M' ? 'Masculino' : 'Femenino'}</p>
               <p><span className="font-bold">F. Nacimiento:</span> {paciente.fechaNacimiento?.split('T')[0]}</p>
             </div>
@@ -236,10 +154,18 @@ export default function DetallePacienteUnificado() {
             <div className="space-y-1 text-sm">
               {isNino ? (
                 <>
-                  <p><span className="font-bold">Pediatra:</span> {paciente.pediatra}</p>
-                  <p><span className="font-bold">Peso:</span> {paciente.peso} kg</p>
-                  <p><span className="font-bold">Talla:</span> {paciente.talla} cm</p>
-                  <p><span className="font-bold">Padre:</span> {paciente.nombrePadre}</p>
+                  <p><span className="font-bold">Pediatra:</span> {paciente.pediatra || 'No especificado'}</p>
+                  <p><span className="font-bold">Peso:</span> {paciente.peso ? paciente.peso.replace(/kg|gr/ig, '').trim() + ' kg' : 'N/A'}</p>
+                  <p><span className="font-bold">Talla:</span> {paciente.talla ? paciente.talla.replace(/cm|m|mt/ig, '').trim() + ' cm' : 'N/A'}</p>
+
+                  <div className="mt-2 pt-2 border-t border-green-200">
+                    <p><span className="font-bold">Madre:</span> {paciente.nombreMadre || 'No especificada'} {paciente.edadMadre ? `(${paciente.edadMadre} años)` : ''}</p>
+                    {paciente.ocupacionMadre && <p><span className="font-bold text-gray-500 text-xs">Ocupación:</span> {paciente.ocupacionMadre}</p>}
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-green-200">
+                    <p><span className="font-bold">Padre:</span> {paciente.nombrePadre || 'No especificado'} {paciente.edadPadre ? `(${paciente.edadPadre} años)` : ''}</p>
+                    {paciente.ocupacionPadre && <p><span className="font-bold text-gray-500 text-xs">Ocupación:</span> {paciente.ocupacionPadre}</p>}
+                  </div>
                 </>
               ) : (
                 <>
@@ -356,7 +282,7 @@ export default function DetallePacienteUnificado() {
                       className="flex items-center gap-3 bg-pink-50 hover:bg-pink-600 hover:text-white text-pink-800 font-bold py-4 px-6 rounded-2xl text-lg w-full justify-center transition border border-pink-100"
                       onClick={() => {
                         setShowValuationModal(false);
-                        navigate(`/valoracion-piso-pelvico/${id}`);
+                        navigate(`/valoracion?paciente=${id}&tipo=pisopelvico`);
                       }}
                     >
                       💖 Piso Pélvico
@@ -365,7 +291,7 @@ export default function DetallePacienteUnificado() {
                       className="flex items-center gap-3 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-800 font-bold py-4 px-6 rounded-2xl text-lg w-full justify-center transition border border-blue-100"
                       onClick={() => {
                         setShowValuationModal(false);
-                        navigate(`/valoracion-adultos/nueva/${id}`);
+                        navigate(`/valoracion?paciente=${id}&tipo=lactancia`);
                       }}
                     >
                       🤱 Lactancia
@@ -374,7 +300,7 @@ export default function DetallePacienteUnificado() {
                       className="flex items-center gap-3 bg-green-50 hover:bg-green-600 hover:text-white text-green-800 font-bold py-4 px-6 rounded-2xl text-lg w-full justify-center transition border border-green-100"
                       onClick={() => {
                         setShowValuationModal(false);
-                        navigate(`/valoracion-ingreso-programa-perinatal/${id}`);
+                        navigate(`/valoracion?paciente=${id}&tipo=perinatal`);
                       }}
                     >
                       🤰 Perinatal

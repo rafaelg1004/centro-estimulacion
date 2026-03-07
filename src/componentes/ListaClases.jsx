@@ -15,6 +15,7 @@ export default function ListaClases() {
   // Paginación
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  // eslint-disable-next-line no-unused-vars
   const [totalItems, setTotalItems] = useState(0);
   const limite = 10;
 

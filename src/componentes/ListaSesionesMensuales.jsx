@@ -26,9 +26,11 @@ export default function ListaSesionesMensuales() {
   // Paginación
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  // eslint-disable-next-line no-unused-vars
   const [totalItems, setTotalItems] = useState(0);
   const limite = 12;
 
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
 
   const mesesNom = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -86,6 +88,7 @@ export default function ListaSesionesMensuales() {
     } else {
       cargarSesiones(pagina, mesSeleccionado);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vista, pagina, mesSeleccionado]);
 
   const eliminarSesion = async (id, e) => {

@@ -5,29 +5,35 @@ import { ESQUEMA_VALORACION_LACTANCIA } from "../config/esquemaValoracionLactanc
 import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPisoPelvico";
 import { ESQUEMA_CONSENTIMIENTO_PERINATAL } from "../config/esquemaConsentimientoPerinatal";
 import { apiRequest } from "../config/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function NuevaValoracionUnificada() {
-    const [pacienteId, setPacienteId] = useState(null);
+    const { search } = useLocation();
+    const query = new URLSearchParams(search);
+    const paramPacienteId = query.get("paciente");
+    const paramTipo = query.get("tipo");
+
+    const [pacienteId, setPacienteId] = useState(paramPacienteId || null);
     const [pacientes, setPacientes] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [filtro, setFiltro] = useState("");
-    const [tipoValoracionAdulto, setTipoValoracionAdulto] = useState(null); // 'lactancia', 'pisopelvico', 'perinatal'
+    const [tipoValoracionAdulto, setTipoValoracionAdulto] = useState(paramTipo || null); // 'lactancia', 'pisopelvico', 'perinatal'
     const navigate = useNavigate();
 
     // Paso 1: Cargar pacientes
     useEffect(() => {
-        Promise.all([
-            apiRequest("/pacientes").catch(() => []),
-            apiRequest("/pacientes-adultos").catch(() => [])
-        ])
-            .then(([ninos, adultos]) => {
-                const combinados = [
-                    ...(Array.isArray(ninos) ? ninos.map(p => ({ ...p, tipoModulo: 'pediatria' })) : []),
-                    ...(Array.isArray(adultos) ? adultos.map(p => ({ ...p, tipoModulo: 'adulto' })) : [])
-                ];
+        apiRequest("/pacientes")
+            .then((data) => {
+                const combinados = Array.isArray(data) ? data.map(p => ({
+                    ...p,
+                    tipoModulo: p.esAdulto ? 'adulto' : 'pediatria'
+                })) : [];
                 combinados.sort((a, b) => (a.nombres || "").localeCompare(b.nombres || ""));
                 setPacientes(combinados);
+                setCargando(false);
+            })
+            .catch(err => {
+                console.error("Error cargando pacientes:", err);
                 setCargando(false);
             });
     }, []);

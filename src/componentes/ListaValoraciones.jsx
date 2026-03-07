@@ -1,7 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
 import TablaDinamica from "./ui/TablaDinamica";
-import { apiRequest } from "../config/api";
-import { LockClosedIcon } from "@heroicons/react/24/solid";
 
 export default function HistoriaClinicaDigital() {
   // Columnas inteligentes para la Historia Clínica
@@ -14,7 +12,7 @@ export default function HistoriaClinicaDigital() {
           <span className="font-bold text-gray-800">{val.nombres} {val.apellidos}</span>
           <span className="text-[10px] text-gray-500 italic">{val.numDocumentoIdentificacion}</span>
         </div>
-      ) : "Paciente elminado"
+      ) : <span className="text-red-500 text-xs">Paciente no asignado</span>
     },
     {
       header: "Especialidad / Tipo",
@@ -24,6 +22,7 @@ export default function HistoriaClinicaDigital() {
           'Pediatría': 'bg-indigo-100 text-indigo-700 border-indigo-200',
           'Lactancia': 'bg-pink-100 text-pink-700 border-pink-200',
           'Piso Pélvico': 'bg-orange-100 text-orange-700 border-orange-200',
+          'Perinatal': 'bg-purple-100 text-purple-700 border-purple-200',
           'General': 'bg-gray-100 text-gray-700 border-gray-200 shadow-sm'
         };
         const color = colors[val] || colors.General;
@@ -80,19 +79,10 @@ export default function HistoriaClinicaDigital() {
           { name: "fechaFin", label: "Hasta", type: "date" }
         ]}
         acciones={{
-          ver: (row) => {
-            // Lógica dinámica de ruta según el tipo mapeado en el backend
-            let ruta = "/detalle-valoracion/";
-            if (row.tipo === 'Piso Pélvico') ruta = "/valoraciones-piso-pelvico/";
-            if (row.tipo === 'Lactancia') ruta = "/valoracion-ingreso-adultos-lactancia/";
-            return `${ruta}${row._id}`;
-          },
+          ver: (row) => `/valoraciones/${row._id}`,
           editar: (row) => {
             if (row.bloqueada) return null;
-            let ruta = "/valoraciones/editar/";
-            if (row.tipo === 'Piso Pélvico') ruta = "/valoracion-piso-pelvico/editar/";
-            if (row.tipo === 'Lactancia') ruta = "/valoraciones-adultos-lactancia/editar/";
-            return `${ruta}${row._id}`;
+            return `/valoraciones/editar/${row._id}`;
           },
           eliminar: true
         }}

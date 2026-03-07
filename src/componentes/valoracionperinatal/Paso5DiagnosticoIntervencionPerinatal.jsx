@@ -1,5 +1,5 @@
 import React from "react";
-import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
+import FirmaCanvas from "../ui/FirmaCanvas";
 
 export default function Paso5DiagnosticoIntervencionPerinatal({ formulario, setFirma, handleChange, anterior, siguiente }) {
 
@@ -42,7 +42,7 @@ export default function Paso5DiagnosticoIntervencionPerinatal({ formulario, setF
 
       {process.env.NODE_ENV === 'development' && (
         <div className="mb-4 p-2 bg-blue-100 text-xs">
-          Debug Paso 5 - firmaPaciente: {formulario.firmaPaciente ? 'TIENE FIRMA' : 'VACIO'}, 
+          Debug Paso 5 - firmaPaciente: {formulario.firmaPaciente ? 'TIENE FIRMA' : 'VACIO'},
           firmaPacienteGeneral: {formulario.firmaPacienteGeneral ? 'TIENE FIRMA' : 'VACIO'}
         </div>
       )}

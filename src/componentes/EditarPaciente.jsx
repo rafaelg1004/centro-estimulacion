@@ -3,14 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { apiRequest } from "../config/api";
 
-const EPS_LIST = [
-  "Nueva EPS", "Sanitas EPS", "Sura EPS", "Famisanar EPS", "Aliansalud EPS: MinTrabajo",
-  "Comfenalco Valle", "Salud Total EPS", "Capital Salud: MinTrabajo", "Compesar EPS: MinTrabajo",
-  "EPS y Medicina Prepagada Suramericana S.A.: MinTrabajo", "EPS Servicio Occidental de Salud S.A.: MinTrabajo",
-  "Comfenalco Antioquia", "Asfamilias", "Cafam", "Mutual Ser Eps", "Coosalud EPS: consultorsalud",
-  "Saludcoop: Ministerio de Salud y Protección Social", "Coomeva EPS", "Salud Colpatria",
-  "EPS Servicio Occidental de Salud (SOS)", "EPS Familiar de Colombia", "EPM Salud"
-];
+
 
 export default function EdicionHistoriaClinica() {
   const { id } = useParams();
@@ -33,6 +26,24 @@ export default function EdicionHistoriaClinica() {
   }, [id]);
 
   const isNino = paciente && ['RC', 'TI', 'MS', 'AS', 'CD', 'CN', 'SC'].includes(paciente.tipoDocumentoIdentificacion);
+
+  const calcularEdad = (fechaNac) => {
+    if (!fechaNac) return '';
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNac);
+    if (isNaN(nacimiento.getTime())) return '';
+
+    if (isNino) {
+      const meses = (hoy.getFullYear() - nacimiento.getFullYear()) * 12 + (hoy.getMonth() - nacimiento.getMonth());
+      return meses >= 0 ? meses : 0;
+    } else {
+      let edadAños = hoy.getFullYear() - nacimiento.getFullYear();
+      if (hoy.getMonth() < nacimiento.getMonth() || (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())) {
+        edadAños--;
+      }
+      return edadAños >= 0 ? edadAños : 0;
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -110,8 +121,8 @@ export default function EdicionHistoriaClinica() {
                 <input type="date" name="fechaNacimiento" value={paciente.fechaNacimiento?.split('T')[0] || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-400">Edad ({isNino ? 'meses' : 'años'})</label>
-                <input name="edad" value={paciente.edad || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                <label className="text-xs font-bold text-gray-400">Edad Calculada ({isNino ? 'meses' : 'años'})</label>
+                <input value={paciente.fechaNacimiento ? calcularEdad(paciente.fechaNacimiento) : ''} disabled className="w-full bg-gray-50 border-b-2 border-gray-200 p-2 text-gray-400 font-bold" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400">Aseguradora</label>

@@ -1,5 +1,5 @@
 import React from "react";
-import FirmaCanvas from "../valoraciondeingreso/FirmaCanvas";
+import FirmaCanvas from "../ui/FirmaCanvas";
 
 export default function Paso7ConsentimientoEducacionNacimientoPerinatal({ formulario, handleChange, setFirma, anterior, onSubmit, siguiente, tipoPrograma, paciente }) {
   // Depuración
@@ -11,7 +11,7 @@ export default function Paso7ConsentimientoEducacionNacimientoPerinatal({ formul
   // Si es ambos, este es el último paso de consentimiento
   return (
     <div>
-      <div style={{background: '#fffae6', color: '#b45309', padding: 8, marginBottom: 8, borderRadius: 4}}>PRUEBA: Este es el Paso 7 (Consentimiento Educación)</div>
+      <div style={{ background: '#fffae6', color: '#b45309', padding: 8, marginBottom: 8, borderRadius: 4 }}>PRUEBA: Este es el Paso 7 (Consentimiento Educación)</div>
       <h3 className="text-lg font-bold text-indigo-700 mb-4 text-center">CONSENTIMIENTO INFORMADO PROGRAMA DE EDUCACION PARA EL NACIMIENTO</h3>
       <div className="mb-6 bg-indigo-50 rounded p-4 text-gray-700 text-justify">
         Usted va a iniciar nuestro Programa de Educacion para el Nacimiento consta de 7 sesiones Teórico -prácticas para los padres, 1 sesión para los abuelos, descritas a continuación.

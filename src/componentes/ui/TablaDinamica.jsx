@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../../config/api";
 import Swal from "sweetalert2";
 
@@ -35,7 +35,7 @@ export default function TablaDinamica({
 
     // Paginación Básica Local (si el endpoint retorna un arreglo plano)
     const [paginaActiva, setPaginaActiva] = useState(1);
-    const itemsPorPagina = 10;
+    const itemsPorPagina = 50;
 
     const cargarDatos = async () => {
         setCargando(true);
@@ -47,12 +47,13 @@ export default function TablaDinamica({
                 setDatos(response);
             } else {
                 // Modo interno: asume que es una lista plana
-                let targetUrl = `${endpoint}`;
+                let targetUrl = `${endpoint}?limite=500`;
                 if (busqueda) {
-                    targetUrl = `${endpoint}/buscar?q=${encodeURIComponent(busqueda)}`;
+                    targetUrl = `${endpoint}?limite=500&busqueda=${encodeURIComponent(busqueda)}`;
                 }
                 const data = await apiRequest(targetUrl);
-                setDatos(Array.isArray(data) ? data : (data.data || []));
+                const extractedData = Array.isArray(data) ? data : (data.data || data.valoraciones || data.pacientes || data.registros || []);
+                setDatos(extractedData);
             }
         } catch (err) {
             console.error(err);
@@ -189,7 +190,7 @@ export default function TablaDinamica({
                                         <th key={i} className="px-5 py-4 text-left font-bold tracking-wider">{col.header}</th>
                                     ))}
                                     {acciones && (acciones.ver || acciones.editar || acciones.eliminar) && (
-                                        <th className="px-5 py-4 text-center font-bold tracking-wider rounded-tr-xl">Acciones</th>
+                                        <th className="px-5 py-4 text-center font-bold tracking-wider rounded-tr-xl sticky right-0 bg-indigo-600 shadow-md z-10">Acciones</th>
                                     )}
                                 </tr>
                             </thead>
@@ -208,12 +209,15 @@ export default function TablaDinamica({
                                             ))}
 
                                             {acciones && (acciones.ver || acciones.editar || acciones.eliminar) && (
-                                                <td className="px-5 py-4 text-center whitespace-nowrap">
+                                                <td className={`px-5 py-4 text-center whitespace-nowrap sticky right-0 z-10 border-l border-gray-100 ${rIdx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
                                                     <div className="flex items-center justify-center gap-2">
                                                         {acciones.ver && (
                                                             <button
-                                                                onClick={() => navigate(`${acciones.ver}${idRow}`)}
-                                                                className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition tooltip-trigger"
+                                                                onClick={() => {
+                                                                    const target = typeof acciones.ver === 'function' ? acciones.ver(row) : `${acciones.ver}${idRow}`;
+                                                                    navigate(target);
+                                                                }}
+                                                                className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition tooltip-trigger shadow-sm hover:shadow"
                                                                 title="Ver Detalles"
                                                             >
                                                                 👁️
@@ -221,8 +225,11 @@ export default function TablaDinamica({
                                                         )}
                                                         {acciones.editar && (
                                                             <button
-                                                                onClick={() => navigate(`${acciones.editar}${idRow}`)}
-                                                                className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition"
+                                                                onClick={() => {
+                                                                    const targetUrl = typeof acciones.editar === 'function' ? acciones.editar(row) : `${acciones.editar}${idRow}`;
+                                                                    if (targetUrl) navigate(targetUrl);
+                                                                }}
+                                                                className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition shadow-sm hover:shadow"
                                                                 title="Editar"
                                                             >
                                                                 ✏️
@@ -231,7 +238,7 @@ export default function TablaDinamica({
                                                         {acciones.eliminar && (
                                                             <button
                                                                 onClick={() => handleEliminar(idRow)}
-                                                                className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                                                                className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition shadow-sm hover:shadow"
                                                                 title="Eliminar permanentemente"
                                                             >
                                                                 🗑️
