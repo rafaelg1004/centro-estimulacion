@@ -5,101 +5,191 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
     secciones: [
         {
             titulo: "Información de Consulta e Ingreso",
+            siempreVisible: true,
             campos: [
                 {
                     nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
-                        { valor: "890201", etiqueta: "890201 - Consulta de primera vez (Medicina General)" },
-                        { valor: "890204", etiqueta: "890204 - Consulta Fisioterapia Pediátrica" },
-                    ], requerido: true
+                        { valor: "890201", etiqueta: "890201 - Valoración fisioterapéutica pediátrica (primera vez)" },
+                        { valor: "890209", etiqueta: "890209 - Control fisioterapéutico pediátrico" },
+                        { valor: "890215", etiqueta: "890215 - Sesión de fisioterapia neuromotora" },
+                        { valor: "890218", etiqueta: "890218 - Sesión de estimulación temprana" },
+                    ], requerido: true, valorPorDefecto: "890201"
                 },
-                { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true },
+                { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {
                     nombre: "finalidadTecnologiaSalud", etiqueta: "Finalidad", tipo: "select", opciones: [
-                        { valor: "44", etiqueta: "Rehabilitación" },
-                        { valor: "10", etiqueta: "Promoción de la Salud" }
-                    ], requerido: true
+                        { valor: "44", etiqueta: "44 - Rehabilitación funcional" },
+                        { valor: "10", etiqueta: "10 - Promoción de la salud / Estimulación temprana" },
+                        { valor: "27", etiqueta: "27 - Diagnóstico (valoración inicial)" },
+                        { valor: "12", etiqueta: "12 - Prevención / Educación terapéutica" },
+                    ], requerido: true, valorPorDefecto: "44"
                 },
                 {
                     nombre: "causaMotivoAtencion", etiqueta: "Causa Externa", tipo: "select", opciones: [
-                        { valor: "21", etiqueta: "Enfermedad general" },
-                        { valor: "04", etiqueta: "Accidente de trabajo" }
-                    ], requerido: true
+                        { valor: "21", etiqueta: "21 - Enfermedad general (desarrollo neuromotor)" },
+                        { valor: "24", etiqueta: "24 - Enfermedad congénita o perinatal" },
+                        { valor: "29", etiqueta: "29 - Consulta de seguimiento (control)" },
+                        { valor: "10", etiqueta: "10 - Lesión accidental" },
+                        { valor: "30", etiqueta: "30 - Prematurez / bajo peso al nacer" },
+                    ], requerido: true, valorPorDefecto: "21"
                 },
-                { nombre: "codDiagnosticoPrincipal", etiqueta: "Código Diagnóstico (CIE-10)", tipo: "text", requerido: true, placeholder: "Ej. M545" }
+                { nombre: "codDiagnosticoPrincipal", etiqueta: "Diagnóstico CIE-10", tipo: "cie10", requerido: true, placeholder: "Buscar diagnóstico..." }
             ]
         },
         {
-            titulo: "Anamnesis",
+            titulo: "Motivo de Consulta",
             campos: [
                 { nombre: "motivoConsulta", etiqueta: "Motivo de Consulta", tipo: "textarea", requerido: true },
-                { nombre: "enfermedadActual", etiqueta: "Enfermedad Actual / Evolución", tipo: "textarea" },
             ]
         },
         {
-            titulo: "Signos Vitales y Antropometría",
+            titulo: "Antecedentes Prenatales",
             campos: [
-                { nombre: "signosVitales.fc", etiqueta: "Frecuencia Cardíaca (lpm)", tipo: "text" },
-                { nombre: "signosVitales.fr", etiqueta: "Frecuencia Respiratoria (rpm)", tipo: "text" },
-                { nombre: "signosVitales.ta", etiqueta: "Tensión Arterial (mmHg)", tipo: "text" },
-                { nombre: "signosVitales.temperatura", etiqueta: "Temperatura (°C)", tipo: "text" },
-                { nombre: "signosVitales.pesoActual", etiqueta: "Peso (kg)", tipo: "text" },
-                { nombre: "signosVitales.talla", etiqueta: "Talla (cm)", tipo: "text" },
+                { nombre: "moduloPediatria.prenatales.gestacionPlaneada", etiqueta: "Gestación Planeada", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.gestacionControlada", etiqueta: "Gestación Controlada", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.metodosAnticonceptivos", etiqueta: "Gestación con métodos anticonceptivos", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.intentoAborto", etiqueta: "Intento de aborto", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.vomito1erTrim", etiqueta: "Vómito Primer Trimestre", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.sustancias", etiqueta: "Ingesta de fármacos, alcohol, drogas o cigarrillo", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.rayosX", etiqueta: "Exposición Rayos X", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.convulsiones", etiqueta: "Convulsiones", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.desnutricion", etiqueta: "Desnutrición", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.anemia", etiqueta: "Anemia", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.maltrato", etiqueta: "Maltrato", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.hipertension", etiqueta: "Hipertensión", tipo: "checkbox" },
+                { nombre: "moduloPediatria.prenatales.diabetes", etiqueta: "Diabetes", tipo: "checkbox" },
             ]
         },
         {
-            titulo: "Antecedentes",
+            titulo: "Antecedentes Perinatales",
             campos: [
-                { nombre: "antecedentes.prenatales", etiqueta: "Antecedentes Prenatales", tipo: "textarea" },
-                { nombre: "antecedentes.tipoParto", etiqueta: "Tipo de Parto", tipo: "text" },
-                { nombre: "antecedentes.tiempoGestacion", etiqueta: "Tiempo de Gestación", tipo: "text" },
-                { nombre: "antecedentes.lactancia", etiqueta: "Lactancia", tipo: "text" },
-                { nombre: "antecedentes.patologicos", etiqueta: "Patológicos", tipo: "textarea" },
-                { nombre: "antecedentes.quirurgicos", etiqueta: "Quirúrgicos", tipo: "textarea" },
-                { nombre: "antecedentes.farmacologicos", etiqueta: "Farmacológicos", tipo: "textarea" },
-                { nombre: "antecedentes.traumaticos", etiqueta: "Traumáticos", tipo: "textarea" },
-                { nombre: "antecedentes.familiares", etiqueta: "Familiares", tipo: "textarea" },
+                { nombre: "moduloPediatria.perinatales.tipoParto", etiqueta: "Parto / Cesárea", tipo: "select", opciones: ["Parto", "Cesárea"] },
+                { nombre: "moduloPediatria.perinatales.formaParto", etiqueta: "Forma de Parto", tipo: "select", opciones: ["Espontáneo", "Inducido", "Programado"] },
+                { nombre: "moduloPediatria.perinatales.tiempoGestacion", etiqueta: "Tiempo de gestación", tipo: "text" },
+                { nombre: "moduloPediatria.perinatales.lugarParto", etiqueta: "Lugar de Parto", tipo: "text" },
+                { nombre: "moduloPediatria.perinatales.atendidaOportunamente", etiqueta: "Atendida Oportunamente", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.perinatales.medicoTratante", etiqueta: "Médico Tratante", tipo: "text" },
+                { nombre: "moduloPediatria.perinatales.pesoAlNacer", etiqueta: "Peso al nacer", tipo: "text" },
+                { nombre: "moduloPediatria.perinatales.tallaAlNacer", etiqueta: "Talla al nacer", tipo: "text" },
+                { nombre: "moduloPediatria.perinatales.recibioCurso", etiqueta: "Recibió Curso Psicoprofiláctico", tipo: "select", opciones: ["Sí", "No"] },
             ]
         },
         {
-            titulo: "Desarrollo Motor",
+            titulo: "Antecedentes Recién Nacido",
             campos: [
-                { nombre: "moduloPediatria.desarrolloMotor.sostieneCabeza", etiqueta: "Control Cefálico", tipo: "text" },
-                { nombre: "moduloPediatria.desarrolloMotor.seVoltea", etiqueta: "Rolados", tipo: "text" },
-                { nombre: "moduloPediatria.desarrolloMotor.seSientaSinApoyo", etiqueta: "Sedestación", tipo: "text" },
-                { nombre: "moduloPediatria.desarrolloMotor.gateo", etiqueta: "Gateo", tipo: "text" },
-                { nombre: "moduloPediatria.desarrolloMotor.sePoneDePie", etiqueta: "Bipedestación", tipo: "text" },
-                { nombre: "moduloPediatria.desarrolloMotor.marcha", etiqueta: "Marcha", tipo: "text" },
-                { nombre: "moduloPediatria.desarrolloMotor.correSalta", etiqueta: "Corre/Salta", tipo: "text" },
+                { nombre: "moduloPediatria.recienNacido.llantoAlNacer", etiqueta: "Llanto al nacer", tipo: "checkbox" },
+                { nombre: "moduloPediatria.recienNacido.problemasRespiratorios", etiqueta: "Problemas Respiratorios", tipo: "checkbox" },
+                { nombre: "moduloPediatria.recienNacido.incubadora", etiqueta: "Incubadora", tipo: "checkbox" },
+                { nombre: "moduloPediatria.recienNacido.lactanciaMaterna", etiqueta: "Lactancia Materna", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.recienNacido.tiempoLactancia", etiqueta: "Tiempo de Lactancia", tipo: "text" },
+                { nombre: "moduloPediatria.recienNacido.hospitalarios", etiqueta: "Hospitalarios", tipo: "textarea" },
+                { nombre: "moduloPediatria.recienNacido.patologicos", etiqueta: "Patológicos", tipo: "textarea" },
+                { nombre: "moduloPediatria.recienNacido.familiares", etiqueta: "Familiares", tipo: "textarea" },
+                { nombre: "moduloPediatria.recienNacido.traumaticos", etiqueta: "Traumáticos", tipo: "textarea" },
+                { nombre: "moduloPediatria.recienNacido.farmacologicos", etiqueta: "Farmacológicos", tipo: "textarea" },
+                { nombre: "moduloPediatria.recienNacido.quirurgicos", etiqueta: "Quirúrgicos", tipo: "textarea" },
+                { nombre: "moduloPediatria.recienNacido.toxicosAlergicos", etiqueta: "Tóxico/alérgicos", tipo: "textarea" },
             ]
         },
         {
-            titulo: "Examen Físico",
+            titulo: "Hábitos y Estilo de Vida",
             campos: [
-                { nombre: "examenFisico.postura", etiqueta: "Postura", tipo: "textarea" },
-                { nombre: "examenFisico.marcha", etiqueta: "Desplazamientos", tipo: "textarea" },
-                { nombre: "examenFisico.tonoMuscular", etiqueta: "Tono Muscular", tipo: "textarea" },
-                { nombre: "examenFisico.controlMotor", etiqueta: "Control Motor", tipo: "textarea" },
-                { nombre: "examenFisico.perfilSensorial", etiqueta: "Perfil Sensorial", tipo: "textarea" },
-                { nombre: "examenFisico.tejidoTegumentario", etiqueta: "Tejido Tegumentario", tipo: "textarea" },
-                { nombre: "examenFisico.reflejos", etiqueta: "Reflejos", tipo: "textarea" },
+                { nombre: "moduloPediatria.habitos.recomendacionesMedicas", etiqueta: "Recomendaciones Médicas o dieta especial", tipo: "textarea" },
+                { nombre: "moduloPediatria.habitos.problemasSueno", etiqueta: "Tiene problemas antes/durante/después de dormir", tipo: "textarea" },
+                { nombre: "moduloPediatria.habitos.duermeCon", etiqueta: "Duerme con", tipo: "select", opciones: ["Mamá", "Papá", "Hermanos", "Solo", "Otros"] },
+                { nombre: "moduloPediatria.habitos.patronSueno", etiqueta: "Patrón de sueño", tipo: "textarea" },
+                { nombre: "moduloPediatria.habitos.pesadillas", etiqueta: "¿Se despierta con pesadillas?", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.habitos.siesta", etiqueta: "¿Suele dormir siesta?", tipo: "text" },
+                { nombre: "moduloPediatria.habitos.miedos", etiqueta: "¿Tiene miedos?", tipo: "textarea", placeholder: "¿A qué?" },
+                { nombre: "moduloPediatria.habitos.cambioAlimentacion", etiqueta: "¿Le costó pasar de alimentación líquida a sólida?", tipo: "textarea", placeholder: "¿Por qué?" },
+                { nombre: "moduloPediatria.habitos.problemasSuccion", etiqueta: "Problemas de Succión", tipo: "checkbox" },
+                { nombre: "moduloPediatria.habitos.problemasMasticacion", etiqueta: "Problemas de Masticación", tipo: "checkbox" },
+                { nombre: "moduloPediatria.habitos.problemasDeglucion", etiqueta: "Problemas de Deglución", tipo: "checkbox" },
+                { nombre: "moduloPediatria.habitos.problemasComer", etiqueta: "¿Presenta problemas al comer?", tipo: "textarea", placeholder: "¿Cuáles?" },
+                { nombre: "moduloPediatria.habitos.alimentosPreferidos", etiqueta: "Alimentos preferidos", tipo: "textarea" },
+                { nombre: "moduloPediatria.habitos.alimentosNoGustan", etiqueta: "Alimentos que no le gustan", tipo: "textarea" },
             ]
         },
         {
-            titulo: "Diagnóstico y Plan de Tratamiento",
+            titulo: "Desarrollo Personal y Social",
+            campos: [
+                { nombre: "moduloPediatria.desarrolloSocial.viveConPadres", etiqueta: "¿Vive el niño con sus padres?", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloSocial.permaneceCon", etiqueta: "¿Con quién permanece el niño?", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloSocial.prefiereA", etiqueta: "¿A quién prefiere?", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloSocial.relacionHermanos", etiqueta: "¿Cómo es la relación con los hermanos?", tipo: "textarea" },
+                { nombre: "moduloPediatria.desarrolloSocial.emociones", etiqueta: "¿Cuáles son los sentimientos y emociones que más expresa?", tipo: "textarea" },
+                { nombre: "moduloPediatria.desarrolloSocial.juegaCon", etiqueta: "¿Con quién juega?", tipo: "text" },
+                { nombre: "moduloPediatria.desarrolloSocial.juegosPrefiere", etiqueta: "¿Qué juegos prefiere?", tipo: "textarea" },
+                { nombre: "moduloPediatria.desarrolloSocial.relacionDesconocidos", etiqueta: "¿Cómo se relaciona con desconocidos?", tipo: "textarea" },
+                { nombre: "moduloPediatria.rutinaDiaria", etiqueta: "Describa la rutina diaria de su hijo", tipo: "textarea" },
+            ]
+        },
+        {
+            titulo: "Desarrollo Ontológico (Hitos)",
+            campos: [
+                { nombre: "moduloPediatria.hitos.controlCefalico.si", etiqueta: "Control Cefálico (SI/NO)", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.hitos.controlCefalico.tiempo", etiqueta: "Control Cefálico (Tiempo)", tipo: "text" },
+                { nombre: "moduloPediatria.hitos.controlCefalico.obs", etiqueta: "Control Cefálico (Observaciones)", tipo: "text" },
+
+                { nombre: "moduloPediatria.hitos.rolados.si", etiqueta: "Rolados (SI/NO)", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.hitos.rolados.tiempo", etiqueta: "Rolados (Tiempo)", tipo: "text" },
+                { nombre: "moduloPediatria.hitos.rolados.obs", etiqueta: "Rolados (Observaciones)", tipo: "text" },
+
+                { nombre: "moduloPediatria.hitos.sedente.si", etiqueta: "Sedente (SI/NO)", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.hitos.sedente.tiempo", etiqueta: "Sedente (Tiempo)", tipo: "text" },
+                { nombre: "moduloPediatria.hitos.sedente.obs", etiqueta: "Sedente (Observaciones)", tipo: "text" },
+
+                { nombre: "moduloPediatria.hitos.gateo.si", etiqueta: "Gateo (SI/NO)", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.hitos.gateo.tiempo", etiqueta: "Gateo (Tiempo)", tipo: "text" },
+                { nombre: "moduloPediatria.hitos.gateo.obs", etiqueta: "Gateo (Observaciones)", tipo: "text" },
+
+                { nombre: "moduloPediatria.hitos.bipedo.si", etiqueta: "Bípedo (SI/NO)", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.hitos.bipedo.tiempo", etiqueta: "Bípedo (Tiempo)", tipo: "text" },
+                { nombre: "moduloPediatria.hitos.bipedo.obs", etiqueta: "Bípedo (Observaciones)", tipo: "text" },
+
+                { nombre: "moduloPediatria.hitos.marcha.si", etiqueta: "Marcha (SI/NO)", tipo: "select", opciones: ["Sí", "No"] },
+                { nombre: "moduloPediatria.hitos.marcha.tiempo", etiqueta: "Marcha (Tiempo)", tipo: "text" },
+                { nombre: "moduloPediatria.hitos.marcha.obs", etiqueta: "Marcha (Observaciones)", tipo: "text" },
+            ]
+        },
+        {
+            titulo: "Observación General y Examen Físico",
+            campos: [
+                { nombre: "moduloPediatria.examen.fc", etiqueta: "Frecuencia Cardíaca (80-160ppm)", tipo: "text" },
+                { nombre: "moduloPediatria.examen.fr", etiqueta: "Frecuencia Respiratoria (30+-5)", tipo: "text" },
+                { nombre: "moduloPediatria.examen.temperatura", etiqueta: "Temperatura", tipo: "text" },
+                { nombre: "moduloPediatria.examen.tejidoTegumentario", etiqueta: "Tejido Tegumentario", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.reflejos", etiqueta: "Reflejos Osteotendinosos", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.anormales", etiqueta: "Anormales", tipo: "text" },
+                { nombre: "moduloPediatria.examen.patologicos", etiqueta: "Patológicos", tipo: "text" },
+                { nombre: "moduloPediatria.examen.tonoMuscular", etiqueta: "Tono Muscular", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.controlMotor", etiqueta: "Control Motor", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.desplazamientos", etiqueta: "Desplazamientos", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.sensibilidad", etiqueta: "Sensibilidad", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.perfilSensorial", etiqueta: "Perfil Sensorial", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.deformidades", etiqueta: "Deformidades o Contracturas", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.aparatosOrtopedicos", etiqueta: "Aparatos Ortopédicos", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.sistemaPulmonar", etiqueta: "Sistema Pulmonar (Simetría, patrón, expansión, auscultación...)", tipo: "textarea" },
+                { nombre: "moduloPediatria.examen.problemasAsociados", etiqueta: "Problemas Asociados", tipo: "textarea" },
+            ]
+        },
+        {
+            titulo: "Diagnóstico y Plan",
             campos: [
                 { nombre: "diagnosticoFisioterapeutico", etiqueta: "Diagnóstico Fisioterapéutico", tipo: "textarea", requerido: true },
-                { nombre: "planTratamiento", etiqueta: "Plan de Manejo / Tratamiento", tipo: "textarea", requerido: true },
+                { nombre: "planTratamiento", etiqueta: "Plan de Tratamiento", tipo: "textarea", requerido: true },
             ]
         },
         {
-            titulo: "Firmas Legales",
+            titulo: "Autorización y Firmas",
             campos: [
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre del Acudiente", tipo: "text" },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento del Acudiente", tipo: "text" },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma del Acudiente", tipo: "firma" },
-                { nombre: "firmas.profesional.nombre", etiqueta: "Nombre del Fisioterapeuta", tipo: "text" },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text" },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma" },
+                { nombre: "moduloPediatria.autorizacionImagen", etiqueta: "Autorizo el uso de imagen para fines educativos y redes sociales", tipo: "checkbox", valorPorDefecto: false },
+                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre del Acudiente / Representante", tipo: "text", requerido: true },
+                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "C.C. del Acudiente", tipo: "text", requerido: true },
+                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma del Acudiente", tipo: "firma", requerido: true },
+                { nombre: "firmas.profesional.nombre", etiqueta: "Firma del Fisioterapeuta", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
+                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
+                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma", requerido: true },
             ]
         }
     ]

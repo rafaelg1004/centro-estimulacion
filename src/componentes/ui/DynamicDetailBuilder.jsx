@@ -8,13 +8,67 @@ const Card = ({ title, children }) => (
     </div>
 );
 
-function Field({ label, value, isImage, audit }) {
-    if (isImage && (value || audit)) {
+function Field({ label, value, isImage, audit, options, type }) {
+    const [enrichedValue, setEnrichedValue] = React.useState(value);
+
+    React.useEffect(() => {
+        const resolveValue = async () => {
+            if (!value) {
+                setEnrichedValue(null);
+                return;
+            }
+
+            // Si es un select, buscar la etiqueta en las opciones
+            if (options && options.length > 0) {
+                const option = options.find(o => String(o.valor) === String(value) || String(o) === String(value));
+                if (option) {
+                    setEnrichedValue(option.etiqueta || option);
+                    return;
+                }
+            }
+
+            // Si es CIE-10 y solo viene el código, intentar buscar la descripción
+            if (type === 'cie10' && typeof value === 'string' && value.length > 0 && !value.includes(" - ")) {
+                try {
+                    // Importar dinámicamente o usar fetch si está disponible
+                    const res = await fetch(`${window.location.origin}/api/cie10?q=${value}&limit=1`);
+                    const data = await res.json();
+                    if (data && data.length > 0 && data[0].codigo.toUpperCase() === value.toUpperCase()) {
+                        setEnrichedValue(`${data[0].codigo} - ${data[0].descripcion}`);
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("Error resolviendo CIE-10", e);
+                }
+            }
+
+            // Si es una fecha (tipo datetime-local o parece una fecha ISO)
+            if (type === 'datetime-local' || type === 'date' || (typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/))) {
+                const date = new Date(value);
+                if (!isNaN(date.getTime())) {
+                    setEnrichedValue(date.toLocaleString('es-CO', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    }));
+                    return;
+                }
+            }
+
+            setEnrichedValue(value);
+        };
+        resolveValue();
+    }, [value, options, type]);
+
+    if (isImage && (enrichedValue || audit)) {
         return (
             <div className="flex flex-col items-center mb-6 p-4 bg-white rounded-2xl border border-dashed border-gray-200 shadow-sm">
                 {label && <span className="font-bold text-indigo-900 mb-3 text-sm uppercase tracking-wider">{label}</span>}
-                {value ? (
-                    <img src={value} alt={label} className="max-w-xs rounded-xl shadow-md border bg-gray-50 max-h-40 object-contain p-2 hover:scale-105 transition-transform" />
+                {enrichedValue ? (
+                    <img src={enrichedValue} alt={label} className="max-w-xs rounded-xl shadow-md border bg-gray-50 max-h-40 object-contain p-2 hover:scale-105 transition-transform" />
                 ) : (
                     <div className="h-24 w-48 flex items-center justify-center text-gray-300 italic border rounded-xl bg-gray-50">Sin firma registrada</div>
                 )}
@@ -30,12 +84,12 @@ function Field({ label, value, isImage, audit }) {
         );
     }
 
-    if (typeof value === "boolean") {
+    if (typeof enrichedValue === "boolean") {
         return (
             <div className="flex items-center gap-2 mb-3 p-3 bg-white rounded-xl border border-indigo-50 shadow-sm">
-                <span className={`h-3 w-3 rounded-full ${value ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></span>
+                <span className={`h-3 w-3 rounded-full ${enrichedValue ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></span>
                 <span className="font-semibold text-gray-600 text-sm whitespace-nowrap">{label}:</span>
-                <span className={`font-bold ${value ? 'text-green-700' : 'text-gray-400'}`}>{value ? "SÍ" : "NO"}</span>
+                <span className={`font-bold ${enrichedValue ? 'text-green-700' : 'text-gray-400'}`}>{enrichedValue ? "SÍ" : "NO"}</span>
             </div>
         );
     }
@@ -44,7 +98,7 @@ function Field({ label, value, isImage, audit }) {
         <div className="flex flex-col mb-4 p-3 hover:bg-indigo-50/30 rounded-xl transition-colors">
             {label && <span className="font-bold text-indigo-900 mb-1 text-xs uppercase tracking-tight">{label}</span>}
             <span className="text-gray-800 font-medium break-words leading-relaxed">
-                {value ? String(value) : <span className="text-gray-300 italic">No registrado</span>}
+                {enrichedValue ? String(enrichedValue) : <span className="text-gray-300 italic">No registrado</span>}
             </span>
         </div>
     );
@@ -56,6 +110,31 @@ export default function DynamicDetailBuilder({ esquema, data, onBack, onEdit, on
     const getNestedValue = (obj, path) => {
         if (!path) return null;
         return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    };
+
+    const calcularEdad = (fechaNac) => {
+        if (!fechaNac) return "N/A";
+        const hoy = new Date();
+        const cumple = new Date(fechaNac);
+
+        let edadAnos = hoy.getFullYear() - cumple.getFullYear();
+        let edadMeses = hoy.getMonth() - cumple.getMonth();
+
+        if (hoy.getDate() < cumple.getDate()) {
+            edadMeses--;
+        }
+
+        if (edadMeses < 0) {
+            edadAnos--;
+            edadMeses += 12;
+        }
+
+        if (edadAnos < 2) {
+            const totalMeses = (edadAnos * 12) + edadMeses;
+            return `${edadAnos} años (${totalMeses} meses)`;
+        }
+
+        return `${edadAnos} años`;
     };
 
     return (
@@ -110,17 +189,36 @@ export default function DynamicDetailBuilder({ esquema, data, onBack, onEdit, on
 
                     {/* Datos del Paciente - siempre debe venir del populate de paciente */}
                     {data.paciente && (
-                        <Card title="Datos del Paciente">
+                        <Card title="Ficha del Paciente">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
-                                <Field label="Nombres" value={data.paciente.nombres} />
-                                <Field label="Apellidos" value={data.paciente.apellidos} />
-                                <Field label="Documento" value={data.paciente.numDocumentoIdentificacion || data.paciente.registroCivil} />
-                                <Field label="Fecha de Nacimiento" value={data.paciente.fechaNacimiento ? new Date(data.paciente.fechaNacimiento).toLocaleDateString('es-CO') : null} />
-                                <Field label="Sexo" value={data.paciente.codSexo === 'M' ? 'Masculino' : data.paciente.codSexo === 'F' ? 'Femenino' : data.paciente.codSexo} />
-                                <Field label="Edad" value={data.paciente.edad} />
-                                <Field label="Aseguradora" value={data.paciente.aseguradora} />
-                                <Field label="Teléfono" value={data.paciente.telefono || data.paciente.celular} />
-                                <Field label="Dirección" value={data.paciente.direccion} />
+                                <Field label="Nombre Completo" value={`${data.paciente.nombres} ${data.paciente.apellidos || ""}`} />
+                                <Field label="Identificación" value={`${data.paciente.tipoDocumentoIdentificacion || "CC"}: ${data.paciente.numDocumentoIdentificacion || "S.D"}`} />
+                                <Field label="Edad Actual" value={calcularEdad(data.paciente.fechaNacimiento)} />
+                                <Field label="Sexo / Género" value={data.paciente.codSexo === 'M' ? 'Masculino' : data.paciente.codSexo === 'F' ? 'Femenino' : data.paciente.codSexo} />
+                                <Field label="Aseguradora" value={data.paciente.aseguradora || "Particular"} />
+                                <Field label="Teléfono / Celular" value={data.paciente.telefono || data.paciente.celular || data.paciente.datosContacto?.telefono || "S.D"} />
+
+                                {/* Campos Extra para Niños */}
+                                {!data.paciente.esAdulto && (
+                                    <>
+                                        <Field label="Pediatra" value={data.paciente.pediatra} />
+                                        <Field label="Madre" value={data.paciente.nombreMadre} />
+                                        <Field label="Padre" value={data.paciente.nombrePadre} />
+                                    </>
+                                )}
+
+                                {/* Campos Extra para Adultos/Materno */}
+                                {data.paciente.esAdulto && (
+                                    <>
+                                        <Field label="Sem. Gestación" value={data.paciente.semanasGestacion} />
+                                        <Field label="FUM" value={data.paciente.fum} />
+                                        <Field label="Ocupación" value={data.paciente.ocupacion} />
+                                    </>
+                                )}
+
+                                <div className="md:col-span-2 lg:col-span-3">
+                                    <Field label="Dirección de Residencia" value={data.paciente.direccion || data.paciente.datosContacto?.direccion} />
+                                </div>
                             </div>
                         </Card>
                     )}
@@ -147,6 +245,8 @@ export default function DynamicDetailBuilder({ esquema, data, onBack, onEdit, on
                                                     value={val}
                                                     isImage={campo.tipo === 'firma'}
                                                     audit={audit}
+                                                    options={campo.opciones}
+                                                    type={campo.tipo}
                                                 />
                                             </div>
                                         );

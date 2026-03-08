@@ -4,14 +4,15 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
     redireccion: "/valoraciones",
     secciones: [
         {
-            titulo: "Información General e Ingreso",
+            titulo: "Información de Consulta e Ingreso",
+            siempreVisible: true,
             campos: [
                 {
                     nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
                         { valor: "890204", etiqueta: "890204 - Consentimiento y Valoración Perinatal" },
                     ], requerido: true, valorPorDefecto: "890204"
                 },
-                { nombre: "fechaInicioAtencion", etiqueta: "Fecha de Ingreso al Programa", tipo: "datetime-local", requerido: true },
+                { nombre: "fechaInicioAtencion", etiqueta: "Fecha de Ingreso al Programa", tipo: "datetime-local", requerido: true, autoNow: true },
                 {
                     nombre: "finalidadTecnologiaSalud", etiqueta: "Finalidad", tipo: "select", opciones: [
                         { valor: "10", etiqueta: "Promoción de la Salud" },
@@ -24,7 +25,7 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
                         { valor: "21", etiqueta: "Enfermedad general" }
                     ], requerido: true, valorPorDefecto: "22"
                 },
-                { nombre: "codDiagnosticoPrincipal", etiqueta: "Código Diagnóstico (CIE-10)", tipo: "text", requerido: true, placeholder: "Ej. Z349 - Supervisión de embarazo normal" }
+                { nombre: "codDiagnosticoPrincipal", etiqueta: "Código Diagnóstico (CIE-10)", tipo: "cie10", requerido: true, placeholder: "Ej. Z349 - Supervisión de embarazo normal" }
             ]
         },
         {
@@ -84,8 +85,8 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
                 { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text" },
                 { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de Consentimiento", tipo: "firma" },
 
-                { nombre: "firmas.profesional.nombre", etiqueta: "Certificación Fisioterapeuta - Nombre", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa" },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental" },
+                { nombre: "firmas.profesional.nombre", etiqueta: "Certificación Fisioterapeuta - Nombre", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
+                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
                 { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional Asistente", tipo: "firma" },
             ]
         }

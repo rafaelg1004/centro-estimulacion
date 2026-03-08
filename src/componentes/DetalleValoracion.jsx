@@ -20,21 +20,21 @@ export default function DetalleValoracion() {
         const data = await apiRequest(`/valoraciones/${id}`);
         setValoracion(data);
 
-        // Determinar el esquema basándose en codConsulta (CUPS) primero, luego módulos
-        if (data.codConsulta === "890204") {
-          // Perinatal (código CUPS específico)
-          setEsquema(ESQUEMA_CONSENTIMIENTO_PERINATAL);
-        } else if (data.codConsulta === "890202" || (data.moduloPisoPelvico && Object.keys(data.moduloPisoPelvico).length > 0)) {
-          // Piso Pélvico
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (data.moduloLactancia && Object.keys(data.moduloLactancia).length > 0) {
+        // Determinar el esquema basándose primero en la presencia de módulos poblados
+        if (data.moduloLactancia && Object.keys(data.moduloLactancia).length > 0) {
           // Lactancia
           setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else if (data.moduloPediatria && Object.keys(data.moduloPediatria).length > 0) {
+        } else if (data.moduloPisoPelvico && Object.keys(data.moduloPisoPelvico).length > 0 || data.codConsulta === "890202") {
+          // Piso Pélvico
+          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
+        } else if (data.codConsulta === "890204" || data.tipoPrograma === 'Perinatal') {
+          // Perinatal
+          setEsquema(ESQUEMA_CONSENTIMIENTO_PERINATAL);
+        } else if (data.moduloPediatria && Object.keys(data.moduloPediatria).length > 0 || data.codConsulta === "890201") {
           // Pediatría
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         } else {
-          // Por defecto Pediatría (o un esquema general)
+          // Por defecto Pediatría
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         }
       } catch (err) {

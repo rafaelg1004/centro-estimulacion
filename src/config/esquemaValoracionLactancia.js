@@ -4,7 +4,8 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
     redireccion: "/valoraciones",
     secciones: [
         {
-            titulo: "Información de Consulta",
+            titulo: "Información de Consulta e Ingreso",
+            siempreVisible: true,
             campos: [
                 {
                     nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
@@ -12,7 +13,7 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
                         { valor: "890203", etiqueta: "890203 - Consulta Fisioterapia General" },
                     ], requerido: true, valorPorDefecto: "890201"
                 },
-                { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true },
+                { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {
                     nombre: "finalidadTecnologiaSalud", etiqueta: "Finalidad", tipo: "select", opciones: [
                         { valor: "44", etiqueta: "Rehabilitación" },
@@ -24,7 +25,7 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
                         { valor: "21", etiqueta: "Enfermedad general" }
                     ], requerido: true, valorPorDefecto: "21"
                 },
-                { nombre: "codDiagnosticoPrincipal", etiqueta: "Diagnóstico CIE-10", tipo: "text", requerido: true, placeholder: "Ej. Z391" }
+                { nombre: "codDiagnosticoPrincipal", etiqueta: "Diagnóstico CIE-10", tipo: "cie10", requerido: true, placeholder: "Ej. Z391" }
             ]
         },
         {
@@ -59,6 +60,8 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
                 { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Madre", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento de la Madre", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de la Madre", tipo: "firma", requerido: true },
+                { nombre: "firmas.profesional.nombre", etiqueta: "Nombre del Profesional", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
+                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
                 { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma", requerido: true },
             ]
         }

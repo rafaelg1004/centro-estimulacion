@@ -9,8 +9,8 @@
 export const API_CONFIG = {
   // URLs según entorno - En producción usa rutas relativas (mismo servidor)
   // Usar siempre el puerto del backend mientras estemos en localhost
-  BASE_URL: window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
+  BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5000'
     : '',
 
   // Timeouts por entorno

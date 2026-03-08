@@ -35,7 +35,7 @@ export default function TablaDinamica({
 
     // Paginación Básica Local (si el endpoint retorna un arreglo plano)
     const [paginaActiva, setPaginaActiva] = useState(1);
-    const itemsPorPagina = 50;
+    const itemsPorPagina = 20;
 
     const cargarDatos = async () => {
         setCargando(true);

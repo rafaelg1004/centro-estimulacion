@@ -27,7 +27,8 @@ import GestionUsuarios from "./componentes/GestionUsuarios";
 import ListaSesionesMensuales from "./componentes/ListaSesionesMensuales";
 import CrearSesionMensual from "./componentes/CrearSesionMensual";
 import DetalleSesionMensual from "./componentes/DetalleSesionMensual";
-import ListaSesionesPerinatal from "./componentes/valoracionperinatal/ListaSesionesPerinatal";
+import ListaSesionesPerinatal from "./componentes/ListaSesionesPerinatal";
+import ListaGlobalSesionesPerinatal from "./componentes/ListaGlobalSesionesPerinatal";
 import EditarClase from "./componentes/EditarClase";
 import Swal from "sweetalert2";
 
@@ -45,8 +46,7 @@ import {
   ClipboardDocumentCheckIcon,
   DocumentTextIcon,
   ChartBarIcon,
-
-
+  CalendarDaysIcon,
 } from "@heroicons/react/24/solid";
 import { logAPIConfig, testAPIConnection } from "./config/api";
 
@@ -145,6 +145,14 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               >
                 <UsersIcon className="h-5 w-5" />
                 Ver Pacientes
+              </Link>
+              <Link
+                to="/sesiones-perinatal"
+                className="bg-purple-100 hover:bg-purple-200 text-purple-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <CalendarDaysIcon className="h-5 w-5" />
+                Sesiones Perinatales
               </Link>
               <Link
                 to="/clases"
@@ -288,6 +296,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/paquetes/nuevo/:id" element={<RegistrarPaquete />} />
             <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
             <Route path="/pacientes/:id/sesiones-perinatal" element={<ListaSesionesPerinatal />} />
+            <Route path="/sesiones-perinatal" element={<ListaGlobalSesionesPerinatal />} />
             <Route path="/reporte-paquetes" element={<ReportePaquetes />} />
             <Route path="/paquetes/editar/:id" element={<EditarPaquete />} />
             <Route path="/generar-rips" element={<GenerarRIPS />} />
