@@ -8,10 +8,7 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
             siempreVisible: true,
             campos: [
                 {
-                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
-                        { valor: "890202", etiqueta: "890202 - Valoración Fisioterapia Piso Pélvico" },
-                        { valor: "890203", etiqueta: "890203 - Control Fisioterapia Piso Pélvico" }
-                    ], requerido: true, valorPorDefecto: "890202"
+                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
                 { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {

@@ -9,9 +9,7 @@ export const ESQUEMA_VALORACION_LACTANCIA_POSTPARTO = {
             campos: [
                 { nombre: "moduloLactancia.tipoLactancia", tipo: "hidden", valorPorDefecto: "postparto" },
                 {
-                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
-                        { valor: "890203", etiqueta: "890203 - Control Fisioterapia General" }
-                    ], requerido: true, valorPorDefecto: "890203"
+                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
                 { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {

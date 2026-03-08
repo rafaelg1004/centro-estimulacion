@@ -398,6 +398,104 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
             );
         }
 
+        // Campo CUPS buscable (Procedimientos, Consulta desde API Mongoose en Excel)
+        if (campo.tipo === "cups") {
+            const query = cie10Search[campo.nombre] ?? (formData[campo.nombre] || "");
+            const isOpen = cie10Open[campo.nombre];
+            const results = cie10Results[campo.nombre] || [];
+            const isLoading = cie10Loading[campo.nombre];
+
+            const isDropUp = cie10DropUp[campo.nombre];
+
+            const handleCupsFocus = async (e) => {
+                setCie10Open(p => ({ ...p, [campo.nombre]: true }));
+
+                // Determinar dirección si hay poco espacio abajo (250px es la altura max de la lista)
+                if (e && e.target) {
+                    const rect = e.target.getBoundingClientRect();
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    setCie10DropUp(p => ({ ...p, [campo.nombre]: spaceBelow < 250 }));
+                }
+
+                // Sugerencia default (Consulta Fisiatria Primera Vez)
+                const currentQuery = cie10Search[campo.nombre];
+                if (!currentQuery && (!cie10Results[campo.nombre] || cie10Results[campo.nombre].length === 0)) {
+                    setCie10Results(p => ({ ...p, [campo.nombre]: [{ codigo: "890264", descripcion: "CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FISICA Y REHABILITACION" }] }));
+                }
+            };
+
+            const handleCupsChange = (e) => {
+                const val = e.target.value;
+                setCie10Search(p => ({ ...p, [campo.nombre]: val }));
+                setCie10Open(p => ({ ...p, [campo.nombre]: true }));
+                if (!val) {
+                    setFormData(prev => ({ ...prev, [campo.nombre]: "" }));
+                    setCie10Results(p => ({ ...p, [campo.nombre]: [{ codigo: "890264", descripcion: "CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FISICA Y REHABILITACION" }] }));
+                    return;
+                }
+
+                clearTimeout(cie10Timers.current[campo.nombre]);
+                cie10Timers.current[campo.nombre] = setTimeout(async () => {
+                    setCie10Loading(p => ({ ...p, [campo.nombre]: true }));
+                    try {
+                        const data = await apiRequest(`/cups-catalogo?q=${encodeURIComponent(val)}&limit=15`);
+                        setCie10Results(p => ({ ...p, [campo.nombre]: data }));
+                    } catch { /* silenciar */ }
+                    setCie10Loading(p => ({ ...p, [campo.nombre]: false }));
+                }, 300);
+            };
+
+            return (
+                <div className="flex flex-col gap-1 relative">
+                    <label className="text-sm font-semibold text-gray-700" htmlFor={campo.nombre}>
+                        {campo.etiqueta} {campo.requerido && <span className="text-pink-600">*</span>}
+                    </label>
+                    <div className="relative">
+                        <input
+                            id={campo.nombre}
+                            type="text"
+                            placeholder={campo.placeholder || "Buscar por CUPS o descripción..."}
+                            value={query}
+                            onFocus={handleCupsFocus}
+                            onBlur={() => setTimeout(() => setCie10Open(p => ({ ...p, [campo.nombre]: false })), 200)}
+                            onChange={handleCupsChange}
+                            className="px-4 py-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-300 w-full"
+                            autoComplete="off"
+                        />
+                        {isLoading && (
+                            <span className="absolute right-3 top-3 text-blue-400 text-xs">Buscando...</span>
+                        )}
+                    </div>
+                    {formData[campo.nombre] && (
+                        <span className="text-xs text-blue-600 font-semibold">
+                            ✓ <strong>{formData[campo.nombre]}</strong>
+                        </span>
+                    )}
+                    {isOpen && results.length > 0 && (
+                        <ul className={`absolute left-0 right-0 z-50 bg-white border border-blue-200 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] max-h-56 overflow-y-auto ${isDropUp ? 'bottom-full mb-1 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.2)]' : 'top-full mt-1'}`}>
+                            {results.map(d => (
+                                <li
+                                    key={d.codigo}
+                                    className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-0"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        const fullValue = `${d.codigo} - ${d.nombre || d.descripcion}`;
+                                        setFormData(prev => ({ ...prev, [campo.nombre]: fullValue }));
+                                        setCie10Search(p => ({ ...p, [campo.nombre]: fullValue }));
+                                        setCie10Open(p => ({ ...p, [campo.nombre]: false }));
+                                    }}
+                                >
+                                    <span className="font-bold text-blue-700 mr-2">{d.codigo}</span>
+                                    <span className="text-gray-600 text-xs">{d.nombre || d.descripcion}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            );
+        }
+
+
         if (campo.tipo === "firma") {
             return (
                 <div className="flex flex-col gap-2 md:col-span-2">

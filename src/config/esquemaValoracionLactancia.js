@@ -8,10 +8,7 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
             siempreVisible: true,
             campos: [
                 {
-                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
-                        { valor: "890201", etiqueta: "890201 - Consulta de primera vez" },
-                        { valor: "890203", etiqueta: "890203 - Consulta Fisioterapia General" },
-                    ], requerido: true, valorPorDefecto: "890201"
+                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
                 { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {

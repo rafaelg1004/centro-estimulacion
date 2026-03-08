@@ -8,12 +8,7 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
             siempreVisible: true,
             campos: [
                 {
-                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
-                        { valor: "890201", etiqueta: "890201 - Valoración fisioterapéutica pediátrica (primera vez)" },
-                        { valor: "890209", etiqueta: "890209 - Control fisioterapéutico pediátrico" },
-                        { valor: "890215", etiqueta: "890215 - Sesión de fisioterapia neuromotora" },
-                        { valor: "890218", etiqueta: "890218 - Sesión de estimulación temprana" },
-                    ], requerido: true, valorPorDefecto: "890201"
+                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
                 { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {

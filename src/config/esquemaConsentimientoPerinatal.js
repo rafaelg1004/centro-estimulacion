@@ -8,9 +8,7 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
             siempreVisible: true,
             campos: [
                 {
-                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "select", opciones: [
-                        { valor: "890204", etiqueta: "890204 - Consentimiento y Valoración Perinatal" },
-                    ], requerido: true, valorPorDefecto: "890204"
+                    nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
                 { nombre: "fechaInicioAtencion", etiqueta: "Fecha de Ingreso al Programa", tipo: "datetime-local", requerido: true, autoNow: true },
                 {
