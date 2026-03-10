@@ -63,6 +63,7 @@ export default function ListaPacientesUnificada() {
         endpoint="/pacientes"
         columnas={columnasUnificadas}
         acciones={{
+          crear: "/registro",
           ver: "/pacientes/",
           editar: "/pacientes/editar/",
           eliminar: true
