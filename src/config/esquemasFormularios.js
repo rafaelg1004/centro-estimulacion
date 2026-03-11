@@ -17,7 +17,7 @@ export const ESQUEMA_PACIENTE_NINO = {
         {
             titulo: "Datos del niño",
             campos: [
-                { nombre: "esAdulto", etiqueta: "Adulto", tipo: "checkbox", lecsolo: true, valorPorDefecto: false, oculto: true },
+                { nombre: "esAdulto", etiqueta: "Adulto", tipo: "hidden", valorPorDefecto: false },
                 { nombre: "nombres", etiqueta: "Nombres", tipo: "text", requerido: true },
                 { nombre: "apellidos", etiqueta: "Apellidos", tipo: "text", requerido: true },
                 {
@@ -83,7 +83,7 @@ export const ESQUEMA_PACIENTE_ADULTO = {
         {
             titulo: "Datos Personales",
             campos: [
-                { nombre: "esAdulto", etiqueta: "Adulto", tipo: "checkbox", lecsolo: true, valorPorDefecto: true, oculto: true },
+                { nombre: "esAdulto", etiqueta: "Adulto", tipo: "hidden", valorPorDefecto: true },
                 { nombre: "nombres", etiqueta: "Nombres", tipo: "text", requerido: true },
                 { nombre: "apellidos", etiqueta: "Apellidos", tipo: "text", requerido: true },
                 {

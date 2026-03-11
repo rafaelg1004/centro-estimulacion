@@ -657,7 +657,8 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
         if (!seccion) return null;
         const camposReq = seccion.campos.filter(c => c.requerido && !c.oculto && c.tipo !== 'firma' && c.tipo !== 'checkbox');
         const camposOpc = seccion.campos.filter(c => !c.requerido && !c.oculto && c.tipo !== 'firma' && c.tipo !== 'checkbox' && c.tipo !== 'textarea');
-        const camposTexarea = seccion.campos.filter(c => c.tipo === 'textarea' || c.tipo === 'firma' || c.tipo === 'checkbox' || c.tipo === 'checkbox_group');
+        const camposTexarea = seccion.campos.filter(c => !c.oculto && (c.tipo === 'textarea' || c.tipo === 'firma' || c.tipo === 'checkbox' || c.tipo === 'checkbox_group'));
+        const camposOcultos = seccion.campos.filter(c => c.tipo === 'hidden' || c.oculto);
         const tieneOpcionales = camposOpc.length > 0;
 
         return (
@@ -691,6 +692,8 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
                             {camposTexarea.map((c, i) => <React.Fragment key={i}>{renderCampo(c)}</React.Fragment>)}
                         </div>
                     )}
+                    {/* Campos ocultos o hidden que no deben ocupar espacio */}
+                    {camposOcultos.map((c, i) => <React.Fragment key={i}>{renderCampo(c)}</React.Fragment>)}
                 </div>
             </div>
         );

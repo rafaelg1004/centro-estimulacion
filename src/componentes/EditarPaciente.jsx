@@ -25,7 +25,14 @@ export default function EdicionHistoriaClinica() {
       .catch(() => setError("Error al cargar la historia clínica"));
   }, [id]);
 
-  const isNino = paciente && ['RC', 'TI', 'MS', 'AS', 'CD', 'CN', 'SC'].includes(paciente.tipoDocumentoIdentificacion);
+  // Un paciente es niÃ±o si esAdulto es explÃcitamente falso (o string "false")
+  // o si el campo esAdulto estÃ¡ vacÃo/null pero el tipo de documento es obligatoriamente pediÃ¡trico.
+  const isNino = paciente && (
+    paciente.esAdulto === false || 
+    paciente.esAdulto === "false" ||
+    ((paciente.esAdulto === undefined || paciente.esAdulto === null || paciente.esAdulto === "") && 
+     ['RC', 'TI', 'MS', 'CN', 'SC', 'AS'].includes(paciente.tipoDocumentoIdentificacion))
+  );
 
   const calcularEdad = (fechaNac) => {
     if (!fechaNac) return '';
@@ -128,6 +135,24 @@ export default function EdicionHistoriaClinica() {
                 <label className="text-xs font-bold text-gray-400">Aseguradora</label>
                 <input name="aseguradora" value={paciente.aseguradora || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
               </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400">Lugar de Nacimiento</label>
+                <input name="lugarNacimiento" value={paciente.lugarNacimiento || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+              </div>
+              <div className="col-span-1 md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-50 pt-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-400">DirecciÃ³n</label>
+                  <input name="direccion" value={paciente.direccion || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400">TelÃ©fono Fijo</label>
+                  <input name="telefono" value={paciente.telefono || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400">Celular</label>
+                  <input name="celular" value={paciente.celular || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                </div>
+              </div>
             </div>
           </section>
 
@@ -145,8 +170,24 @@ export default function EdicionHistoriaClinica() {
                     <input name="nombreMadre" value={paciente.nombreMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
+                    <label className="text-xs font-bold text-indigo-400">Edad Madre</label>
+                    <input name="edadMadre" value={paciente.edadMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">OcupaciÃ³n Madre</label>
+                    <input name="ocupacionMadre" value={paciente.ocupacionMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
                     <label className="text-xs font-bold text-indigo-400">Nombre del Padre</label>
                     <input name="nombrePadre" value={paciente.nombrePadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">Edad Padre</label>
+                    <input name="edadPadre" value={paciente.edadPadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">OcupaciÃ³n Padre</label>
+                    <input name="ocupacionPadre" value={paciente.ocupacionPadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-indigo-400">Pediatra Tratante</label>
@@ -168,20 +209,46 @@ export default function EdicionHistoriaClinica() {
                     <input name="estadoCivil" value={paciente.estadoCivil || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-pink-400">Ocupación</label>
+                    <label className="text-xs font-bold text-pink-400">OcupaciÃ³n</label>
                     <input name="ocupacion" value={paciente.ocupacion || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-pink-400">Acompañante</label>
+                    <label className="text-xs font-bold text-pink-400">Nivel Educativo</label>
+                    <input name="nivelEducativo" value={paciente.nivelEducativo || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-pink-400">MÃ©dico Tratante</label>
+                    <input name="medicoTratante" value={paciente.medicoTratante || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-pink-400">Nombre AcompaÃ±ante</label>
                     <input name="acompanante" value={paciente.acompanante || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-pink-400">TelÃ©fono AcompaÃ±ante</label>
+                    <input name="telefonoAcompanante" value={paciente.telefonoAcompanante || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                  </div>
+                  <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-pink-100 pt-4">
+                    <div>
+                      <label className="text-xs font-bold text-pink-400">Nombre del BebÃ© (si aplica)</label>
+                      <input name="nombreBebe" value={paciente.nombreBebe || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-pink-400">Estado Embarazo</label>
+                      <select name="estadoEmbarazo" value={paciente.estadoEmbarazo || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-sm">
+                        <option value="">Seleccione...</option>
+                        <option value="gestacion">En gestaciÃ³n</option>
+                        <option value="posparto">Posparto</option>
+                      </select>
+                    </div>
                   </div>
                   <div className="md:col-span-3 grid grid-cols-3 gap-4 border-t border-pink-100 pt-4">
                     <div>
-                      <label className="text-xs font-bold text-pink-400 italic">FUM (Ult Menstruación)</label>
+                      <label className="text-xs font-bold text-pink-400 italic">FUM (Ult MenstruaciÃ³n)</label>
                       <input type="date" name="fum" value={paciente.fum || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-pink-400 italic">Semanas Gestación</label>
+                      <label className="text-xs font-bold text-pink-400 italic">Semanas GestaciÃ³n</label>
                       <input name="semanasGestacion" value={paciente.semanasGestacion || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
                     </div>
                     <div>
