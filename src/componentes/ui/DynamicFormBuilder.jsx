@@ -583,7 +583,7 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
                     key={campo.nombre}
                     type="hidden"
                     name={campo.nombre}
-                    value={formData[campo.nombre] || (campo.valorPorDefecto !== undefined ? campo.valorPorDefecto : "")}
+                    value={formData[campo.nombre] ?? (campo.valorPorDefecto !== undefined ? campo.valorPorDefecto : "")}
                 />
             );
         }
@@ -615,7 +615,7 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
                         value={
                             campo.tipo === 'datetime-local' && formData[campo.nombre]
                                 ? String(formData[campo.nombre]).substring(0, 16)
-                                : (formData[campo.nombre] || "")
+                                : (formData[campo.nombre] ?? "")
                         }
                         onChange={handleChange}
                         required={campo.requerido}
