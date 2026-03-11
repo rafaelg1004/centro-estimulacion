@@ -28,7 +28,7 @@ const CIE10_FISIO_SUGERENCIAS = [
 ];
 
 
-export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginado = false, initialData = null }) {
+export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel, isPaginado = false, initialData = null, isModalLayout = false }) {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({});
     const [errores, setErrores] = useState("");
@@ -79,7 +79,7 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                     } else if (campo.tipo === "checkbox") {
                         defaultData[campo.nombre] = campo.valorPorDefecto ?? false;
                     } else {
-                        defaultData[campo.nombre] = campo.valorPorDefecto || "";
+                        defaultData[campo.nombre] = campo.valorPorDefecto !== undefined ? campo.valorPorDefecto : "";
                     }
                     if (campo.tipo === "firma") {
                         signatureRefs.current[campo.nombre] = React.createRef();
@@ -697,13 +697,15 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-3">
+        <div className={isModalLayout ? "flex-1 w-full bg-white flex flex-col min-h-0" : "w-full h-full flex items-center justify-center p-4"}>
             <form
                 onSubmit={(e) => { e.preventDefault(); if (!isPaginado || pasoActual === totalPasos - 1) handleSubmit(e); }}
-                className="w-full max-w-7xl mx-auto"
+                className={isModalLayout ? "flex-1 flex flex-col w-full min-h-0 h-full" : "w-full max-w-7xl mx-auto"}
             >
-                {/* Título */}
-                <h2 className="text-2xl font-extrabold text-indigo-700 mb-5 text-center">{esquema.titulo}</h2>
+                {/* Cabeceras, alertas y layout */}
+                <div className={isModalLayout ? "flex-1 overflow-y-auto px-6 py-6" : ""}>
+                    {/* Título */}
+                    {!isModalLayout && <h2 className="text-2xl font-extrabold text-indigo-700 mb-5 text-center">{esquema.titulo}</h2>}
 
                 {/* Barra de progreso */}
                 {isPaginado && (
@@ -723,7 +725,7 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                 {errores && <div className="mb-4 p-4 bg-red-100 text-red-700 font-semibold rounded-xl">{errores}</div>}
 
                 {/* Layout principal: sidebar izquierdo fijo + paso actual derecho */}
-                <div className={`flex flex-col ${seccionesAlwaysOn.length > 0 ? 'lg:flex-row' : ''} gap-6 items-start`}>
+                <div className={`flex flex-col w-full ${seccionesAlwaysOn.length > 0 ? 'lg:flex-row items-start' : 'max-w-5xl mx-auto'} gap-6`}>
 
                     {/* PANEL IZQUIERDO: secciones siempreVisible — siempre visibles en todos los pasos */}
                     {seccionesAlwaysOn.length > 0 && (
@@ -740,16 +742,20 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                     )}
 
                     {/* PANEL DERECHO: pasos del formulario */}
-                    <div className="flex-1 min-w-0 space-y-5 lg:pl-2">
+                    <div className="flex-1 min-w-0 space-y-5 lg:pl-2 pb-8">
                         {seccionesARenderizar.map((s, i) => renderSeccion(s, i, false))}
+                    </div>
+                </div>
+                </div>
 
-
-                        {/* Botones de navegación - AHORA FIJOS AL FONDO */}
-                        <div className="sticky bottom-4 z-50 flex justify-between items-center bg-white/90 backdrop-blur-md border border-indigo-100 rounded-3xl px-8 py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8">
+                {/* Botones de navegación - AHORA FIJOS AL FONDO o FLAT en Modal */}
+                <div className={isModalLayout 
+                    ? "shrink-0 border-t border-gray-200 bg-gray-50 px-6 py-4 flex justify-end items-center" 
+                    : "sticky bottom-4 z-50 flex justify-between items-center bg-white/90 backdrop-blur-md border border-indigo-100 rounded-3xl px-8 py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8"}>
                             {isPaginado ? (
                                 <>
                                     <button type="button"
-                                        onClick={pasoActual === 0 ? () => navigate(esquema.redireccion) : anteriorPaso}
+                                        onClick={pasoActual === 0 ? () => (onCancel ? onCancel() : navigate(esquema.redireccion)) : anteriorPaso}
                                         className="px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200">
                                         {pasoActual === 0 ? '✕ Cancelar' : '← Anterior'}
                                     </button>
@@ -768,21 +774,19 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, isPaginad
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex gap-4 w-full justify-center">
-                                    <button type="button" onClick={() => navigate(esquema.redireccion)}
-                                        className="px-10 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200">✕ Cancelar</button>
+                                <div className={isModalLayout ? "flex gap-3 w-full justify-end" : "flex gap-4 w-full justify-center"}>
+                                    <button type="button" onClick={() => (onCancel ? onCancel() : navigate(esquema.redireccion))}
+                                        className={isModalLayout ? "px-6 py-2.5 font-bold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors" : "px-10 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200"}>✕ Cancelar</button>
                                     <button type="submit" disabled={guardando || submitLocked}
-                                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-indigo-200 disabled:opacity-50">
+                                        className={isModalLayout ? "px-6 py-2.5 font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50" : "px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"}>
                                         {guardando ? 'Guardando...' : '✓ Guardar Valoración'}
                                     </button>
                                 </div>
                             )}
-                        </div>
-                    </div>
                 </div>
             </form>
-            {/* Espaciador final para que los botones fijas no tapen el contenido */}
-            <div className="h-20"></div>
+            {/* Espaciador final solo si NO es modal */}
+            {!isModalLayout && <div className="h-20"></div>}
         </div>
     );
 }

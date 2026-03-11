@@ -114,7 +114,13 @@ export default function TablaDinamica({
                     <h1 className="text-3xl font-extrabold text-indigo-800 drop-shadow-sm">{titulo}</h1>
                     {acciones?.crear && (
                         <button
-                            onClick={() => navigate(acciones.crear)}
+                            onClick={() => {
+                                if (typeof acciones.crear === 'function') {
+                                    acciones.crear();
+                                } else {
+                                    navigate(acciones.crear);
+                                }
+                            }}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-md transition-all flex items-center gap-2"
                         >
                             <span>+ Nuevo Registro</span>

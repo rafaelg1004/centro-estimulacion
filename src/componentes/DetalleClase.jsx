@@ -21,6 +21,12 @@ export default function DetalleClase() {
   const [paquetesParaAsignar, setPaquetesParaAsignar] = useState([]);
   const [facturaAsignar, setFacturaAsignar] = useState("");
 
+  const [showPackageModal, setShowPackageModal] = useState(false);
+  const [pacienteCompraId, setPacienteCompraId] = useState("");
+  const [numeroFacturaNueva, setNumeroFacturaNueva] = useState('');
+  const [clasesPagadasNueva, setClasesPagadasNueva] = useState(1);
+  const [fechaPagoNueva, setFechaPagoNueva] = useState('');
+
   useEffect(() => {
     apiRequest(`/clases/${id}`)
       .then(setClase);
@@ -182,6 +188,46 @@ export default function DetalleClase() {
     });
   };
 
+  const handleRegistrarPaquete = async (e) => {
+    e.preventDefault();
+    try {
+      if (!numeroFacturaNueva.trim() || !fechaPagoNueva) {
+        return Swal.fire('Atención', 'Por favor llena todos los campos', 'warning');
+      }
+
+      await apiRequest("/pagoPaquete", {
+        method: "POST",
+        body: JSON.stringify({ 
+          paciente: pacienteCompraId, 
+          numeroFactura: numeroFacturaNueva, 
+          clasesPagadas: clasesPagadasNueva, 
+          fechaPago: fechaPagoNueva 
+        }),
+      });
+      
+      setShowPackageModal(false);
+      setNumeroFacturaNueva('');
+      setClasesPagadasNueva(1);
+      setFechaPagoNueva('');
+      
+      Swal.fire('¡Paquete registrado!', 'La compra se procesó correctamente.', 'success');
+      
+      // Recargar paquetes dependiendo del panel activo
+      if (pacienteCompraId === ninoId) {
+        apiRequest(`/pagoPaquete/por-nino/${ninoId}`).then(setPaquetes).catch(() => []);
+      }
+      if (pacienteCompraId === asignarPaqueteId) {
+        apiRequest(`/pagoPaquete/por-nino/${asignarPaqueteId}`).then(setPaquetesParaAsignar).catch(() => []);
+      }
+    } catch (err) {
+      Swal.fire(
+        'Error', 
+        err.message || 'Hubo un problema al registrar el paquete. ¿El número de factura ya existe?', 
+        'error'
+      );
+    }
+  };
+
   if (!clase) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
       <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-indigo-600 border-solid"></div>
@@ -258,18 +304,31 @@ export default function DetalleClase() {
                 )}
               </div>
               {ninoId && (
-                <select
-                  value={facturaAgregar}
-                  onChange={e => setFacturaAgregar(e.target.value)}
-                  className="border p-2 mb-2 w-full rounded-xl mt-2 bg-green-50"
-                >
-                  <option value="">Selecciona una factura/paquete</option>
-                  {paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).map(p => (
-                    <option key={p._id} value={p.numeroFactura}>
-                      {p.numeroFactura} (usadas: {p.clasesUsadas}/{p.clasesPagadas})
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-col md:flex-row gap-2 items-center mt-2 mb-2">
+                  <select
+                    value={facturaAgregar}
+                    onChange={e => setFacturaAgregar(e.target.value)}
+                    className="border p-2 w-full rounded-xl bg-green-50 transition"
+                  >
+                    <option value="">Selecciona una factura/paquete</option>
+                    {paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).map(p => (
+                      <option key={p._id} value={p.numeroFactura}>
+                        {p.numeroFactura} (usadas: {p.clasesUsadas}/{p.clasesPagadas})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPacienteCompraId(ninoId);
+                      setShowPackageModal(true);
+                    }}
+                    className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow flex justify-center items-center gap-2 font-bold transition whitespace-nowrap"
+                  >
+                    <CreditCardIcon className="h-5 w-5" /> Comprar Paquete
+                  </button>
+                </div>
               )}
               {ninoId && paquetes.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).length === 0 && (
                 <div className="text-red-600 text-sm mb-2">
@@ -359,18 +418,31 @@ export default function DetalleClase() {
             </div>
             <div className="mb-4">
               <label className="block mb-2 font-medium text-gray-700">Selecciona un paquete:</label>
-              <select
-                value={facturaAsignar}
-                onChange={e => setFacturaAsignar(e.target.value)}
-                className="border border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 rounded-xl px-4 py-2 w-full mb-4 transition outline-none shadow-sm bg-white"
-              >
-                <option value="">Selecciona una factura/paquete</option>
-                {paquetesParaAsignar.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).map(p => (
-                  <option key={p._id} value={p.numeroFactura}>
-                    {p.numeroFactura} (usadas: {p.clasesUsadas}/{p.clasesPagadas})
-                  </option>
-                ))}
-              </select>
+              <div className="flex flex-col md:flex-row gap-2 items-center mb-4">
+                <select
+                  value={facturaAsignar}
+                  onChange={e => setFacturaAsignar(e.target.value)}
+                  className="border border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 rounded-xl px-4 py-2 w-full transition outline-none shadow-sm bg-white"
+                >
+                  <option value="">Selecciona una factura/paquete</option>
+                  {paquetesParaAsignar.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).map(p => (
+                    <option key={p._id} value={p.numeroFactura}>
+                      {p.numeroFactura} (usadas: {p.clasesUsadas}/{p.clasesPagadas})
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPacienteCompraId(asignarPaqueteId);
+                    setShowPackageModal(true);
+                  }}
+                  className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl shadow flex justify-center items-center gap-2 font-bold transition whitespace-nowrap"
+                >
+                  <CreditCardIcon className="h-5 w-5" /> Comprar Paquete
+                </button>
+              </div>
             </div>
             {paquetesParaAsignar.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).length === 0 && (
               <div className="text-red-600 text-sm mb-4">
@@ -383,7 +455,7 @@ export default function DetalleClase() {
             <div className="flex gap-2">
               <button
                 onClick={asignarPaquete}
-                disabled={!facturaAsignar || paquetesParaAsignar.filter(p => (p.clasesUsadas || 0) < (p.clasesPagadas || 0)).length === 0}
+                disabled={!facturaAsignar}
                 className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl shadow flex items-center gap-2 text-lg transition"
               >
                 <CreditCardIcon className="h-5 w-5" /> Asignar Paquete
@@ -487,6 +559,64 @@ export default function DetalleClase() {
           Volver a lista de clases
         </button>
       </div>
+
+      {/* Modal para Registrar Paquete (Comprar) */}
+      {showPackageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-green-100 animate-pop">
+            <h2 className="text-2xl font-bold text-green-700 mb-6 text-center">🛒 Comprar Paquete</h2>
+            <form onSubmit={handleRegistrarPaquete} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Número de Factura *</label>
+                <input
+                  type="text"
+                  value={numeroFacturaNueva}
+                  onChange={e => setNumeroFacturaNueva(e.target.value)}
+                  className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
+                  placeholder="Ej: FAC-001"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Clases Pagadas *</label>
+                <input
+                  type="number"
+                  value={clasesPagadasNueva}
+                  min={1}
+                  onChange={e => setClasesPagadasNueva(e.target.value)}
+                  className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago *</label>
+                <input
+                  type="date"
+                  value={fechaPagoNueva}
+                  onChange={e => setFechaPagoNueva(e.target.value)}
+                  className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
+                  required
+                />
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPackageModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow transition flex items-center justify-center gap-2"
+                >
+                  <CreditCardIcon className="h-5 w-5" /> Registrar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

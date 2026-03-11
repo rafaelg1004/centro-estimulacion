@@ -1,0 +1,169 @@
+/* Custom CSS for Patient Registration Modal to ensure perfect alignment and style */
+
+.registro-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.registro-modal-container {
+  background-color: #F9FAFB; /* Fondo gris muy claro para contrastar las tarjetas internas del form */
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.registro-modal-selection {
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 450px;
+  padding: 3rem 2.5rem;
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto;
+  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Modal Title */
+.registro-modal-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #3730A3; /* Indigo 800 */
+  margin-bottom: 2rem;
+  width: 100%;
+  text-align: center;
+}
+
+/* Close button corner */
+.registro-modal-close-btn {
+  position: fixed; /* Fijo para que siempre esté visible al hacer scroll */
+  top: max(20px, calc(5vh + 0px));
+  right: max(20px, calc(50vw - 580px)); /* Calcula posición sobre el modal de 1200px máx */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  color: #6B7280;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 99999; /* Por encima de todo */
+}
+
+.registro-modal-close-btn:hover {
+  background-color: #FEE2E2;
+  color: #EF4444;
+  border-color: #FECACA;
+}
+
+/* Back button (change patient type) */
+.registro-modal-back-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #ffffff;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 101;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+  font-size: 0.85rem;
+}
+
+.registro-modal-back-btn:hover {
+  background-color: #EEF2FF;
+}
+
+/* Selection Buttons */
+.registro-btn {
+  width: 100%;
+  padding: 20px;
+  border-radius: 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.registro-btn:last-child {
+  margin-bottom: 0;
+}
+
+.registro-btn-nino {
+  background-color: #4F46E5; /* Indigo 600 */
+}
+
+.registro-btn-nino:hover {
+  background-color: #4338CA;
+  transform: translateY(-2px);
+}
+
+.registro-btn-madre {
+  background-color: #EC4899; /* Pink 500 */
+}
+
+.registro-btn-madre:hover {
+  background-color: #DB2777;
+  transform: translateY(-2px);
+}
+
+.registro-form-wrapper {
+  padding: 60px 10px 10px 10px; /* Leave space only for absolute top buttons */
+}
+
+/* Fix flex centering bug causing cutoff */
+.dynamic-form-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

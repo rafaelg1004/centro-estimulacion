@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import TablaDinamica from "./ui/TablaDinamica";
+import RegistroPacienteUnificado from "./RegistroPacienteUnificado";
 
 export default function ListaPacientesUnificada() {
+  const [showModal, setShowModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   // Columnas inteligentes para todos los pacientes
   const columnasUnificadas = [
     {
@@ -57,18 +61,33 @@ export default function ListaPacientesUnificada() {
   ];
 
   return (
-    <div className="p-4">
+    <div className="p-4 relative">
       <TablaDinamica
+        key={refreshKey}
         titulo="Lista Maestra de Pacientes"
         endpoint="/pacientes"
         columnas={columnasUnificadas}
         acciones={{
-          crear: "/registro",
+          crear: () => setShowModal(true),
           ver: "/pacientes/",
           editar: "/pacientes/editar/",
           eliminar: true
         }}
       />
+
+      {/* Modal Overlay para Nuevo Paciente */}
+      {showModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.55)', backdropFilter: 'blur(5px)' }}>
+          <RegistroPacienteUnificado 
+            isModal={true} 
+            onClose={() => setShowModal(false)}
+            onSuccess={() => {
+              setShowModal(false);
+              setRefreshKey(prev => prev + 1); // Fuerza recarga de TablaDinamica 
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
