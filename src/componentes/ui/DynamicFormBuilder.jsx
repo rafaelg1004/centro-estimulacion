@@ -66,6 +66,14 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
                 });
             };
             flatten(initialData);
+            // Aplicar valorPorDefecto como fallback para campos no presentes en initialData (ej. campos de visualización del paciente)
+            esquema.secciones.forEach(sec => {
+                sec.campos.forEach(campo => {
+                    if (flatData[campo.nombre] === undefined && campo.valorPorDefecto !== undefined) {
+                        flatData[campo.nombre] = campo.valorPorDefecto;
+                    }
+                });
+            });
             setFormData(flatData);
         } else {
             const defaultData = {};
@@ -538,6 +546,20 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
             return (
                 <div className="flex flex-col gap-1 md:col-span-2">
                     <label className="text-sm font-semibold text-gray-700" htmlFor={campo.nombre}>{campo.etiqueta}</label>
+                    {campo.presets && campo.presets.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-1">
+                            {campo.presets.map((preset, idx) => (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, [campo.nombre]: preset.texto }))}
+                                    className="text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors"
+                                >
+                                    {preset.etiqueta}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     <textarea
                         id={campo.nombre}
                         name={campo.nombre}

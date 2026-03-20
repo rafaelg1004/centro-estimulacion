@@ -34,7 +34,10 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
         {
             titulo: "Motivo de Consulta",
             campos: [
-                { nombre: "motivoConsulta", etiqueta: "Motivo de Consulta", tipo: "textarea", requerido: true },
+                { nombre: "motivoConsulta", etiqueta: "Motivo de Consulta", tipo: "textarea", requerido: true, presets: [
+                    { etiqueta: "Opción 1 — Estimulación", texto: "Acude a consulta para realizar valoración del desarrollo con el fin de iniciar programa de estimulación adecuada, orientado a favorecer y potenciar el desarrollo integral del bebé de acuerdo con su etapa del desarrollo." },
+                    { etiqueta: "Opción 2 — Fisioterapia", texto: "Acude a consulta para valoración por fisioterapia con el objetivo de determinar el estado del neurodesarrollo del bebé y orientar manejo o intervención según los hallazgos encontrados." }
+                ]},
             ]
         },
         {
@@ -171,8 +174,14 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
         {
             titulo: "Diagnóstico y Plan",
             campos: [
-                { nombre: "diagnosticoFisioterapeutico", etiqueta: "Diagnóstico Fisioterapéutico", tipo: "textarea", requerido: true },
-                { nombre: "planTratamiento", etiqueta: "Plan de Tratamiento", tipo: "textarea", requerido: true },
+                { nombre: "diagnosticoFisioterapeutico", etiqueta: "Diagnóstico Fisioterapéutico", tipo: "textarea", requerido: true, presets: [
+                    { etiqueta: "Opción 1 — Desarrollo acorde", texto: "Paciente que presenta desarrollo neuromotor acorde a su edad cronológica, evidenciando habilidades motoras apropiadas para su etapa del desarrollo. Se recomienda inicio de programa de estimulación adecuada, con el objetivo de favorecer, potenciar y acompañar su desarrollo integral, promoviendo la adquisición progresiva de habilidades motoras y la interacción con el entorno." },
+                    { etiqueta: "Opción 2 — Alteraciones del desarrollo", texto: "Paciente que presenta alteraciones en el desarrollo neuromotor, evidenciándose dificultades en la adquisición de habilidades motoras esperadas para su edad. Se recomienda intervención desde fisioterapia, mediante un programa de tratamiento personalizado e individualizado, con el objetivo de favorecer su desarrollo integral, potenciar sus habilidades motoras y mejorar su funcionalidad." }
+                ]},
+                { nombre: "planTratamiento", etiqueta: "Plan de Tratamiento", tipo: "textarea", requerido: true, presets: [
+                    { etiqueta: "Opción 1 — Estimulación grupal", texto: "Programa Grupal de Estimulación Adecuada: Se recomienda el ingreso al programa de estimulación adecuada en modalidad grupal, con el objetivo de favorecer y potenciar el desarrollo integral del niño, fortaleciendo habilidades motoras, sensoriales, cognitivas y de interacción con el entorno, mediante actividades acordes a su etapa del desarrollo. Se brindará además orientación a los padres o cuidadores para continuar la estimulación en el hogar." },
+                    { etiqueta: "Opción 2 — Fisioterapia personalizada", texto: "Fisioterapia Personalizada: Se recomienda inicio de programa de fisioterapia pediátrica en modalidad individualizada, orientado a abordar las alteraciones identificadas en el desarrollo neuromotor. El tratamiento se realizará mediante intervenciones terapéuticas específicas y personalizadas, con el objetivo de favorecer la adquisición de habilidades motoras, mejorar el control postural y promover el desarrollo integral del niño, incluyendo orientación a los padres para apoyo en casa." }
+                ]},
             ]
         },
         {
