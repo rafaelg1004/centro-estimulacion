@@ -816,37 +816,37 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
                 </div>
                 </div>
 
-                {/* Botones de navegación - AHORA FIJOS AL FONDO o FLAT en Modal */}
+                {/* Botones de navegación - AHORA FIJOS AL FONDO o FLAT en Modal, adaptados para mobile */}
                 <div className={isModalLayout 
-                    ? "shrink-0 border-t border-gray-200 bg-gray-50 px-6 py-4 flex justify-end items-center" 
-                    : "sticky bottom-4 z-50 flex justify-between items-center bg-white/90 backdrop-blur-md border border-indigo-100 rounded-3xl px-8 py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8"}>
+                    ? "shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-4 flex flex-col sm:flex-row justify-end items-center gap-3" 
+                    : "static lg:sticky lg:bottom-4 z-50 flex flex-col sm:flex-row justify-between items-center bg-white/90 backdrop-blur-md border border-indigo-100 rounded-3xl px-4 py-4 sm:px-8 sm:py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8 gap-4 w-full"}>
                             {isPaginado ? (
                                 <>
                                     <button type="button"
                                         onClick={pasoActual === 0 ? () => (onCancel ? onCancel() : navigate(esquema.redireccion)) : anteriorPaso}
-                                        className="px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200">
+                                        className="w-full sm:w-auto px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200 order-2 sm:order-1 mt-2 sm:mt-0">
                                         {pasoActual === 0 ? '✕ Cancelar' : '← Anterior'}
                                     </button>
-                                    <div className="flex gap-3">
+                                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto order-1 sm:order-2">
                                         {pasoActual < totalPasos - 1 ? (
                                             <button type="button" onClick={siguientePaso}
-                                                className="px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-wider hover:bg-indigo-700 transition-all text-xs shadow-lg shadow-indigo-200">
+                                                className="w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-wider hover:bg-indigo-700 transition-all text-xs shadow-lg shadow-indigo-200">
                                                 Siguiente Paso →
                                             </button>
                                         ) : (
                                             <button type="submit" disabled={guardando || submitLocked}
-                                                className="px-8 py-3 bg-pink-600 text-white rounded-2xl font-black uppercase tracking-wider hover:bg-pink-700 transition-all text-xs shadow-lg shadow-pink-200 disabled:opacity-50">
+                                                className="w-full sm:w-auto px-8 py-3 bg-pink-600 text-white rounded-2xl font-black uppercase tracking-wider hover:bg-pink-700 transition-all text-xs shadow-lg shadow-pink-200 disabled:opacity-50">
                                                 {guardando ? 'Guardando...' : '✓ Terminar y Guardar'}
                                             </button>
                                         )}
                                     </div>
                                 </>
                             ) : (
-                                <div className={isModalLayout ? "flex gap-3 w-full justify-end" : "flex gap-4 w-full justify-center"}>
+                                <div className={isModalLayout ? "flex flex-col-reverse sm:flex-row gap-3 w-full justify-end" : "flex flex-col-reverse sm:flex-row gap-4 w-full justify-center"}>
                                     <button type="button" onClick={() => (onCancel ? onCancel() : navigate(esquema.redireccion))}
-                                        className={isModalLayout ? "px-6 py-2.5 font-bold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors" : "px-10 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200"}>✕ Cancelar</button>
+                                        className={isModalLayout ? "w-full sm:w-auto px-6 py-2.5 font-bold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors" : "w-full sm:w-auto px-10 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200"}>✕ Cancelar</button>
                                     <button type="submit" disabled={guardando || submitLocked}
-                                        className={isModalLayout ? "px-6 py-2.5 font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50" : "px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"}>
+                                        className={isModalLayout ? "w-full sm:w-auto px-6 py-2.5 font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50" : "w-full sm:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"}>
                                         {guardando ? 'Guardando...' : '✓ Guardar Valoración'}
                                     </button>
                                 </div>

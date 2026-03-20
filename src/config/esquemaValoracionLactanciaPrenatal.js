@@ -131,13 +131,5 @@ export const ESQUEMA_VALORACION_LACTANCIA_PRENATAL = {
                 { nombre: "planTratamiento", etiqueta: "Plan de Tratamiento / Recomendaciones", tipo: "textarea", requerido: true }
             ]
         },
-        {
-            titulo: "Consentimiento, Firmas y Autorizaciones",
-            campos: [
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Madre", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento de la Madre", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de la Madre", tipo: "firma", requerido: true }
-            ]
-        }
     ]
 };

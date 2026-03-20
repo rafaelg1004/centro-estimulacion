@@ -212,12 +212,9 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
             ]
         },
         {
-            titulo: "Autorización y Firmas",
+            titulo: "Autorizaciones",
             campos: [
                 { nombre: "moduloPediatria.autorizacionImagen", etiqueta: "Autorizo el uso de imagen para fines educativos y redes sociales", tipo: "checkbox", valorPorDefecto: false },
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre del Acudiente / Representante", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "C.C. del Acudiente", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma del Acudiente", tipo: "firma", requerido: true },
             ]
         }
     ]

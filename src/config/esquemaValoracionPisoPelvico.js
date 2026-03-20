@@ -381,12 +381,9 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
             ]
         },
         {
-            titulo: "Firmas y Autorizaciones",
+            titulo: "Autorizaciones",
             campos: [
                 { nombre: "moduloPediatria.autorizacionImagen", etiqueta: "Autorizo el uso de imagen corporativa para fines educativos y redes sociales", tipo: "checkbox" },
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Firma de Paciente - Nombre", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma Digital Paciente", tipo: "firma", requerido: true },
             ]
         }
     ]

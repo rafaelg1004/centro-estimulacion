@@ -173,11 +173,8 @@ export const ESQUEMA_VALORACION_PERINATAL = {
             ]
         },
         {
-            titulo: "Firmas y Autorizaciones",
+            titulo: "Autorizaciones",
             campos: [
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Paciente", tipo: "text", lecsolo: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento de Identidad", tipo: "text", lecsolo: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de la Paciente", tipo: "firma", requerido: true },
                 {
                     nombre: "moduloPerinatal.autorizaImagenes",
                     etiqueta: "Autorizo a D'Mamitas & Babies para reproducir fotografías e imágenes de las actividades para redes sociales y web.",

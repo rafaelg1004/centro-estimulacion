@@ -51,13 +51,5 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
                 { nombre: "planTratamiento", etiqueta: "Plan de Intervención / Recomendaciones", tipo: "textarea", requerido: true },
             ]
         },
-        {
-            titulo: "Firmas Legales",
-            campos: [
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Madre", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento de la Madre", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de la Madre", tipo: "firma", requerido: true },
-            ]
-        }
     ]
 };

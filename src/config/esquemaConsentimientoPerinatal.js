@@ -76,12 +76,9 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
             ]
         },
         {
-            titulo: "Términos, Condiciones y Firmas Electrónicas",
+            titulo: "Términos y Condiciones",
             campos: [
                 { nombre: "terminos_acepto", etiqueta: "Acepto voluntariamente el ingreso al programa de ejercicios perinatales eximiendo de riesgos inherentes al Centro DMamitas.", tipo: "checkbox" },
-                { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Paciente Maternar", tipo: "text" },
-                { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text" },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de Consentimiento", tipo: "firma" },
             ]
         }
     ]
