@@ -48,7 +48,11 @@ export default function DetalleValoracion() {
         didOpen: () => Swal.showLoading()
       });
 
-      const type = (valoracion.moduloPediatria) ? 'nino' : 'adulto';
+      const tp = valoracion.tipoPrograma || '';
+      let type = 'nino';
+      if (tp.includes('Lactancia') || valoracion.moduloLactancia?.tipoLactancia) type = 'lactancia';
+      else if (tp.includes('Piso') || valoracion.codConsulta === '890202') type = 'adulto';
+      else if (tp === 'Perinatal' || valoracion.codConsulta === '890204') type = 'perinatal';
       const blob = await apiDownload(`/valoraciones/reporte/exportar-pdf/${id}?type=${type}`);
 
       const url = window.URL.createObjectURL(blob);
