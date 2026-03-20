@@ -136,6 +136,29 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
         }
     }, [formData, esquema]);
 
+    // Auto-calcular IMC cuando cambian peso o talla
+    useEffect(() => {
+        if (Object.keys(formData).length === 0) return;
+        const updates = {};
+        esquema.secciones.forEach(sec => {
+            sec.campos.forEach(campo => {
+                if (campo.autoCalc?.formula === 'imc') {
+                    const peso = parseFloat(formData[campo.autoCalc.peso]);
+                    const talla = parseFloat(formData[campo.autoCalc.talla]);
+                    const newVal = (peso > 0 && talla > 0)
+                        ? (peso / Math.pow(talla / 100, 2)).toFixed(1)
+                        : '';
+                    if (formData[campo.nombre] !== newVal) {
+                        updates[campo.nombre] = newVal;
+                    }
+                }
+            });
+        });
+        if (Object.keys(updates).length > 0) {
+            setFormData(prev => ({ ...prev, ...updates }));
+        }
+    }, [formData, esquema]);
+
 
     const handleChange = (e) => {
         const { name, type, checked, value } = e.target;

@@ -93,7 +93,7 @@ export const ESQUEMA_VALORACION_PERINATAL = {
                 { nombre: "moduloPerinatal.pesoPrevio", etiqueta: "Peso Previo (kg)", tipo: "text" },
                 { nombre: "signosVitales.pesoActual", etiqueta: "Peso Actual (kg)", tipo: "text" },
                 { nombre: "signosVitales.talla", etiqueta: "Talla (cm)", tipo: "text" },
-                { nombre: "signosVitales.imc", etiqueta: "IMC", tipo: "text", lecsolo: true },
+                { nombre: "signosVitales.imc", etiqueta: "IMC", tipo: "text", lecsolo: true, autoCalc: { formula: "imc", peso: "signosVitales.pesoActual", talla: "signosVitales.talla" } },
                 { nombre: "moduloPerinatal.otrasComplicacionesGesta", etiqueta: "¿Complicaciones en la gestación actual?", tipo: "select", opciones: ["si", "no"] },
                 { nombre: "moduloPerinatal.explicacionComplicaciones", etiqueta: "Explique complicaciones", tipo: "textarea", condicion: { campo: "moduloPerinatal.otrasComplicacionesGesta", valor: "si" } }
             ]

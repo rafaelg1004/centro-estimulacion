@@ -172,6 +172,33 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
             ]
         },
         {
+            titulo: "Observación de la Sesión",
+            siempreVisible: true,
+            campos: [
+                {
+                    nombre: "moduloPediatria.emocionesExpresadas", etiqueta: "Sentimientos y emociones que el niño expresa", tipo: "checkbox_group",
+                    opciones: [
+                        { valor: "Alegría", etiqueta: "Alegría" },
+                        { valor: "Tranquilidad", etiqueta: "Tranquilidad" },
+                        { valor: "Inseguridad", etiqueta: "Inseguridad" },
+                        { valor: "Timidez", etiqueta: "Timidez" },
+                        { valor: "Frustración", etiqueta: "Frustración" },
+                        { valor: "Enojo", etiqueta: "Enojo" },
+                        { valor: "Ansiedad", etiqueta: "Ansiedad" },
+                        { valor: "Cansancio", etiqueta: "Cansancio" },
+                    ]
+                },
+                {
+                    nombre: "moduloPediatria.relacionEntorno", etiqueta: "Cómo se relaciona el niño con el entorno", tipo: "select",
+                    opciones: [
+                        { valor: "Adecuada", etiqueta: "Adecuada — Se integra fácilmente al ambiente terapéutico, responde positivamente a las actividades y muestra comodidad e iniciativa en la interacción con el entorno y con el terapeuta." },
+                        { valor: "Con apoyo inicial", etiqueta: "Con apoyo inicial — Requiere un período de adaptación antes de integrarse al entorno terapéutico; con acompañamiento y orientación se logra una participación activa en las actividades." },
+                        { valor: "Dificultad para adaptarse", etiqueta: "Dificultad para adaptarse — Presenta resistencia o dificultad significativa para integrarse al entorno terapéutico, mostrando conductas de evitación, llanto persistente o baja tolerancia a las actividades propuestas." },
+                    ]
+                },
+            ]
+        },
+        {
             titulo: "Diagnóstico y Plan",
             campos: [
                 { nombre: "diagnosticoFisioterapeutico", etiqueta: "Diagnóstico Fisioterapéutico", tipo: "textarea", requerido: true, presets: [

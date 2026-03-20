@@ -37,7 +37,7 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
                 { nombre: "signosVitales.pesoPrevio", etiqueta: "Peso Previo (kg)", tipo: "text" },
                 { nombre: "signosVitales.pesoActual", etiqueta: "Peso Actual (kg)", tipo: "text" },
                 { nombre: "signosVitales.talla", etiqueta: "Talla (cm)", tipo: "text" },
-                { nombre: "signosVitales.imc", etiqueta: "IMC", tipo: "text" },
+                { nombre: "signosVitales.imc", etiqueta: "IMC", tipo: "text", lecsolo: true, autoCalc: { formula: "imc", peso: "signosVitales.pesoActual", talla: "signosVitales.talla" } },
             ]
         },
         {
