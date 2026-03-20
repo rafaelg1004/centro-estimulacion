@@ -30,23 +30,20 @@ import DetalleSesionMensual from "./componentes/DetalleSesionMensual";
 import ListaSesionesPerinatal from "./componentes/ListaSesionesPerinatal";
 import ListaGlobalSesionesPerinatal from "./componentes/ListaGlobalSesionesPerinatal";
 import EditarClase from "./componentes/EditarClase";
+import MiPerfil from "./componentes/MiPerfil";
 import Swal from "sweetalert2";
 
 
 import {
   HomeIcon,
   UsersIcon,
-
   AcademicCapIcon,
-
   ArrowLeftOnRectangleIcon,
-
-
-
   ClipboardDocumentCheckIcon,
   DocumentTextIcon,
   ChartBarIcon,
   CalendarDaysIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/solid";
 import { logAPIConfig, testAPIConnection, apiRequest, API_ENDPOINTS } from "./config/api";
 
@@ -246,6 +243,15 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               </div>
             </div>
 
+            <Link
+              to="/mi-perfil"
+              className="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center justify-center gap-2"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <UserCircleIcon className="h-5 w-5" />
+              Mi Perfil / Firma
+            </Link>
+
             <button
               onClick={async () => {
                 const result = await Swal.fire({
@@ -330,6 +336,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/sesiones-mensuales" element={<ListaSesionesMensuales />} />
             <Route path="/sesiones-mensuales/nueva" element={<CrearSesionMensual />} />
             <Route path="/sesiones-mensuales/:id" element={<DetalleSesionMensual />} />
+            <Route path="/mi-perfil" element={<MiPerfil />} />
 
           </Routes>
         </div>
