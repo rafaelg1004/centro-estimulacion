@@ -185,9 +185,6 @@ export const ESQUEMA_VALORACION_PERINATAL = {
                     opciones: ["SI", "NO"],
                     requerido: true
                 },
-                { nombre: "firmas.profesional.nombre", etiqueta: "Fisioterapeuta", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625", lecsolo: true },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma", requerido: true }
             ]
         }
     ]

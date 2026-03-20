@@ -218,9 +218,6 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
                 { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre del Acudiente / Representante", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "C.C. del Acudiente", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma del Acudiente", tipo: "firma", requerido: true },
-                { nombre: "firmas.profesional.nombre", etiqueta: "Firma del Fisioterapeuta", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma", requerido: true },
             ]
         }
     ]

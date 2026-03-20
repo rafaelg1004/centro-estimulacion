@@ -387,9 +387,6 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
                 { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Firma de Paciente - Nombre", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma Digital Paciente", tipo: "firma", requerido: true },
-                { nombre: "firmas.profesional.nombre", etiqueta: "Fisioterapeuta", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma Profesional", tipo: "firma", requerido: true },
             ]
         }
     ]

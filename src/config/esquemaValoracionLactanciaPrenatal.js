@@ -136,10 +136,7 @@ export const ESQUEMA_VALORACION_LACTANCIA_PRENATAL = {
             campos: [
                 { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Madre", tipo: "text", requerido: true },
                 { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Documento de la Madre", tipo: "text", requerido: true },
-                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de la Madre", tipo: "firma", requerido: true },
-                { nombre: "firmas.profesional.nombre", etiqueta: "Nombre del Profesional", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional", tipo: "firma", requerido: true }
+                { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de la Madre", tipo: "firma", requerido: true }
             ]
         }
     ]

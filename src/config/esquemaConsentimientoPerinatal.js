@@ -82,10 +82,6 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
                 { nombre: "firmas.pacienteOAcudiente.nombre", etiqueta: "Nombre de la Paciente Maternar", tipo: "text" },
                 { nombre: "firmas.pacienteOAcudiente.cedula", etiqueta: "Cédula de Ciudadanía", tipo: "text" },
                 { nombre: "firmas.pacienteOAcudiente.firmaUrl", etiqueta: "Firma de Consentimiento", tipo: "firma" },
-
-                { nombre: "firmas.profesional.nombre", etiqueta: "Certificación Fisioterapeuta - Nombre", tipo: "text", valorPorDefecto: "Ft. Dayan Ivonne Villegas Gamboa", lecsolo: true },
-                { nombre: "firmas.profesional.registroMedico", etiqueta: "Registro Profesional", tipo: "text", valorPorDefecto: "52862625 - Reg. Salud Departamental", lecsolo: true },
-                { nombre: "firmas.profesional.firmaUrl", etiqueta: "Firma del Profesional Asistente", tipo: "firma" },
             ]
         }
     ]
