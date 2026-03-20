@@ -71,6 +71,11 @@ export const apiRequest = async (endpoint, options = {}) => {
         }
       }
 
+      // Si el token venció o es inválido, cerrar sesión automáticamente
+      if (response.status === 401) {
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
+
       // Crear un error que incluya los datos del backend
       const error = new Error(errorMessage);
       error.response = { data: errorData, status: response.status };

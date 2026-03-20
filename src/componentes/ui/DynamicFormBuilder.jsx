@@ -160,10 +160,30 @@ export default function DynamicFormBuilder({ esquema, onSubmitSuccess, onCancel,
     }, [formData, esquema]);
 
 
+    const calcularIMC = (nombre, valor, prevData) => {
+        const updates = {};
+        esquema.secciones.forEach(sec => {
+            sec.campos.forEach(campo => {
+                if (campo.autoCalc?.formula === 'imc' &&
+                    (campo.autoCalc.peso === nombre || campo.autoCalc.talla === nombre)) {
+                    const peso = parseFloat(campo.autoCalc.peso === nombre ? valor : prevData[campo.autoCalc.peso]);
+                    const talla = parseFloat(campo.autoCalc.talla === nombre ? valor : prevData[campo.autoCalc.talla]);
+                    updates[campo.nombre] = (peso > 0 && talla > 0)
+                        ? (peso / Math.pow(talla / 100, 2)).toFixed(1)
+                        : '';
+                }
+            });
+        });
+        return updates;
+    };
+
     const handleChange = (e) => {
         const { name, type, checked, value } = e.target;
         const finalValue = type === "checkbox" ? checked : value;
-        setFormData((prev) => ({ ...prev, [name]: finalValue }));
+        setFormData((prev) => {
+            const imcUpdates = calcularIMC(name, finalValue, prev);
+            return { ...prev, [name]: finalValue, ...imcUpdates };
+        });
     };
 
     const handleCheckboxGroupChange = (nombreCampo, valor, checked) => {

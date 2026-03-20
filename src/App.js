@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Link, useNavigate } from "react-router-dom";
 import RegistroPacienteUnificado from "./componentes/RegistroPacienteUnificado";
 import VerRegistros from "./componentes/VerRegistros";
@@ -48,7 +48,7 @@ import {
   ChartBarIcon,
   CalendarDaysIcon,
 } from "@heroicons/react/24/solid";
-import { logAPIConfig, testAPIConnection } from "./config/api";
+import { logAPIConfig, testAPIConnection, apiRequest, API_ENDPOINTS } from "./config/api";
 
 // DEBUG: Mostrar configuración al iniciar
 console.log('🚀 === INICIANDO APLICACIÓN ===');
@@ -81,6 +81,32 @@ function RutasAutenticadas({ usuario, setUsuario }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const navigate = useNavigate();
+
+  // Verificar token en cada cambio de ruta
+  useEffect(() => {
+    if (!usuario) return;
+    apiRequest(API_ENDPOINTS.USER_INFO).catch(() => {
+      // Si falla con 401, el evento session:expired ya se dispara desde apiRequest
+    });
+  }, [location.pathname, usuario]);
+
+  // Cerrar sesión automáticamente cuando el token vence
+  useEffect(() => {
+    const handleExpired = () => {
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userRole");
+      setUsuario(null);
+      navigate("/");
+      Swal.fire({
+        title: "Sesión expirada",
+        text: "Tu sesión ha vencido. Por favor inicia sesión de nuevo.",
+        icon: "warning",
+        confirmButtonColor: "#6366f1"
+      });
+    };
+    window.addEventListener('session:expired', handleExpired);
+    return () => window.removeEventListener('session:expired', handleExpired);
+  }, [setUsuario, navigate]);
 
   // Obtener rol del usuario desde sessionStorage
   const userRole = sessionStorage.getItem("userRole");
