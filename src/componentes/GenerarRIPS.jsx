@@ -82,10 +82,13 @@ const GenerarRIPS = () => {
     }));
   };
 
+  const [errorDetails, setErrorDetails] = useState(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setErrorDetails(null);
     setResultado(null);
 
     try {
@@ -97,6 +100,13 @@ const GenerarRIPS = () => {
       setResultado(response);
     } catch (error) {
       setError(error.message || 'Error generando RIPS');
+      // Capturar detalles de errores de validación del backend
+      if (error.response?.data) {
+        setErrorDetails({
+          errors: error.response.data.errors || [],
+          warnings: error.response.data.warnings || []
+        });
+      }
       console.error('Error:', error);
     } finally {
       setLoading(false);
@@ -119,7 +129,18 @@ const GenerarRIPS = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg relative">
+      {/* Spinner overlay */}
+      {loading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-lg">
+          <svg className="animate-spin h-16 w-16 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-blue-600 font-semibold text-lg">Generando RIPS...</p>
+          <p className="text-gray-500 text-sm mt-1">Por favor espere</p>
+        </div>
+      )}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
           Generar RIPS - Resolución 2275 de 2023 (JSON)
@@ -254,8 +275,14 @@ const GenerarRIPS = () => {
           <button
             type="submit"
             disabled={loading || (facturaData.pacienteIds.length === 0 && (!facturaData.fechaInicio || !facturaData.fechaFin))}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
+            {loading && (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
             {loading ? 'Generando RIPS...' : 'Generar RIPS (Res. 2275)'}
           </button>
         </div>
@@ -270,13 +297,35 @@ const GenerarRIPS = () => {
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="ml-3">
+            <div className="ml-3 w-full">
               <h3 className="text-sm font-medium text-red-800">
                 Error generando RIPS
               </h3>
               <div className="mt-2 text-sm text-red-700">
                 {error}
               </div>
+              {/* Mostrar errores de validación detallados */}
+              {errorDetails?.errors?.length > 0 && (
+                <div className="mt-3">
+                  <h4 className="text-sm font-semibold text-red-800">Errores de validación:</h4>
+                  <ul className="mt-1 list-disc list-inside text-sm text-red-700">
+                    {errorDetails.errors.map((err, index) => (
+                      <li key={index}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Mostrar advertencias */}
+              {errorDetails?.warnings?.length > 0 && (
+                <div className="mt-3 p-2 bg-yellow-50 rounded">
+                  <h4 className="text-sm font-semibold text-yellow-800">Advertencias:</h4>
+                  <ul className="mt-1 list-disc list-inside text-sm text-yellow-700">
+                    {errorDetails.warnings.map((warn, index) => (
+                      <li key={index}>{warn}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
