@@ -150,7 +150,7 @@ export default function DetalleClase() {
   };
 
   const getFacturaDeNino = (ninoId) => {
-    const n = clase.ninos.find((n) => (n.nino?._id || n.nino) === ninoId);
+    const n = clase.ninos.find((n) => (n.nino?.id || n.nino) === ninoId);
     return n?.numeroFactura || "";
   };
 
@@ -305,10 +305,10 @@ export default function DetalleClase() {
                   <ul className="absolute left-0 top-full mt-1 w-full bg-white border border-indigo-300 rounded shadow-lg z-20 max-h-40 overflow-y-auto">
                     {ninos.map((n) => (
                       <li
-                        key={n._id}
+                        key={n.id}
                         className="px-3 py-2 hover:bg-indigo-100 cursor-pointer transition"
                         onMouseDown={() => {
-                          setNinoId(n._id);
+                          setNinoId(n.id);
                           setBusquedaNino(`${n.nombres} ${n.apellidos}`);
                           setShowSugerencias(false);
                           setFacturaAgregar("");
@@ -333,7 +333,7 @@ export default function DetalleClase() {
                         (p) => (p.clasesUsadas || 0) < (p.clasesPagadas || 0),
                       )
                       .map((p) => (
-                        <option key={p._id} value={p.numeroFactura}>
+                        <option key={p.id} value={p.numeroFactura}>
                           {p.numeroFactura} (usadas: {p.clasesUsadas}/
                           {p.clasesPagadas})
                         </option>
@@ -380,7 +380,7 @@ export default function DetalleClase() {
               n.numeroFactura && n.numeroFactura.trim() !== "";
             return (
               <li
-                key={n.nino?._id || n.nino}
+                key={n.nino?.id || n.nino}
                 className={`border rounded-2xl shadow p-4 flex flex-col gap-2 relative ${
                   tienePaquete
                     ? "bg-white border-green-200"
@@ -424,7 +424,7 @@ export default function DetalleClase() {
                 <div className="absolute top-2 right-2 flex gap-1">
                   {!tienePaquete && !clase.bloqueada && (
                     <button
-                      onClick={() => setAsignarPaqueteId(n.nino?._id || n.nino)}
+                      onClick={() => setAsignarPaqueteId(n.nino?.id || n.nino)}
                       className="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 rounded-full p-2 shadow"
                       title="Asignar paquete"
                     >
@@ -433,7 +433,7 @@ export default function DetalleClase() {
                   )}
                   {!clase.bloqueada && (
                     <button
-                      onClick={() => eliminarNinoDeClase(n.nino?._id || n.nino)}
+                      onClick={() => eliminarNinoDeClase(n.nino?.id || n.nino)}
                       className="bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 shadow"
                       title="Eliminar niño de la sesión"
                     >
@@ -459,7 +459,7 @@ export default function DetalleClase() {
               <p className="text-yellow-700 font-semibold">
                 {(() => {
                   const encontrado = clase.ninos.find(
-                    (n) => (n.nino?._id || n.nino) === asignarPaqueteId,
+                    (n) => (n.nino?.id || n.nino) === asignarPaqueteId,
                   );
                   if (!encontrado) return "";
                   const nombres =
@@ -486,7 +486,7 @@ export default function DetalleClase() {
                       (p) => (p.clasesUsadas || 0) < (p.clasesPagadas || 0),
                     )
                     .map((p) => (
-                      <option key={p._id} value={p.numeroFactura}>
+                      <option key={p.id} value={p.numeroFactura}>
                         {p.numeroFactura} (usadas: {p.clasesUsadas}/
                         {p.clasesPagadas})
                       </option>
@@ -555,8 +555,8 @@ export default function DetalleClase() {
                   .filter((n) => !n.firma)
                   .map((n) => (
                     <option
-                      key={n.nino?._id || n.nino}
-                      value={n.nino?._id || n.nino}
+                      key={n.nino?.id || n.nino}
+                      value={n.nino?.id || n.nino}
                     >
                       {n.nino?.nombres || n.nombres}{" "}
                       {n.nino?.apellidos || n.apellidos}

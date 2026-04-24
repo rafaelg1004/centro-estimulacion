@@ -7,64 +7,92 @@ export default function HistoriaClinicaDigital() {
     {
       header: "Paciente",
       accessor: "paciente",
-      format: (val) => val ? (
-        <div className="flex flex-col">
-          <span className="font-bold text-gray-800">{val.nombres} {val.apellidos}</span>
-          <span className="text-[10px] text-gray-500 italic">{val.numDocumentoIdentificacion}</span>
-        </div>
-      ) : <span className="text-red-500 text-xs">Paciente no asignado</span>
+      format: (val) =>
+        val ? (
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-800">
+              {val.nombres} {val.apellidos}
+            </span>
+            <span className="text-[10px] text-gray-500 italic">
+              {val.num_documento_identificacion}
+            </span>
+          </div>
+        ) : (
+          <span className="text-red-500 text-xs">Paciente no asignado</span>
+        ),
     },
     {
       header: "Especialidad / Tipo",
       accessor: "tipo",
       format: (val) => {
         const colors = {
-          'Pediatría': 'bg-indigo-100 text-indigo-700 border-indigo-200',
-          'Lactancia': 'bg-pink-100 text-pink-700 border-pink-200',
-          'Piso Pélvico': 'bg-orange-100 text-orange-700 border-orange-200',
-          'Perinatal': 'bg-purple-100 text-purple-700 border-purple-200',
-          'General': 'bg-gray-100 text-gray-700 border-gray-200 shadow-sm'
+          Pediatría: "bg-indigo-100 text-indigo-700 border-indigo-200",
+          Lactancia: "bg-pink-100 text-pink-700 border-pink-200",
+          "Piso Pélvico": "bg-orange-100 text-orange-700 border-orange-200",
+          Perinatal: "bg-purple-100 text-purple-700 border-purple-200",
+          General: "bg-gray-100 text-gray-700 border-gray-200 shadow-sm",
         };
         const color = colors[val] || colors.General;
         return (
-          <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter border ${color}`}>
-            {val || 'General'}
+          <span
+            className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter border ${color}`}
+          >
+            {val || "General"}
           </span>
         );
-      }
+      },
     },
     {
       header: "Fecha Atención",
-      accessor: "fechaInicioAtencion",
+      accessor: "fecha_inicio_atencion",
       format: (val, row) => {
-        const d = new Date(val || row.createdAt);
-        return isNaN(d) ? "Fecha Inválida" : (
+        const d = new Date(val || row.created_at);
+        return isNaN(d) ? (
+          "Fecha Inválida"
+        ) : (
           <div className="flex flex-col">
-            <span className="font-medium text-gray-700">{d.toLocaleDateString("es-CO", { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-            <span className="text-[9px] text-gray-400">{d.toLocaleTimeString("es-CO", { hour: '2-digit', minute: '2-digit' })}</span>
+            <span className="font-medium text-gray-700">
+              {d.toLocaleDateString("es-CO", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+            <span className="text-[9px] text-gray-400">
+              {d.toLocaleTimeString("es-CO", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
           </div>
         );
-      }
+      },
     },
     {
       header: "Diagnóstico / Motivo",
-      accessor: "motivoConsulta",
+      accessor: "motivo_consulta",
       format: (val, row) => (
         <div className="max-w-[200px]">
-          <span className="text-xs font-bold text-indigo-900 block truncate">{row.codDiagnosticoPrincipal || 'N/A'}</span>
-          <span className="text-[10px] text-gray-500 italic truncate block">{val || 'No especificado'}</span>
+          <span className="text-xs font-bold text-indigo-900 block truncate">
+            {row.cod_diagnostico_principal || "N/A"}
+          </span>
+          <span className="text-[10px] text-gray-500 italic truncate block">
+            {val || "No especificado"}
+          </span>
         </div>
-      )
+      ),
     },
     {
       header: "Estado",
       accessor: "bloqueada",
       format: (val) => (
-        <span className={`flex items-center gap-1 text-[10px] font-bold ${val ? 'text-green-600' : 'text-amber-600'}`}>
-          {val ? '🔒 Cerrada' : '✍️ En Edición'}
+        <span
+          className={`flex items-center gap-1 text-[10px] font-bold ${val ? "text-green-600" : "text-amber-600"}`}
+        >
+          {val ? "🔒 Cerrada" : "✍️ En Edición"}
         </span>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -74,17 +102,22 @@ export default function HistoriaClinicaDigital() {
         endpoint="/valoraciones"
         columnas={columnasHC}
         filtrosExtras={[
-          { name: "busqueda", label: "Buscar por Paciente o ID", type: "text", placeholder: "Nombre o Cédula..." },
+          {
+            name: "busqueda",
+            label: "Buscar por Paciente o ID",
+            type: "text",
+            placeholder: "Nombre o Cédula...",
+          },
           { name: "fechaInicio", label: "Desde", type: "date" },
-          { name: "fechaFin", label: "Hasta", type: "date" }
+          { name: "fechaFin", label: "Hasta", type: "date" },
         ]}
         acciones={{
-          ver: (row) => `/valoraciones/${row._id}`,
+          ver: (row) => `/valoraciones/${row.id}`,
           editar: (row) => {
             if (row.bloqueada) return null;
-            return `/valoraciones/editar/${row._id}`;
+            return `/valoraciones/editar/${row.id}`;
           },
-          eliminar: true
+          eliminar: true,
         }}
       />
     </div>

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../config/api";
-import * as XLSX from 'xlsx';
-import { 
-  ArrowLeftIcon, 
-  DocumentArrowDownIcon, 
-  EyeIcon, 
+import * as XLSX from "xlsx";
+import {
+  ArrowLeftIcon,
+  DocumentArrowDownIcon,
+  EyeIcon,
   ChartBarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -13,7 +13,7 @@ import {
   PlayIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/solid";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 export default function ReportePaquetes() {
   const [paquetes, setPaquetes] = useState([]);
@@ -25,14 +25,14 @@ export default function ReportePaquetes() {
 
   const editarPaquete = async (paquete) => {
     const result = await Swal.fire({
-      title: 'Editar Paquete',
+      title: "Editar Paquete",
       text: `¿Deseas editar el paquete ${paquete.numeroFactura}?`,
-      icon: 'question',
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sí, editar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, editar",
+      cancelButtonText: "Cancelar",
     });
 
     if (result.isConfirmed) {
@@ -59,64 +59,70 @@ export default function ReportePaquetes() {
 
   const exportarAExcel = () => {
     try {
-      const datosExcel = paquetesFiltrados.map(paquete => ({
-        'Paciente': paquete.paciente.nombres,
-        'Registro Civil': paquete.paciente.registroCivil,
-        'Género': paquete.paciente.genero,
-        'Edad': paquete.paciente.edad + ' meses',
-        'Celular': paquete.paciente.celular,
-        'N° Factura': paquete.numeroFactura,
-        'Clases Pagadas': paquete.clasesPagadas,
-        'Clases Usadas': paquete.clasesUsadas,
-        'Clases Disponibles': paquete.clasesDisponibles,
-        'Porcentaje Uso': paquete.porcentajeUso + '%',
-        'Estado': paquete.estado,
-        'Fecha Pago': new Date(paquete.fechaPago).toLocaleDateString('es-CO')
+      const datosExcel = paquetesFiltrados.map((paquete) => ({
+        Paciente: paquete.paciente.nombres,
+        "Registro Civil": paquete.paciente.registroCivil,
+        Género: paquete.paciente.genero,
+        Edad: paquete.paciente.edad + " meses",
+        Celular: paquete.paciente.celular,
+        "N° Factura": paquete.numeroFactura,
+        "Clases Pagadas": paquete.clasesPagadas,
+        "Clases Usadas": paquete.clasesUsadas,
+        "Clases Disponibles": paquete.clasesDisponibles,
+        "Porcentaje Uso": paquete.porcentajeUso + "%",
+        Estado: paquete.estado,
+        "Fecha Pago": new Date(paquete.fechaPago).toLocaleDateString("es-CO"),
       }));
 
       const libro = XLSX.utils.book_new();
       const hoja = XLSX.utils.json_to_sheet(datosExcel);
       XLSX.utils.book_append_sheet(libro, hoja, "Reporte Paquetes");
-      
-      const fecha = new Date().toISOString().split('T')[0];
+
+      const fecha = new Date().toISOString().split("T")[0];
       const nombreArchivo = `reporte_paquetes_${fecha}.xlsx`;
       XLSX.writeFile(libro, nombreArchivo);
-      
+
       alert(`✅ Reporte exportado exitosamente como: ${nombreArchivo}`);
     } catch (error) {
-      console.error('Error al exportar a Excel:', error);
-      alert('❌ Error al exportar el archivo Excel');
+      console.error("Error al exportar a Excel:", error);
+      alert("❌ Error al exportar el archivo Excel");
     }
   };
 
   // Filtrar paquetes según criterios
-  const paquetesFiltrados = paquetes.filter(paquete => {
-    const cumpleFiltro = filtro === "todos" || 
-                        (filtro === "activos" && paquete.estado === "Activo") ||
-                        (filtro === "agotados" && paquete.estado === "Agotado");
-    
-    const cumpleBusqueda = busqueda === "" || 
-                          paquete.paciente.nombres.toLowerCase().includes(busqueda.toLowerCase()) ||
-                          paquete.paciente.registroCivil.toLowerCase().includes(busqueda.toLowerCase()) ||
-                          paquete.numeroFactura.toLowerCase().includes(busqueda.toLowerCase());
-    
+  const paquetesFiltrados = paquetes.filter((paquete) => {
+    const cumpleFiltro =
+      filtro === "todos" ||
+      (filtro === "activos" && paquete.estado === "Activo") ||
+      (filtro === "agotados" && paquete.estado === "Agotado");
+
+    const cumpleBusqueda =
+      busqueda === "" ||
+      paquete.paciente.nombres.toLowerCase().includes(busqueda.toLowerCase()) ||
+      paquete.paciente.registroCivil
+        .toLowerCase()
+        .includes(busqueda.toLowerCase()) ||
+      paquete.numeroFactura.toLowerCase().includes(busqueda.toLowerCase());
+
     return cumpleFiltro && cumpleBusqueda;
   });
 
   // Estadísticas
   const estadisticas = {
     total: paquetes.length,
-    activos: paquetes.filter(p => p.estado === "Activo").length,
-    agotados: paquetes.filter(p => p.estado === "Agotado").length,
+    activos: paquetes.filter((p) => p.estado === "Activo").length,
+    agotados: paquetes.filter((p) => p.estado === "Agotado").length,
     totalClasesPagadas: paquetes.reduce((sum, p) => sum + p.clasesPagadas, 0),
-    totalClasesUsadas: paquetes.reduce((sum, p) => sum + p.clasesUsadas, 0)
+    totalClasesUsadas: paquetes.reduce((sum, p) => sum + p.clasesUsadas, 0),
   };
 
   if (cargando) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-br from-indigo-100 via-pink-100 to-green-100">
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-600 border-solid"></div>
-        <span className="mt-4 text-indigo-700 font-bold">Cargando reporte...</span>
+        <span className="mt-4 text-indigo-700 font-bold">
+          Cargando reporte...
+        </span>
       </div>
     );
   }
@@ -176,28 +182,48 @@ export default function ReportePaquetes() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6">
           <div className="bg-white rounded-2xl p-3 md:p-6 shadow-lg border border-indigo-100 text-center">
             <ChartBarIcon className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-            <div className="text-xl md:text-2xl font-bold text-indigo-700">{estadisticas.total}</div>
-            <div className="text-xs md:text-sm text-gray-600">Total Paquetes</div>
+            <div className="text-xl md:text-2xl font-bold text-indigo-700">
+              {estadisticas.total}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600">
+              Total Paquetes
+            </div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-100 text-center">
             <CheckCircleIcon className="h-8 w-8 text-green-600 mx-auto mb-2" />
-            <div className="text-xl md:text-2xl font-bold text-green-700">{estadisticas.activos}</div>
-            <div className="text-xs md:text-sm text-gray-600">Paquetes Activos</div>
+            <div className="text-xl md:text-2xl font-bold text-green-700">
+              {estadisticas.activos}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600">
+              Paquetes Activos
+            </div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-red-100 text-center">
             <ExclamationTriangleIcon className="h-8 w-8 text-red-600 mx-auto mb-2" />
-            <div className="text-xl md:text-2xl font-bold text-red-700">{estadisticas.agotados}</div>
-            <div className="text-xs md:text-sm text-gray-600">Paquetes Agotados</div>
+            <div className="text-xl md:text-2xl font-bold text-red-700">
+              {estadisticas.agotados}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600">
+              Paquetes Agotados
+            </div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100 text-center">
             <CreditCardIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <div className="text-xl md:text-2xl font-bold text-blue-700">{estadisticas.totalClasesPagadas}</div>
-            <div className="text-xs md:text-sm text-gray-600">Clases Pagadas</div>
+            <div className="text-xl md:text-2xl font-bold text-blue-700">
+              {estadisticas.totalClasesPagadas}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600">
+              Clases Pagadas
+            </div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100 text-center">
             <PlayIcon className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-            <div className="text-xl md:text-2xl font-bold text-purple-700">{estadisticas.totalClasesUsadas}</div>
-            <div className="text-xs md:text-sm text-gray-600">Clases Usadas</div>
+            <div className="text-xl md:text-2xl font-bold text-purple-700">
+              {estadisticas.totalClasesUsadas}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600">
+              Clases Usadas
+            </div>
           </div>
         </div>
 
@@ -226,8 +252,12 @@ export default function ReportePaquetes() {
                 className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="todos">Todos ({paquetes.length})</option>
-                <option value="activos">Activos ({estadisticas.activos})</option>
-                <option value="agotados">Agotados ({estadisticas.agotados})</option>
+                <option value="activos">
+                  Activos ({estadisticas.activos})
+                </option>
+                <option value="agotados">
+                  Agotados ({estadisticas.agotados})
+                </option>
               </select>
             </div>
           </div>
@@ -239,13 +269,14 @@ export default function ReportePaquetes() {
             <div className="text-center py-16">
               <ChartBarIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-700 mb-2">
-                {busqueda || filtro !== "todos" ? "No se encontraron resultados" : "No hay paquetes registrados"}
+                {busqueda || filtro !== "todos"
+                  ? "No se encontraron resultados"
+                  : "No hay paquetes registrados"}
               </h3>
               <p className="text-gray-500">
-                {busqueda || filtro !== "todos" 
-                  ? "Intenta cambiar los filtros de búsqueda" 
-                  : "Los paquetes comprados aparecerán aquí"
-                }
+                {busqueda || filtro !== "todos"
+                  ? "Intenta cambiar los filtros de búsqueda"
+                  : "Los paquetes comprados aparecerán aquí"}
               </p>
             </div>
           ) : (
@@ -255,24 +286,48 @@ export default function ReportePaquetes() {
                 <table className="min-w-full divide-y divide-gray-200 text-xs">
                   <thead className="bg-indigo-50">
                     <tr>
-                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Paciente</th>
-                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Registro Civil</th>
-                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Factura</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Pagadas</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Usadas</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Disponibles</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">% Uso</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Estado</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Clases</th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">Acciones</th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Paciente
+                      </th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Registro Civil
+                      </th>
+                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Factura
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Pagadas
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Usadas
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Disponibles
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        % Uso
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Clases
+                      </th>
+                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paquetesFiltrados.map((paquete) => (
-                      <tr key={paquete._id} className="hover:bg-gray-50">
+                      <tr key={paquete.id} className="hover:bg-gray-50">
                         <td className="px-2 py-2">
-                          <div className="font-semibold text-gray-900 text-xs">{paquete.paciente.nombres}</div>
-                          <div className="text-xs text-gray-500">{paquete.paciente.genero} • {paquete.paciente.edad}m</div>
+                          <div className="font-semibold text-gray-900 text-xs">
+                            {paquete.paciente.nombres}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {paquete.paciente.genero} • {paquete.paciente.edad}m
+                          </div>
                         </td>
                         <td className="px-2 py-2 text-xs text-gray-800">
                           {paquete.paciente.registroCivil}
@@ -291,22 +346,29 @@ export default function ReportePaquetes() {
                           </span>
                         </td>
                         <td className="px-2 py-2 text-center">
-                          <span className={`px-1 py-0.5 rounded text-xs font-semibold ${
-                            paquete.clasesDisponibles > 0 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span
+                            className={`px-1 py-0.5 rounded text-xs font-semibold ${
+                              paquete.clasesDisponibles > 0
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
                             {paquete.clasesDisponibles}
                           </span>
                         </td>
                         <td className="px-2 py-2 text-center">
                           <div className="flex flex-col items-center">
-                            <span className="text-xs font-semibold text-gray-700">{paquete.porcentajeUso}%</span>
+                            <span className="text-xs font-semibold text-gray-700">
+                              {paquete.porcentajeUso}%
+                            </span>
                             <div className="w-full bg-gray-200 rounded-full h-1 mt-0.5">
-                              <div 
+                              <div
                                 className={`h-1 rounded-full ${
-                                  paquete.porcentajeUso === 100 ? 'bg-red-500' : 
-                                  paquete.porcentajeUso >= 80 ? 'bg-yellow-500' : 'bg-green-500'
+                                  paquete.porcentajeUso === 100
+                                    ? "bg-red-500"
+                                    : paquete.porcentajeUso >= 80
+                                      ? "bg-yellow-500"
+                                      : "bg-green-500"
                                 }`}
                                 style={{ width: `${paquete.porcentajeUso}%` }}
                               ></div>
@@ -314,36 +376,44 @@ export default function ReportePaquetes() {
                           </div>
                         </td>
                         <td className="px-2 py-2 text-center">
-                          <span className={`px-1 py-0.5 rounded text-xs font-bold ${
-                            paquete.estado === 'Activo' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span
+                            className={`px-1 py-0.5 rounded text-xs font-bold ${
+                              paquete.estado === "Activo"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
                             {paquete.estado}
                           </span>
                         </td>
                         <td className="px-2 py-2 text-center">
                           <div className="flex flex-col gap-0.5">
-                            {paquete.clasesConPaquete && paquete.clasesConPaquete.length > 0 && (
-                              <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded text-xs">
-                                ✓{paquete.clasesConPaquete.length}
-                              </span>
-                            )}
-                            {paquete.clasesSinPaquete && paquete.clasesSinPaquete.length > 0 && (
-                              <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded text-xs">
-                                ⚠️{paquete.clasesSinPaquete.length}
-                              </span>
-                            )}
-                            {(!paquete.clasesConPaquete || paquete.clasesConPaquete.length === 0) && 
-                             (!paquete.clasesSinPaquete || paquete.clasesSinPaquete.length === 0) && (
-                              <span className="text-gray-500 text-xs">-</span>
-                            )}
+                            {paquete.clasesConPaquete &&
+                              paquete.clasesConPaquete.length > 0 && (
+                                <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded text-xs">
+                                  ✓{paquete.clasesConPaquete.length}
+                                </span>
+                              )}
+                            {paquete.clasesSinPaquete &&
+                              paquete.clasesSinPaquete.length > 0 && (
+                                <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded text-xs">
+                                  ⚠️{paquete.clasesSinPaquete.length}
+                                </span>
+                              )}
+                            {(!paquete.clasesConPaquete ||
+                              paquete.clasesConPaquete.length === 0) &&
+                              (!paquete.clasesSinPaquete ||
+                                paquete.clasesSinPaquete.length === 0) && (
+                                <span className="text-gray-500 text-xs">-</span>
+                              )}
                           </div>
                         </td>
                         <td className="px-2 py-2 text-center">
                           <div className="flex gap-1 justify-center">
                             <button
-                              onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
+                              onClick={() =>
+                                navigate(`/pacientes/${paquete.paciente._id}`)
+                              }
                               className="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs font-medium transition"
                               title="Ver paciente"
                             >
@@ -363,37 +433,53 @@ export default function ReportePaquetes() {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Vista de tarjetas para móvil y tablet */}
               <div className="lg:hidden space-y-4 p-4">
                 {paquetesFiltrados.map((paquete) => (
-                  <div key={paquete._id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div
+                    key={paquete._id}
+                    className="bg-gray-50 rounded-xl p-4 border border-gray-200"
+                  >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 text-lg">{paquete.paciente.nombres}</h3>
-                        <p className="text-sm text-gray-600">{paquete.paciente.genero} • {paquete.paciente.edad} meses</p>
-                        <p className="text-sm text-gray-600">RC: {paquete.paciente.registroCivil}</p>
+                        <h3 className="font-semibold text-gray-900 text-lg">
+                          {paquete.paciente.nombres}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {paquete.paciente.genero} • {paquete.paciente.edad}{" "}
+                          meses
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          RC: {paquete.paciente.registroCivil}
+                        </p>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        paquete.estado === 'Activo' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          paquete.estado === "Activo"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {paquete.estado}
                       </span>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 mb-3">
                       <div className="text-center">
                         <p className="text-xs text-gray-500 mb-1">Factura</p>
-                        <p className="font-mono text-sm font-semibold">{paquete.numeroFactura}</p>
+                        <p className="font-mono text-sm font-semibold">
+                          {paquete.numeroFactura}
+                        </p>
                       </div>
                       <div className="text-center">
                         <p className="text-xs text-gray-500 mb-1">% Uso</p>
-                        <p className="text-sm font-semibold">{paquete.porcentajeUso}%</p>
+                        <p className="text-sm font-semibold">
+                          {paquete.porcentajeUso}%
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-between items-center mb-3">
                       <div className="flex space-x-4">
                         <div className="text-center">
@@ -409,53 +495,68 @@ export default function ReportePaquetes() {
                           <p className="text-xs text-gray-500 mt-1">Usadas</p>
                         </div>
                         <div className="text-center">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            paquete.clasesDisponibles > 0 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              paquete.clasesDisponibles > 0
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
                             {paquete.clasesDisponibles}
                           </span>
-                          <p className="text-xs text-gray-500 mt-1">Disponibles</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Disponibles
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mb-3">
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full ${
-                            paquete.porcentajeUso === 100 ? 'bg-red-500' : 
-                            paquete.porcentajeUso >= 80 ? 'bg-yellow-500' : 'bg-green-500'
+                            paquete.porcentajeUso === 100
+                              ? "bg-red-500"
+                              : paquete.porcentajeUso >= 80
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
                           }`}
                           style={{ width: `${paquete.porcentajeUso}%` }}
                         ></div>
                       </div>
                     </div>
-                    
+
                     {/* Información de clases */}
                     <div className="mb-3">
                       <div className="flex flex-wrap gap-2 justify-center">
-                        {paquete.clasesConPaquete && paquete.clasesConPaquete.length > 0 && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                            ✓ {paquete.clasesConPaquete.length} con paquete
-                          </span>
-                        )}
-                        {paquete.clasesSinPaquete && paquete.clasesSinPaquete.length > 0 && (
-                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">
-                            ⚠️ {paquete.clasesSinPaquete.length} sin paquete
-                          </span>
-                        )}
-                        {(!paquete.clasesConPaquete || paquete.clasesConPaquete.length === 0) && 
-                         (!paquete.clasesSinPaquete || paquete.clasesSinPaquete.length === 0) && (
-                          <span className="text-gray-500 text-xs">Sin clases</span>
-                        )}
+                        {paquete.clasesConPaquete &&
+                          paquete.clasesConPaquete.length > 0 && (
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                              ✓ {paquete.clasesConPaquete.length} con paquete
+                            </span>
+                          )}
+                        {paquete.clasesSinPaquete &&
+                          paquete.clasesSinPaquete.length > 0 && (
+                            <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">
+                              ⚠️ {paquete.clasesSinPaquete.length} sin paquete
+                            </span>
+                          )}
+                        {(!paquete.clasesConPaquete ||
+                          paquete.clasesConPaquete.length === 0) &&
+                          (!paquete.clasesSinPaquete ||
+                            paquete.clasesSinPaquete.length === 0) && (
+                            <span className="text-gray-500 text-xs">
+                              Sin clases
+                            </span>
+                          )}
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/pacientes/${paquete.paciente._id}`)}
+                        onClick={() =>
+                          navigate(`/pacientes/${paquete.paciente._id}`)
+                        }
                         className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
                       >
                         <EyeIcon className="h-4 w-4" />

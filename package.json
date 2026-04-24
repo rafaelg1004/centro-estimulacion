@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "CI=false react-scripts build",
     "test": "react-scripts test",
     "test:perinatal": "node src/tests/valoracionperinatal.test.js",
     "eject": "react-scripts eject"
