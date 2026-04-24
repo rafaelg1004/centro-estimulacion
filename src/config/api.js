@@ -5,15 +5,28 @@
  * el desarrollo local y el deployment a producción.
  */
 
-// Configuración base de la API
-export const API_CONFIG = {
-  // URLs según entorno - En producción usa rutas relativas (mismo servidor)
-  // Usar siempre el puerto del backend mientras estemos en localhost
-  BASE_URL:
+// Detectar URL del backend
+const getBaseUrl = () => {
+  // 1. Primero intentar usar variable de entorno
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL.replace(/\/+$/, ""); // quitar trailing slashes
+  }
+
+  // 2. Localhost - usar puerto específico del backend
+  if (
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1"
-      ? "http://127.0.0.1:3005"
-      : "",
+  ) {
+    return "http://127.0.0.1:3005";
+  }
+
+  // 3. Producción - usar el mismo origen (asume proxy configura /api al backend)
+  return `${window.location.protocol}//${window.location.host}`;
+};
+
+// Configuración base de la API
+export const API_CONFIG = {
+  BASE_URL: getBaseUrl(),
 
   // Timeouts por entorno
   TIMEOUT: process.env.NODE_ENV === "production" ? 30000 : 10000,
