@@ -229,11 +229,11 @@ export default function TablaDinamica({
                                                                 👁️
                                                             </button>
                                                         )}
-                                                        {acciones.editar && (
+                                                        {acciones.editar && (typeof acciones.editar !== 'function' || acciones.editar(row)) && (
                                                             <button
                                                                 onClick={() => {
                                                                     const targetUrl = typeof acciones.editar === 'function' ? acciones.editar(row) : `${acciones.editar}${idRow}`;
-                                                                    if (targetUrl) navigate(targetUrl);
+                                                                    navigate(targetUrl);
                                                                 }}
                                                                 className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition shadow-sm hover:shadow"
                                                                 title="Editar"

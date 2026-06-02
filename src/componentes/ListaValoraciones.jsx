@@ -117,7 +117,7 @@ export default function HistoriaClinicaDigital() {
             if (row.bloqueada) return null;
             return `/valoraciones/editar/${row.id}`;
           },
-          eliminar: true,
+          eliminar: false,
         }}
       />
     </div>
