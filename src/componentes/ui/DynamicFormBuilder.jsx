@@ -171,7 +171,7 @@ export default function DynamicFormBuilder({
     }
   }, [formData, esquema, cie10Search]);
 
-  // Auto-calcular IMC cuando cambian peso o talla
+  // Auto-calcular IMC, FPP y Semanas de Gestación
   useEffect(() => {
     if (Object.keys(formData).length === 0) return;
     const updates = {};
@@ -186,6 +186,49 @@ export default function DynamicFormBuilder({
               : "";
           if (formData[campo.nombre] !== newVal) {
             updates[campo.nombre] = newVal;
+          }
+        }
+
+        if (campo.autoCalc?.formula === "fpp") {
+          const fumVal = formData[campo.autoCalc.fum];
+          if (fumVal) {
+            const parts = String(fumVal).split("-");
+            if (parts.length === 3) {
+              const y = parseInt(parts[0], 10);
+              const m = parseInt(parts[1], 10) - 1;
+              const d = parseInt(parts[2], 10);
+              const fumDate = new Date(y, m, d);
+              const fppDate = new Date(fumDate.getTime() + 280 * 24 * 60 * 60 * 1000);
+              const fppY = fppDate.getFullYear();
+              const fppM = String(fppDate.getMonth() + 1).padStart(2, '0');
+              const fppD = String(fppDate.getDate()).padStart(2, '0');
+              const fppStr = `${fppY}-${fppM}-${fppD}`;
+              if (formData[campo.nombre] !== fppStr) {
+                updates[campo.nombre] = fppStr;
+              }
+            }
+          }
+        }
+
+        if (campo.autoCalc?.formula === "semanasGestacion") {
+          const fumVal = formData[campo.autoCalc.fum];
+          if (fumVal) {
+            const parts = String(fumVal).split("-");
+            if (parts.length === 3) {
+              const y = parseInt(parts[0], 10);
+              const m = parseInt(parts[1], 10) - 1;
+              const d = parseInt(parts[2], 10);
+              const fumDate = new Date(y, m, d);
+              const currentDate = new Date();
+              currentDate.setHours(12, 0, 0, 0);
+              fumDate.setHours(12, 0, 0, 0);
+              const diffTime = currentDate.getTime() - fumDate.getTime();
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              const weeks = Math.max(0, Math.floor(diffDays / 7));
+              if (formData[campo.nombre] !== weeks && formData[campo.nombre] !== String(weeks)) {
+                updates[campo.nombre] = weeks;
+              }
+            }
           }
         }
       });

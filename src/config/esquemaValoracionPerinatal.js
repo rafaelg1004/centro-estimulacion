@@ -29,16 +29,41 @@ export const ESQUEMA_VALORACION_PERINATAL = {
         {
             titulo: "Motivo de Consulta",
             campos: [
-                { nombre: "motivoConsulta", etiqueta: "Motivo de Consulta", tipo: "textarea", requerido: true }
+                {
+                    nombre: "motivoConsulta",
+                    etiqueta: "Motivo de Consulta",
+                    tipo: "textarea",
+                    requerido: true,
+                    presets: [
+                        {
+                            etiqueta: "Educación para el Nacimiento",
+                            texto: "Gestante que consulta para iniciar programa de Educación para el Nacimiento, con el fin de recibir orientación y preparación integral sobre los cambios físicos y emocionales del embarazo, trabajo de parto, nacimiento, posparto, lactancia materna y cuidados básicos del recién nacido."
+                        },
+                        {
+                            etiqueta: "Educación + Acondicionamiento Físico",
+                            texto: "Gestante que consulta para vincularse al Programa de Educación para el Nacimiento y Acondicionamiento Físico Prenatal, con el fin de recibir preparación física y educativa durante la gestación, promoviendo hábitos saludables, bienestar materno-fetal y preparación para el parto, posparto y cuidados del recién nacido."
+                        }
+                    ]
+                }
             ]
         },
         {
             titulo: "Información de la Gestación y Acompañante",
             campos: [
                 { nombre: "moduloPerinatal.nombreBebe", etiqueta: "Nombre del Bebé", tipo: "text" },
-                { nombre: "moduloPerinatal.semanasGestacion", etiqueta: "Semanas de Gestación", tipo: "number" },
+                {
+                    nombre: "moduloPerinatal.semanasGestacion",
+                    etiqueta: "Semanas de Gestación",
+                    tipo: "number",
+                    autoCalc: { formula: "semanasGestacion", fum: "moduloPerinatal.fum" }
+                },
                 { nombre: "moduloPerinatal.fum", etiqueta: "FUM (Fecha Última Menstruación)", tipo: "date" },
-                { nombre: "moduloPerinatal.fpp", etiqueta: "Fecha Probable de Parto (FPP)", tipo: "date" },
+                {
+                    nombre: "moduloPerinatal.fpp",
+                    etiqueta: "Fecha Probable de Parto (FPP)",
+                    tipo: "date",
+                    autoCalc: { formula: "fpp", fum: "moduloPerinatal.fum" }
+                },
                 { nombre: "moduloPerinatal.acompananteNombre", etiqueta: "Nombre del Acompañante", tipo: "text" },
                 { nombre: "moduloPerinatal.acompananteTelefono", etiqueta: "Teléfono Acompañante", tipo: "text" },
             ]
@@ -155,8 +180,34 @@ export const ESQUEMA_VALORACION_PERINATAL = {
         {
             titulo: "Diagnóstico, Plan y Cierre",
             campos: [
-                { nombre: "diagnosticoFisioterapeutico", etiqueta: "Diagnóstico Fisioterapéutico", tipo: "textarea", requerido: true },
-                { nombre: "planTratamiento", etiqueta: "Plan de Intervención / Objetivos", tipo: "textarea", requerido: true },
+                {
+                    nombre: "diagnosticoFisioterapeutico",
+                    etiqueta: "Diagnóstico Fisioterapéutico",
+                    tipo: "textarea",
+                    requerido: true,
+                    presets: [
+                        {
+                            etiqueta: "Adecuado estado de salud general",
+                            texto: "Gestante con adecuado estado de salud general, sin limitaciones funcionales evidentes al momento de la valoración. Presenta capacidad funcional conservada para las actividades de la vida diaria y ausencia de signos o síntomas que contraindiquen la participación en programas de educación prenatal."
+                        }
+                    ]
+                },
+                {
+                    nombre: "planTratamiento",
+                    etiqueta: "Plan de Intervención / Objetivos",
+                    tipo: "textarea",
+                    requerido: true,
+                    presets: [
+                        {
+                            etiqueta: "Educación para el Nacimiento",
+                            texto: "Brindar preparación integral a la gestante y su acompañante para afrontar de manera informada, segura y participativa el proceso de embarazo, trabajo de parto, nacimiento y posparto."
+                        },
+                        {
+                            etiqueta: "Educación + Acondicionamiento Físico",
+                            texto: "Brindar preparación integral a la gestante y su acompañante para afrontar de manera informada, segura y participativa el proceso de embarazo, trabajo de parto, nacimiento y posparto, además de incluir el programa de acondicionamiento físico que busca mantener sus capacidades físicas, diminuir complicaciones y favorecer su recuperación."
+                        }
+                    ]
+                },
                 { nombre: "moduloPerinatal.visitaCierre", etiqueta: "Anotaciones de Visita de Cierre", tipo: "textarea" },
                 {
                     nombre: "moduloPerinatal.planElegido",
