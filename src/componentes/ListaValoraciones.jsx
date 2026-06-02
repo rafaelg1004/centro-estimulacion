@@ -83,6 +83,15 @@ export default function HistoriaClinicaDigital() {
       ),
     },
     {
+      header: "Profesional",
+      accessor: "creador",
+      format: (val) => (
+        <span className="text-xs text-gray-700">
+          {val ? val.nombre : "Sin asignar"}
+        </span>
+      ),
+    },
+    {
       header: "Estado",
       accessor: "bloqueada",
       format: (val) => (
