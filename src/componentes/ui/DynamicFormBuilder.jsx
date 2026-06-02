@@ -86,7 +86,7 @@ export default function DynamicFormBuilder({
       flatten(initialData);
       // Aplicar valorPorDefecto como fallback para campos no presentes en initialData (ej. campos de visualización del paciente)
       esquema.secciones.forEach((sec) => {
-        sec.campos.forEach((campo) => {
+        (sec.campos || []).forEach((campo) => {
           if (
             flatData[campo.nombre] === undefined &&
             campo.valorPorDefecto !== undefined
@@ -105,7 +105,7 @@ export default function DynamicFormBuilder({
         .substring(0, 16);
 
       esquema.secciones.forEach((seccion) => {
-        seccion.campos.forEach((campo) => {
+        (seccion.campos || []).forEach((campo) => {
           if (campo.autoNow && campo.tipo === "datetime-local") {
             defaultData[campo.nombre] = nowLocal;
           } else if (campo.tipo === "checkbox") {
@@ -130,7 +130,7 @@ export default function DynamicFormBuilder({
       let hasNew = false;
 
       for (const seccion of esquema.secciones) {
-        for (const campo of seccion.campos) {
+        for (const campo of (seccion.campos || [])) {
           if (campo.tipo === "cie10") {
             const val = formData[campo.nombre];
             // Si tenemos algo pero no tiene el formato "COD - Desc" y no lo hemos buscado ya en este efecto
@@ -176,7 +176,7 @@ export default function DynamicFormBuilder({
     if (Object.keys(formData).length === 0) return;
     const updates = {};
     esquema.secciones.forEach((sec) => {
-      sec.campos.forEach((campo) => {
+      (sec.campos || []).forEach((campo) => {
         if (campo.autoCalc?.formula === "imc") {
           const peso = parseFloat(formData[campo.autoCalc.peso]);
           const talla = parseFloat(formData[campo.autoCalc.talla]);
@@ -198,7 +198,7 @@ export default function DynamicFormBuilder({
   const calcularIMC = (nombre, valor, prevData) => {
     const updates = {};
     esquema.secciones.forEach((sec) => {
-      sec.campos.forEach((campo) => {
+      (sec.campos || []).forEach((campo) => {
         if (
           campo.autoCalc?.formula === "imc" &&
           (campo.autoCalc.peso === nombre || campo.autoCalc.talla === nombre)
@@ -275,7 +275,7 @@ export default function DynamicFormBuilder({
       : [...seccionesFijas, ...seccionesAValidar];
 
     setFinal.forEach((seccion) => {
-      seccion.campos.forEach((campo) => {
+      (seccion.campos || []).forEach((campo) => {
         let visible = true;
         if (campo.dependeDe) {
           visible = formData[campo.dependeDe.campo] === campo.dependeDe.valor;
