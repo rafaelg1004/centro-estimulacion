@@ -31,6 +31,7 @@ import ListaSesionesPerinatal from "./componentes/ListaSesionesPerinatal";
 import ListaGlobalSesionesPerinatal from "./componentes/ListaGlobalSesionesPerinatal";
 import EditarClase from "./componentes/EditarClase";
 import MiPerfil from "./componentes/MiPerfil";
+import ConfiguracionClinica from "./componentes/ConfiguracionClinica";
 import Swal from "sweetalert2";
 
 
@@ -44,6 +45,7 @@ import {
   ChartBarIcon,
   CalendarDaysIcon,
   UserCircleIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
 import { logAPIConfig, testAPIConnection, apiRequest, API_ENDPOINTS } from "./config/api";
 
@@ -212,6 +214,14 @@ function RutasAutenticadas({ usuario, setUsuario }) {
                     <UsersIcon className="h-5 w-5" />
                     Gestión de Usuarios
                   </Link>
+                  <Link
+                    to="/configuracion"
+                    className="bg-pink-100 hover:bg-pink-200 text-pink-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <BuildingOfficeIcon className="h-5 w-5" />
+                    Configuración Clínica
+                  </Link>
                 </>
               )}
               <Link
@@ -337,6 +347,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/sesiones-mensuales/nueva" element={<CrearSesionMensual />} />
             <Route path="/sesiones-mensuales/:id" element={<DetalleSesionMensual />} />
             <Route path="/mi-perfil" element={<MiPerfil />} />
+            <Route path="/configuracion" element={<ConfiguracionClinica />} />
 
           </Routes>
         </div>
