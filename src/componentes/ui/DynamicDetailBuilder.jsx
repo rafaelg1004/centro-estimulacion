@@ -71,16 +71,17 @@ function Field({ label, value, isImage, audit, options, type }) {
       ) {
         const date = new Date(value);
         if (!isNaN(date.getTime())) {
-          setEnrichedValue(
-            date.toLocaleString("es-CO", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            }),
-          );
+          const formatOptions = {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          };
+          if (type !== "date") {
+            formatOptions.hour = "2-digit";
+            formatOptions.minute = "2-digit";
+            formatOptions.hour12 = true;
+          }
+          setEnrichedValue(date.toLocaleString("es-CO", formatOptions));
           return;
         }
       }

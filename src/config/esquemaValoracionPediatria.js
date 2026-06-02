@@ -733,10 +733,5 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
         },
       ],
     },
-    {
-      titulo: "Información Completa del Módulo Pediátrico",
-      siempreVisible: true,
-      camposDinamicos: "moduloPediatriaCompleto",
-    },
   ],
 };
