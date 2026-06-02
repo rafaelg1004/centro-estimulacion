@@ -227,10 +227,12 @@ export default function DynamicDetailBuilder({
             </button>
 
             <div className="flex flex-wrap gap-3">
-              {!data.bloqueada && onEdit && (
+              {onEdit && (
                 <button
-                  onClick={onEdit}
-                  className="bg-amber-400 hover:bg-amber-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all flex items-center gap-2"
+                  onClick={data.bloqueada ? undefined : onEdit}
+                  disabled={data.bloqueada}
+                  title={data.bloqueada ? "Historia clínica cerrada, no se puede editar" : "Editar registro"}
+                  className={`${data.bloqueada ? "bg-gray-400 opacity-50 cursor-not-allowed" : "bg-amber-400 hover:bg-amber-500"} text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all flex items-center gap-2`}
                 >
                   Editar Historia
                 </button>
@@ -243,10 +245,12 @@ export default function DynamicDetailBuilder({
                   <ArrowDownTrayIcon className="h-5 w-5" /> Exportar PDF
                 </button>
               )}
-              {!data.bloqueada && onLock && (
+              {onLock && (
                 <button
-                  onClick={onLock}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all flex items-center gap-2"
+                  onClick={data.bloqueada ? undefined : onLock}
+                  disabled={data.bloqueada}
+                  title={data.bloqueada ? "La historia ya se encuentra cerrada" : "Cerrar historia para evitar modificaciones"}
+                  className={`${data.bloqueada ? "bg-gray-400 opacity-50 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"} text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition-all flex items-center gap-2`}
                 >
                   <LockClosedIcon className="h-5 w-5" /> Cerrar Historia
                 </button>

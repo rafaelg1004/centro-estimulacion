@@ -931,11 +931,12 @@ export default function DynamicFormBuilder({
   // Helper: renderizar una sección completa
   const renderSeccion = (seccion, idxSec, isSidebar = false) => {
     if (!seccion) return null;
-    const camposReq = seccion.campos.filter(
+    const camposSeguros = seccion.campos || [];
+    const camposReq = camposSeguros.filter(
       (c) =>
         c.requerido && !c.oculto && c.tipo !== "firma" && c.tipo !== "checkbox",
     );
-    const camposOpc = seccion.campos.filter(
+    const camposOpc = camposSeguros.filter(
       (c) =>
         !c.requerido &&
         !c.oculto &&
@@ -943,7 +944,7 @@ export default function DynamicFormBuilder({
         c.tipo !== "checkbox" &&
         c.tipo !== "textarea",
     );
-    const camposTexarea = seccion.campos.filter(
+    const camposTexarea = camposSeguros.filter(
       (c) =>
         !c.oculto &&
         (c.tipo === "textarea" ||
@@ -951,7 +952,7 @@ export default function DynamicFormBuilder({
           c.tipo === "checkbox" ||
           c.tipo === "checkbox_group"),
     );
-    const camposOcultos = seccion.campos.filter(
+    const camposOcultos = camposSeguros.filter(
       (c) => c.tipo === "hidden" || c.oculto,
     );
     // const tieneOpcionales = camposOpc.length > 0; // No se usa actualmente
@@ -989,7 +990,7 @@ export default function DynamicFormBuilder({
           ) : (
             // MODO FORMULARIO PRINCIPAL: Layout grid normal ordenado sin separar obligatorios/opcionales
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
-              {seccion.campos
+              {camposSeguros
                 .filter(
                   (c) =>
                     !c.oculto &&
