@@ -289,6 +289,14 @@ export default function DynamicDetailBuilder({
                   value={`${data.paciente.tipoDocumentoIdentificacion || "CC"}: ${data.paciente.numDocumentoIdentificacion || "S.D"}`}
                 />
                 <Field
+                  label="Fecha de Nacimiento"
+                  value={
+                    data.paciente.fechaNacimiento
+                      ? new Date(data.paciente.fechaNacimiento).toLocaleDateString("es-CO", { year: 'numeric', month: 'long', day: 'numeric' })
+                      : "No registrado"
+                  }
+                />
+                <Field
                   label="Edad Actual"
                   value={calcularEdad(data.paciente.fechaNacimiento)}
                 />

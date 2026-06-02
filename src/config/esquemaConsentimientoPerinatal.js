@@ -4,42 +4,6 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
   redireccion: "/valoraciones",
   secciones: [
     {
-      titulo: "Información del Paciente",
-      siempreVisible: true,
-      campos: [
-        {
-          nombre: "paciente.nombreCompleto",
-          etiqueta: "Nombre Completo",
-          tipo: "text",
-          lecsolo: true,
-        },
-        {
-          nombre: "paciente.tipoDocumentoIdentificacion",
-          etiqueta: "Tipo Documento",
-          tipo: "text",
-          lecsolo: true,
-        },
-        {
-          nombre: "paciente.numDocumentoIdentificacion",
-          etiqueta: "Número Documento",
-          tipo: "text",
-          lecsolo: true,
-        },
-        {
-          nombre: "paciente.fechaNacimiento",
-          etiqueta: "Fecha de Nacimiento",
-          tipo: "date",
-          lecsolo: true,
-        },
-        {
-          nombre: "paciente.edadFormateada",
-          etiqueta: "Edad",
-          tipo: "text",
-          lecsolo: true,
-        },
-      ],
-    },
-    {
       titulo: "Información de Consulta e Ingreso",
       siempreVisible: true,
       campos: [
