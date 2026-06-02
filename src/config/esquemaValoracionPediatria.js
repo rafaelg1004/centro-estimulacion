@@ -28,6 +28,41 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
       ],
     },
     {
+      titulo: "Datos de los Padres / Acudientes",
+      campos: [
+        {
+          nombre: "moduloPediatria.datosPadres.nombreMadre",
+          etiqueta: "Nombre de la Madre",
+          tipo: "text",
+        },
+        {
+          nombre: "moduloPediatria.datosPadres.documentoMadre",
+          etiqueta: "Documento de la Madre",
+          tipo: "text",
+        },
+        {
+          nombre: "moduloPediatria.datosPadres.nombrePadre",
+          etiqueta: "Nombre del Padre",
+          tipo: "text",
+        },
+        {
+          nombre: "moduloPediatria.datosPadres.documentoPadre",
+          etiqueta: "Documento del Padre",
+          tipo: "text",
+        },
+        {
+          nombre: "moduloPediatria.datosPadres.nombreAcudiente",
+          etiqueta: "Nombre del Acudiente (si aplica)",
+          tipo: "text",
+        },
+        {
+          nombre: "moduloPediatria.datosPadres.documentoAcudiente",
+          etiqueta: "Documento del Acudiente",
+          tipo: "text",
+        },
+      ],
+    },
+    {
       titulo: "Información de Consulta e Ingreso",
       siempreVisible: true,
       campos: [
