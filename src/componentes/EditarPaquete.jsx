@@ -9,9 +9,9 @@ export default function EditarPaquete() {
   const navigate = useNavigate();
   const [paquete, setPaquete] = useState(null);
   const [formData, setFormData] = useState({
-    numeroFactura: '',
-    clasesPagadas: '',
-    fechaPago: ''
+    numero_factura: '',
+    clases_pagadas: '',
+    fecha_pago: ''
   });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -23,9 +23,9 @@ export default function EditarPaquete() {
         const data = await apiRequest(`/pagoPaquete/${id}`);
         setPaquete(data);
         setFormData({
-          numeroFactura: data.numeroFactura || '',
-          clasesPagadas: data.clasesPagadas || '',
-          fechaPago: data.fechaPago ? data.fechaPago.slice(0, 10) : ''
+          numero_factura: data.numero_factura || '',
+          clases_pagadas: data.clases_pagadas || '',
+          fecha_pago: data.fecha_pago ? data.fecha_pago.slice(0, 10) : ''
         });
       } catch (error) {
         console.error('Error al cargar paquete:', error);
@@ -43,18 +43,18 @@ export default function EditarPaquete() {
     
     try {
       // Validaciones
-      if (!formData.numeroFactura.trim()) {
+      if (!formData.numero_factura.trim()) {
         Swal.fire('Error', 'El número de factura es obligatorio', 'error');
         return;
       }
       
-      if (!formData.clasesPagadas || formData.clasesPagadas <= 0) {
+      if (!formData.clases_pagadas || formData.clases_pagadas <= 0) {
         Swal.fire('Error', 'El número de clases pagadas debe ser mayor a 0', 'error');
         return;
       }
       
-      if (parseInt(formData.clasesPagadas) < paquete.clasesUsadas) {
-        Swal.fire('Error', `No puedes establecer menos clases pagadas (${formData.clasesPagadas}) que las ya usadas (${paquete.clasesUsadas})`, 'error');
+      if (parseInt(formData.clases_pagadas) < paquete.clases_usadas) {
+        Swal.fire('Error', `No puedes establecer menos clases pagadas (${formData.clases_pagadas}) que las ya usadas (${paquete.clases_usadas})`, 'error');
         return;
       }
 
@@ -62,9 +62,9 @@ export default function EditarPaquete() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          numeroFactura: formData.numeroFactura.trim(),
-          clasesPagadas: parseInt(formData.clasesPagadas),
-          fechaPago: formData.fechaPago
+          numero_factura: formData.numero_factura.trim(),
+          clases_pagadas: parseInt(formData.clases_pagadas),
+          fecha_pago: formData.fecha_pago
         })
       });
 
@@ -155,8 +155,8 @@ export default function EditarPaquete() {
             </label>
             <input
               type="text"
-              value={formData.numeroFactura}
-              onChange={(e) => setFormData({ ...formData, numeroFactura: e.target.value })}
+              value={formData.numero_factura}
+              onChange={(e) => setFormData({ ...formData, numero_factura: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               placeholder="Ej: FAC-001-2024"
               required
@@ -170,15 +170,15 @@ export default function EditarPaquete() {
             <input
               type="number"
               min="1"
-              value={formData.clasesPagadas}
-              onChange={(e) => setFormData({ ...formData, clasesPagadas: e.target.value })}
+              value={formData.clases_pagadas}
+              onChange={(e) => setFormData({ ...formData, clases_pagadas: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               placeholder="Ej: 10"
               required
             />
             {paquete && (
               <p className="text-sm text-gray-500 mt-1">
-                Clases ya usadas: {paquete.clasesUsadas} | Mínimo permitido: {paquete.clasesUsadas}
+                Clases ya usadas: {paquete.clases_usadas} | Mínimo permitido: {paquete.clases_usadas}
               </p>
             )}
           </div>
@@ -189,8 +189,8 @@ export default function EditarPaquete() {
             </label>
             <input
               type="date"
-              value={formData.fechaPago}
-              onChange={(e) => setFormData({ ...formData, fechaPago: e.target.value })}
+              value={formData.fecha_pago}
+              onChange={(e) => setFormData({ ...formData, fecha_pago: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>

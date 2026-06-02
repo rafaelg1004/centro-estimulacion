@@ -39,7 +39,7 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
           placeholder: "Buscar procedimiento...",
         },
         {
-          nombre: "fechaInicioAtencion",
+          nombre: "fecha_inicio_atencion",
           etiqueta: "Fecha y Hora Atención",
           tipo: "datetime-local",
           requerido: true,
@@ -68,7 +68,7 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
           valorPorDefecto: "21",
         },
         {
-          nombre: "codDiagnosticoPrincipal",
+          nombre: "cod_diagnostico_principal",
           etiqueta: "Diagnóstico CIE-10",
           tipo: "cie10",
           requerido: true,

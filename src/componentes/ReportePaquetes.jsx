@@ -26,7 +26,7 @@ export default function ReportePaquetes() {
   const editarPaquete = async (paquete) => {
     const result = await Swal.fire({
       title: "Editar Paquete",
-      text: `¿Deseas editar el paquete ${paquete.numeroFactura}?`,
+      text: `¿Deseas editar el paquete ${paquete.numero_factura}?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -65,13 +65,13 @@ export default function ReportePaquetes() {
         Género: paquete.paciente.genero,
         Edad: paquete.paciente.edad + " meses",
         Celular: paquete.paciente.celular,
-        "N° Factura": paquete.numeroFactura,
-        "Clases Pagadas": paquete.clasesPagadas,
-        "Clases Usadas": paquete.clasesUsadas,
+        "N° Factura": paquete.numero_factura,
+        "Clases Pagadas": paquete.clases_pagadas,
+        "Clases Usadas": paquete.clases_usadas,
         "Clases Disponibles": paquete.clasesDisponibles,
         "Porcentaje Uso": paquete.porcentajeUso + "%",
         Estado: paquete.estado,
-        "Fecha Pago": new Date(paquete.fechaPago).toLocaleDateString("es-CO"),
+        "Fecha Pago": new Date(paquete.fecha_pago).toLocaleDateString("es-CO"),
       }));
 
       const libro = XLSX.utils.book_new();
@@ -102,7 +102,7 @@ export default function ReportePaquetes() {
       paquete.paciente.registroCivil
         .toLowerCase()
         .includes(busqueda.toLowerCase()) ||
-      paquete.numeroFactura.toLowerCase().includes(busqueda.toLowerCase());
+      paquete.numero_factura.toLowerCase().includes(busqueda.toLowerCase());
 
     return cumpleFiltro && cumpleBusqueda;
   });
@@ -112,8 +112,8 @@ export default function ReportePaquetes() {
     total: paquetes.length,
     activos: paquetes.filter((p) => p.estado === "Activo").length,
     agotados: paquetes.filter((p) => p.estado === "Agotado").length,
-    totalClasesPagadas: paquetes.reduce((sum, p) => sum + p.clasesPagadas, 0),
-    totalClasesUsadas: paquetes.reduce((sum, p) => sum + p.clasesUsadas, 0),
+    totalClasesPagadas: paquetes.reduce((sum, p) => sum + p.clases_pagadas, 0),
+    totalClasesUsadas: paquetes.reduce((sum, p) => sum + p.clases_usadas, 0),
   };
 
   if (cargando) {
@@ -333,16 +333,16 @@ export default function ReportePaquetes() {
                           {paquete.paciente.registroCivil}
                         </td>
                         <td className="px-2 py-2 text-xs font-mono text-gray-800">
-                          {paquete.numeroFactura}
+                          {paquete.numero_factura}
                         </td>
                         <td className="px-2 py-2 text-center">
                           <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-xs font-semibold">
-                            {paquete.clasesPagadas}
+                            {paquete.clases_pagadas}
                           </span>
                         </td>
                         <td className="px-2 py-2 text-center">
                           <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded text-xs font-semibold">
-                            {paquete.clasesUsadas}
+                            {paquete.clases_usadas}
                           </span>
                         </td>
                         <td className="px-2 py-2 text-center">
@@ -469,7 +469,7 @@ export default function ReportePaquetes() {
                       <div className="text-center">
                         <p className="text-xs text-gray-500 mb-1">Factura</p>
                         <p className="font-mono text-sm font-semibold">
-                          {paquete.numeroFactura}
+                          {paquete.numero_factura}
                         </p>
                       </div>
                       <div className="text-center">
@@ -484,13 +484,13 @@ export default function ReportePaquetes() {
                       <div className="flex space-x-4">
                         <div className="text-center">
                           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
-                            {paquete.clasesPagadas}
+                            {paquete.clases_pagadas}
                           </span>
                           <p className="text-xs text-gray-500 mt-1">Pagadas</p>
                         </div>
                         <div className="text-center">
                           <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-semibold">
-                            {paquete.clasesUsadas}
+                            {paquete.clases_usadas}
                           </span>
                           <p className="text-xs text-gray-500 mt-1">Usadas</p>
                         </div>

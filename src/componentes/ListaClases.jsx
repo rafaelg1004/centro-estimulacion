@@ -183,7 +183,7 @@ export default function ListaClases() {
               // Contar niños sin paquete
               const ninosSinPaquete = clase.ninos
                 ? clase.ninos.filter(
-                    (n) => !n.numeroFactura || n.numeroFactura.trim() === "",
+                    (n) => !n.numero_factura || n.numero_factura.trim() === "",
                   ).length
                 : 0;
 

@@ -5,9 +5,9 @@ import { apiRequest } from "../config/api";
 export default function RegistrarPaquete() {
   const { id } = useParams(); // <-- este es el id del paciente si vienes de /paquetes/nuevo/:id
   const navigate = useNavigate();
-  const [numeroFactura, setNumeroFactura] = useState("");
-  const [clasesPagadas, setClasesPagadas] = useState(1);
-  const [fechaPago, setFechaPago] = useState(""); // Nuevo estado
+  const [numero_factura, setNumeroFactura] = useState("");
+  const [clases_pagadas, setClasesPagadas] = useState(1);
+  const [fecha_pago, setFechaPago] = useState(""); // Nuevo estado
   const [paciente, setPaciente] = useState(null);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function RegistrarPaquete() {
     e.preventDefault();
     await apiRequest("/pagoPaquete", {
       method: "POST",
-      body: JSON.stringify({ paciente: id, numeroFactura, clasesPagadas, fechaPago }),
+      body: JSON.stringify({ paciente: id, numero_factura, clases_pagadas, fecha_pago }),
     });
     setNumeroFactura("");
     setClasesPagadas(1);
@@ -38,7 +38,7 @@ export default function RegistrarPaquete() {
       <input
         type="text"
         placeholder="Número de factura"
-        value={numeroFactura}
+        value={numero_factura}
         onChange={e => setNumeroFactura(e.target.value)}
         className="border p-2 mb-2 w-full rounded"
         required
@@ -46,7 +46,7 @@ export default function RegistrarPaquete() {
       <input
         type="number"
         placeholder="Clases pagadas"
-        value={clasesPagadas}
+        value={clases_pagadas}
         min={1}
         onChange={e => setClasesPagadas(e.target.value)}
         className="border p-2 mb-2 w-full rounded"
@@ -55,7 +55,7 @@ export default function RegistrarPaquete() {
       <input
         type="date"
         placeholder="Fecha de pago"
-        value={fechaPago}
+        value={fecha_pago}
         onChange={e => setFechaPago(e.target.value)}
         className="border p-2 mb-2 w-full rounded"
         required

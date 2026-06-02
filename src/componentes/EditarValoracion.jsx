@@ -27,8 +27,8 @@ export default function EditarValoracion() {
 
         setValoracion(data);
 
-        // Determinar el esquema usando tipoPrograma primero (más confiable que inspeccionar módulos)
-        const tp = data.tipoPrograma || '';
+        // Determinar el esquema usando tipo_programa primero (más confiable que inspeccionar módulos)
+        const tp = data.tipo_programa || '';
         if (tp.includes('Lactancia') || data.moduloLactancia?.tipoLactancia) {
           setEsquema(ESQUEMA_VALORACION_LACTANCIA);
         } else if (tp.includes('Piso') || data.codConsulta === '890202') {

@@ -172,8 +172,8 @@ export default function ListaGlobalSesionesPerinatal() {
                                 Plan Activo
                               </p>
                               <p className="text-xs font-bold text-gray-700 capitalize">
-                                {item.tipoPrograma ||
-                                  item._datosLegacy?.tipoPrograma ||
+                                {item.tipo_programa ||
+                                  item._datosLegacy?.tipo_programa ||
                                   "No especificado"}
                               </p>
                             </div>

@@ -11,7 +11,7 @@ export const ESQUEMA_VALORACION_LACTANCIA_PRENATAL = {
                 {
                     nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
-                { nombre: "fechaInicioAtencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
+                { nombre: "fecha_inicio_atencion", etiqueta: "Fecha y Hora Atención", tipo: "datetime-local", requerido: true, autoNow: true },
                 {
                     nombre: "finalidadTecnologiaSalud", etiqueta: "Finalidad", tipo: "select", opciones: [
                         { valor: "10", etiqueta: "10 - Promoción de la salud" }
@@ -22,7 +22,7 @@ export const ESQUEMA_VALORACION_LACTANCIA_PRENATAL = {
                         { valor: "21", etiqueta: "21 - Enfermedad general" }
                     ], requerido: true, valorPorDefecto: "21"
                 },
-                { nombre: "codDiagnosticoPrincipal", etiqueta: "Diagnóstico CIE-10", tipo: "cie10", requerido: true, placeholder: "Ej. Z391" }
+                { nombre: "cod_diagnostico_principal", etiqueta: "Diagnóstico CIE-10", tipo: "cie10", requerido: true, placeholder: "Ej. Z391" }
             ]
         },
         {

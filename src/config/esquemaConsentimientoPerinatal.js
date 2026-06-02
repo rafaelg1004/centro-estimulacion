@@ -39,7 +39,7 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
           placeholder: "Buscar procedimiento...",
         },
         {
-          nombre: "fechaInicioAtencion",
+          nombre: "fecha_inicio_atencion",
           etiqueta: "Fecha de Ingreso al Programa",
           tipo: "datetime-local",
           requerido: true,
@@ -71,7 +71,7 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
           valorPorDefecto: "22",
         },
         {
-          nombre: "codDiagnosticoPrincipal",
+          nombre: "cod_diagnostico_principal",
           etiqueta: "Código Diagnóstico (CIE-10)",
           tipo: "cie10",
           requerido: true,

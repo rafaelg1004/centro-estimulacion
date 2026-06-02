@@ -180,11 +180,11 @@ export default function NuevaValoracionUnificada() {
             if (tipoValoracionAdulto === 'perinatal') esquemaActivo = ESQUEMA_VALORACION_PERINATAL;
         }
 
-        let tipoProgramaStr = "Pediatría";
+        let tipo_programaStr = "Pediatría";
         if (pacienteElegido?.tipoModulo === 'adulto') {
-            if (tipoValoracionAdulto === 'lactancia') tipoProgramaStr = subTipoLactancia === 'prenatal' ? "Lactancia (Prenatal)" : "Lactancia (Postparto)";
-            if (tipoValoracionAdulto === 'pisopelvico') tipoProgramaStr = "Piso Pélvico";
-            if (tipoValoracionAdulto === 'perinatal') tipoProgramaStr = "Perinatal";
+            if (tipoValoracionAdulto === 'lactancia') tipo_programaStr = subTipoLactancia === 'prenatal' ? "Lactancia (Prenatal)" : "Lactancia (Postparto)";
+            if (tipoValoracionAdulto === 'pisopelvico') tipo_programaStr = "Piso Pélvico";
+            if (tipoValoracionAdulto === 'perinatal') tipo_programaStr = "Perinatal";
         }
 
         const esquemaConPaciente = {
@@ -195,7 +195,7 @@ export default function NuevaValoracionUnificada() {
                         ...sec,
                         campos: [
                             { nombre: "paciente", tipo: "hidden", valorPorDefecto: pacienteId },
-                            { nombre: "tipoPrograma", tipo: "hidden", valorPorDefecto: tipoProgramaStr },
+                            { nombre: "tipo_programa", tipo: "hidden", valorPorDefecto: tipo_programaStr },
                             ...sec.campos
                         ]
                     };

@@ -23,9 +23,9 @@ export default function DetallePacienteUnificado() {
   const [itemsPorPagina] = useState(6);
   const [showValuationModal, setShowValuationModal] = useState(false);
   const [showPackageModal, setShowPackageModal] = useState(false);
-  const [numeroFactura, setNumeroFactura] = useState("");
-  const [clasesPagadas, setClasesPagadas] = useState(1);
-  const [fechaPago, setFechaPago] = useState("");
+  const [numero_factura, setNumeroFactura] = useState("");
+  const [clases_pagadas, setClasesPagadas] = useState(1);
+  const [fecha_pago, setFechaPago] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function DetallePacienteUnificado() {
   const handleRegistrarPaquete = async (e) => {
     e.preventDefault();
     try {
-      if (!numeroFactura.trim() || !fechaPago) {
+      if (!numero_factura.trim() || !fecha_pago) {
         return Swal.fire(
           "Atención",
           "Por favor llena todos los campos",
@@ -95,9 +95,9 @@ export default function DetallePacienteUnificado() {
         method: "POST",
         body: JSON.stringify({
           paciente: id,
-          numeroFactura,
-          clasesPagadas,
-          fechaPago,
+          numero_factura,
+          clases_pagadas,
+          fecha_pago,
         }),
       });
 
@@ -746,7 +746,7 @@ export default function DetallePacienteUnificado() {
                   </label>
                   <input
                     type="text"
-                    value={numeroFactura}
+                    value={numero_factura}
                     onChange={(e) => setNumeroFactura(e.target.value)}
                     className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
                     placeholder="Ej: FAC-001"
@@ -759,7 +759,7 @@ export default function DetallePacienteUnificado() {
                   </label>
                   <input
                     type="number"
-                    value={clasesPagadas}
+                    value={clases_pagadas}
                     min={1}
                     onChange={(e) => setClasesPagadas(e.target.value)}
                     className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
@@ -772,7 +772,7 @@ export default function DetallePacienteUnificado() {
                   </label>
                   <input
                     type="date"
-                    value={fechaPago}
+                    value={fecha_pago}
                     onChange={(e) => setFechaPago(e.target.value)}
                     className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
                     required

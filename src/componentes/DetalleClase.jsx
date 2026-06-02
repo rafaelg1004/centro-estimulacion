@@ -29,9 +29,9 @@ export default function DetalleClase() {
 
   const [showPackageModal, setShowPackageModal] = useState(false);
   const [pacienteCompraId, setPacienteCompraId] = useState("");
-  const [numeroFacturaNueva, setNumeroFacturaNueva] = useState("");
-  const [clasesPagadasNueva, setClasesPagadasNueva] = useState(1);
-  const [fechaPagoNueva, setFechaPagoNueva] = useState("");
+  const [numero_facturaNueva, setNumeroFacturaNueva] = useState("");
+  const [clases_pagadasNueva, setClasesPagadasNueva] = useState(1);
+  const [fecha_pagoNueva, setFechaPagoNueva] = useState("");
 
   useEffect(() => {
     apiRequest(`/clases/${id}`).then(setClase);
@@ -91,8 +91,8 @@ export default function DetalleClase() {
       if (!result.isConfirmed) return;
     } else {
       // Si hay factura seleccionada, validar que tenga clases disponibles
-      const paquete = paquetes.find((p) => p.numeroFactura === facturaAgregar);
-      if (!paquete || paquete.clasesUsadas >= paquete.clasesPagadas) {
+      const paquete = paquetes.find((p) => p.numero_factura === facturaAgregar);
+      if (!paquete || paquete.clases_usadas >= paquete.clases_pagadas) {
         alert("No quedan clases disponibles en este paquete/factura.");
         return;
       }
@@ -101,7 +101,7 @@ export default function DetalleClase() {
     await apiRequest(`/clases/${id}/agregar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ninoId, numeroFactura: facturaAgregar || null }),
+      body: JSON.stringify({ paciente_id: ninoId, numero_factura: facturaAgregar || null }),
     });
     apiRequest(`/clases/${id}`).then(setClase);
     setNinoId("");
@@ -116,12 +116,12 @@ export default function DetalleClase() {
       return;
     }
     const firma = sigRef.current.toDataURL("image/png");
-    const numeroFactura = getFacturaDeNino(firmaNinoId);
+    const numero_factura = getFacturaDeNino(firmaNinoId);
 
     await apiRequest(`/clases/${id}/firma-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ninoId: firmaNinoId, firma, numeroFactura }),
+      body: JSON.stringify({ paciente_id: firmaNinoId, firma, numero_factura: numero_factura }),
     });
 
     apiRequest(`/clases/${id}`).then(setClase);
@@ -144,14 +144,14 @@ export default function DetalleClase() {
     await apiRequest(`/clases/${id}/eliminar-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ninoId }),
+      body: JSON.stringify({ paciente_id: ninoId }),
     });
     apiRequest(`/clases/${id}`).then(setClase);
   };
 
   const getFacturaDeNino = (ninoId) => {
-    const n = clase.ninos.find((n) => (n.nino?.id || n.nino) === ninoId);
-    return n?.numeroFactura || "";
+    const n = clase.ninos.find((n) => (n.paciente?.id || n.paciente) === ninoId);
+    return n?.numero_factura || "";
   };
 
   const asignarPaquete = async () => {
@@ -161,9 +161,9 @@ export default function DetalleClase() {
     }
 
     const paquete = paquetesParaAsignar.find(
-      (p) => p.numeroFactura === facturaAsignar,
+      (p) => p.numero_factura === facturaAsignar,
     );
-    if (!paquete || paquete.clasesUsadas >= paquete.clasesPagadas) {
+    if (!paquete || paquete.clases_usadas >= paquete.clases_pagadas) {
       alert("No quedan clases disponibles en este paquete/factura.");
       return;
     }
@@ -172,8 +172,8 @@ export default function DetalleClase() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ninoId: asignarPaqueteId,
-        numeroFactura: facturaAsignar,
+        paciente_id: asignarPaqueteId,
+        numero_factura: facturaAsignar,
       }),
     });
 
@@ -195,7 +195,7 @@ export default function DetalleClase() {
   const handleRegistrarPaquete = async (e) => {
     e.preventDefault();
     try {
-      if (!numeroFacturaNueva.trim() || !fechaPagoNueva) {
+      if (!numero_facturaNueva.trim() || !fecha_pagoNueva) {
         return Swal.fire(
           "Atención",
           "Por favor llena todos los campos",
@@ -206,10 +206,10 @@ export default function DetalleClase() {
       await apiRequest("/pagoPaquete", {
         method: "POST",
         body: JSON.stringify({
-          paciente: pacienteCompraId,
-          numeroFactura: numeroFacturaNueva,
-          clasesPagadas: clasesPagadasNueva,
-          fechaPago: fechaPagoNueva,
+          paciente_id: pacienteCompraId,
+          numero_factura: numero_facturaNueva,
+          clases_pagadas: clases_pagadasNueva,
+          fecha_pago: fecha_pagoNueva,
         }),
       });
 
@@ -330,12 +330,12 @@ export default function DetalleClase() {
                     <option value="">Selecciona una factura/paquete</option>
                     {paquetes
                       .filter(
-                        (p) => (p.clasesUsadas || 0) < (p.clasesPagadas || 0),
+                        (p) => (p.clases_usadas || 0) < (p.clases_pagadas || 0),
                       )
                       .map((p) => (
-                        <option key={p.id} value={p.numeroFactura}>
-                          {p.numeroFactura} (usadas: {p.clasesUsadas}/
-                          {p.clasesPagadas})
+                        <option key={p.id} value={p.numero_factura}>
+                          {p.numero_factura} (usadas: {p.clases_usadas}/
+                          {p.clases_pagadas})
                         </option>
                       ))}
                   </select>
@@ -354,7 +354,7 @@ export default function DetalleClase() {
               )}
               {ninoId &&
                 paquetes.filter(
-                  (p) => (p.clasesUsadas || 0) < (p.clasesPagadas || 0),
+                  (p) => (p.clases_usadas || 0) < (p.clases_pagadas || 0),
                 ).length === 0 && (
                   <div className="text-red-600 text-sm mb-2">
                     {paquetes.length === 0
@@ -377,10 +377,10 @@ export default function DetalleClase() {
         <ul className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           {clase.ninos.map((n) => {
             const tienePaquete =
-              n.numeroFactura && n.numeroFactura.trim() !== "";
+              n.numero_factura && n.numero_factura.trim() !== "";
             return (
               <li
-                key={n.nino?.id || n.nino}
+                key={n.paciente?.id || n.paciente}
                 className={`border rounded-2xl shadow p-4 flex flex-col gap-2 relative ${
                   tienePaquete
                     ? "bg-white border-green-200"
@@ -393,12 +393,12 @@ export default function DetalleClase() {
                       tienePaquete ? "text-indigo-700" : "text-red-700"
                     }`}
                   >
-                    {n.nino?.nombres || n.nombres}{" "}
-                    {n.nino?.apellidos || n.apellidos}
+                    {n.paciente?.nombres || n.nombres}{" "}
+                    {n.paciente?.apellidos || n.apellidos}
                   </span>
                   {tienePaquete ? (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded ml-2">
-                      ✓ Factura: {n.numeroFactura}
+                      ✓ Factura: {n.numero_factura}
                     </span>
                   ) : (
                     <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded ml-2">
@@ -424,7 +424,7 @@ export default function DetalleClase() {
                 <div className="absolute top-2 right-2 flex gap-1">
                   {!tienePaquete && !clase.bloqueada && (
                     <button
-                      onClick={() => setAsignarPaqueteId(n.nino?.id || n.nino)}
+                      onClick={() => setAsignarPaqueteId(n.paciente?.id || n.paciente)}
                       className="bg-yellow-200 hover:bg-yellow-300 text-yellow-800 rounded-full p-2 shadow"
                       title="Asignar paquete"
                     >
@@ -433,7 +433,7 @@ export default function DetalleClase() {
                   )}
                   {!clase.bloqueada && (
                     <button
-                      onClick={() => eliminarNinoDeClase(n.nino?.id || n.nino)}
+                      onClick={() => eliminarNinoDeClase(n.paciente?.id || n.paciente)}
                       className="bg-pink-200 hover:bg-pink-300 text-pink-800 rounded-full p-2 shadow"
                       title="Eliminar niño de la sesión"
                     >
@@ -459,13 +459,13 @@ export default function DetalleClase() {
               <p className="text-yellow-700 font-semibold">
                 {(() => {
                   const encontrado = clase.ninos.find(
-                    (n) => (n.nino?.id || n.nino) === asignarPaqueteId,
+                    (n) => (n.paciente?.id || n.paciente) === asignarPaqueteId,
                   );
                   if (!encontrado) return "";
                   const nombres =
-                    encontrado.nino?.nombres || encontrado.nombres || "";
+                    encontrado.paciente?.nombres || encontrado.nombres || "";
                   const apellidos =
-                    encontrado.nino?.apellidos || encontrado.apellidos || "";
+                    encontrado.paciente?.apellidos || encontrado.apellidos || "";
                   return `${nombres} ${apellidos}`.trim();
                 })()}
               </p>
@@ -483,12 +483,12 @@ export default function DetalleClase() {
                   <option value="">Selecciona una factura/paquete</option>
                   {paquetesParaAsignar
                     .filter(
-                      (p) => (p.clasesUsadas || 0) < (p.clasesPagadas || 0),
+                      (p) => (p.clases_usadas || 0) < (p.clases_pagadas || 0),
                     )
                     .map((p) => (
-                      <option key={p.id} value={p.numeroFactura}>
-                        {p.numeroFactura} (usadas: {p.clasesUsadas}/
-                        {p.clasesPagadas})
+                      <option key={p.id} value={p.numero_factura}>
+                        {p.numero_factura} (usadas: {p.clases_usadas}/
+                        {p.clases_pagadas})
                       </option>
                     ))}
                 </select>
@@ -506,7 +506,7 @@ export default function DetalleClase() {
               </div>
             </div>
             {paquetesParaAsignar.filter(
-              (p) => (p.clasesUsadas || 0) < (p.clasesPagadas || 0),
+              (p) => (p.clases_usadas || 0) < (p.clases_pagadas || 0),
             ).length === 0 && (
               <div className="text-red-600 text-sm mb-4">
                 {paquetesParaAsignar.length === 0
@@ -555,11 +555,11 @@ export default function DetalleClase() {
                   .filter((n) => !n.firma)
                   .map((n) => (
                     <option
-                      key={n.nino?.id || n.nino}
-                      value={n.nino?.id || n.nino}
+                      key={n.paciente?.id || n.paciente}
+                      value={n.paciente?.id || n.paciente}
                     >
-                      {n.nino?.nombres || n.nombres}{" "}
-                      {n.nino?.apellidos || n.apellidos}
+                      {n.paciente?.nombres || n.nombres}{" "}
+                      {n.paciente?.apellidos || n.apellidos}
                     </option>
                   ))}
               </select>
@@ -671,7 +671,7 @@ export default function DetalleClase() {
                 </label>
                 <input
                   type="text"
-                  value={numeroFacturaNueva}
+                  value={numero_facturaNueva}
                   onChange={(e) => setNumeroFacturaNueva(e.target.value)}
                   className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
                   placeholder="Ej: FAC-001"
@@ -684,7 +684,7 @@ export default function DetalleClase() {
                 </label>
                 <input
                   type="number"
-                  value={clasesPagadasNueva}
+                  value={clases_pagadasNueva}
                   min={1}
                   onChange={(e) => setClasesPagadasNueva(e.target.value)}
                   className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
@@ -697,7 +697,7 @@ export default function DetalleClase() {
                 </label>
                 <input
                   type="date"
-                  value={fechaPagoNueva}
+                  value={fecha_pagoNueva}
                   onChange={(e) => setFechaPagoNueva(e.target.value)}
                   className="w-full border border-green-300 focus:border-green-500 focus:ring-green-500 rounded-xl px-4 py-3 transition outline-none bg-green-50"
                   required
