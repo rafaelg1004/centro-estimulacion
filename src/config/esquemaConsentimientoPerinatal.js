@@ -25,6 +25,18 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
           tipo: "text",
           lecsolo: true,
         },
+        {
+          nombre: "paciente.fechaNacimiento",
+          etiqueta: "Fecha de Nacimiento",
+          tipo: "date",
+          lecsolo: true,
+        },
+        {
+          nombre: "paciente.edadFormateada",
+          etiqueta: "Edad",
+          tipo: "text",
+          lecsolo: true,
+        },
       ],
     },
     {
@@ -244,11 +256,6 @@ export const ESQUEMA_CONSENTIMIENTO_PERINATAL = {
           tipo: "checkbox",
         },
       ],
-    },
-    {
-      titulo: "Información Completa del Módulo Perinatal",
-      siempreVisible: true,
-      camposDinamicos: "moduloPerinatalCompleto",
     },
   ],
 };

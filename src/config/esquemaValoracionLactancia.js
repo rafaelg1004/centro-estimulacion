@@ -25,6 +25,18 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
           tipo: "text",
           lecsolo: true,
         },
+        {
+          nombre: "paciente.fechaNacimiento",
+          etiqueta: "Fecha de Nacimiento",
+          tipo: "date",
+          lecsolo: true,
+        },
+        {
+          nombre: "paciente.edadFormateada",
+          etiqueta: "Edad",
+          tipo: "text",
+          lecsolo: true,
+        },
       ],
     },
     {
@@ -150,11 +162,6 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
           requerido: true,
         },
       ],
-    },
-    {
-      titulo: "Información Completa del Módulo de Lactancia",
-      siempreVisible: true,
-      camposDinamicos: "moduloLactanciaCompleto",
     },
   ],
 };
