@@ -107,7 +107,7 @@ export default function TablaDinamica({
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-10 px-4">
-            <div className="w-full max-w-6xl bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
+            <div className="w-full max-w-7xl 2xl:max-w-[95%] bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
 
                 {/* Header y Botón Creación */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-indigo-100 pb-4">
