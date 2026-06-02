@@ -544,7 +544,7 @@ export default function DetallePacienteUnificado() {
                         )
                         .map((c) => {
                           const infoPaciente = c.ninos.find(
-                            (n) => (n.nino?.id || n.nino) === id,
+                            (n) => (n.paciente?.id || n.paciente) === id,
                           );
                           return (
                             <tr key={c.id} className="hover:bg-gray-50">
