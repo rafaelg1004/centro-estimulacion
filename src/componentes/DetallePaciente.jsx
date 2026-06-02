@@ -456,13 +456,7 @@ export default function DetallePacienteUnificado() {
                           Usadas: <strong>{p.clases_usadas}</strong> / Pagadas:{" "}
                           <strong>{p.clases_pagadas}</strong>
                         </p>
-                        <button
-                          onClick={() => eliminarPaquete(p.id)}
-                          className="flex justify-center items-center w-full gap-2 p-2 rounded-xl text-red-600 font-semibold hover:bg-red-50 transition border border-red-100"
-                          title="Eliminar factura y registro de paquete"
-                        >
-                          <TrashIcon className="h-4 w-4" /> Eliminar
-                        </button>
+
                       </div>
                     ))}
                 </div>
