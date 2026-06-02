@@ -60,6 +60,16 @@ export const ESQUEMA_PACIENTE_NINO = {
             titulo: "Datos de la madre",
             campos: [
                 { nombre: "nombreMadre", etiqueta: "Nombre de la Madre", tipo: "text", requerido: true },
+                {
+                    nombre: "tipoDocumentoMadre", etiqueta: "Tipo Documento Madre", tipo: "select", opciones: [
+                        { valor: "CC", etiqueta: "Cédula de Ciudadanía (CC)" },
+                        { valor: "CE", etiqueta: "Cédula de Extranjería (CE)" },
+                        { valor: "PA", etiqueta: "Pasaporte (PA)" },
+                        { valor: "TI", etiqueta: "Tarjeta de Identidad (TI)" },
+                        { valor: "RC", etiqueta: "Registro Civil (RC)" }
+                    ]
+                },
+                { nombre: "numDocumentoMadre", etiqueta: "Número Documento Madre", tipo: "text" },
                 { nombre: "edadMadre", etiqueta: "Edad de la Madre", tipo: "text", requerido: true },
                 { nombre: "ocupacionMadre", etiqueta: "Ocupación de la Madre", tipo: "text", requerido: true },
             ]
@@ -68,6 +78,16 @@ export const ESQUEMA_PACIENTE_NINO = {
             titulo: "Datos del padre",
             campos: [
                 { nombre: "nombrePadre", etiqueta: "Nombre del Padre", tipo: "text", requerido: true },
+                {
+                    nombre: "tipoDocumentoPadre", etiqueta: "Tipo Documento Padre", tipo: "select", opciones: [
+                        { valor: "CC", etiqueta: "Cédula de Ciudadanía (CC)" },
+                        { valor: "CE", etiqueta: "Cédula de Extranjería (CE)" },
+                        { valor: "PA", etiqueta: "Pasaporte (PA)" },
+                        { valor: "TI", etiqueta: "Tarjeta de Identidad (TI)" },
+                        { valor: "RC", etiqueta: "Registro Civil (RC)" }
+                    ]
+                },
+                { nombre: "numDocumentoPadre", etiqueta: "Número Documento Padre", tipo: "text" },
                 { nombre: "edadPadre", etiqueta: "Edad del Padre", tipo: "text", requerido: true },
                 { nombre: "ocupacionPadre", etiqueta: "Ocupación del Padre", tipo: "text", requerido: true },
             ]
