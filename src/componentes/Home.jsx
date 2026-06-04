@@ -25,13 +25,25 @@ export default function Home() {
             text: `Dejaste incompleta la valoración de ${borrador.tipoFormulario} para ${borrador.nombrePaciente || 'un paciente'}. ¿Deseas reanudarla?`,
             icon: 'info',
             showCancelButton: true,
+            showDenyButton: true,
             confirmButtonText: 'Sí, reanudar',
             cancelButtonText: 'No, descartar por ahora',
-            confirmButtonColor: '#4f46e5'
-          }).then((result) => {
+            denyButtonText: 'Eliminar borrador',
+            confirmButtonColor: '#4f46e5',
+            denyButtonColor: '#ef4444'
+          }).then(async (result) => {
             if (result.isConfirmed) {
               // Redirigir a NuevaValoracionUnificada con los parámetros
               navigate(`/valoracion?paciente=${borrador.pacienteId}&tipo=${borrador.tipoFormulario === 'Piso Pélvico' ? 'pisopelvico' : (borrador.tipoFormulario.includes('Perinatal') ? 'perinatal' : 'lactancia')}&borradorId=${borrador.id}`);
+            } else if (result.isDenied) {
+              // Borrar directamente desde el Home
+              try {
+                await apiRequest(`/borradores/${borrador.id}`, { method: 'DELETE' });
+                setBorradores(prev => prev.filter(b => b.id !== borrador.id));
+                Swal.fire('Eliminado', 'El borrador ha sido eliminado permanentemente.', 'success');
+              } catch (e) {
+                console.error("Error al borrar desde el Home", e);
+              }
             }
           });
         }

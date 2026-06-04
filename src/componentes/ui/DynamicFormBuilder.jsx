@@ -71,13 +71,16 @@ export default function DynamicFormBuilder({
     });
 
     if (confirmar.isConfirmed) {
-      if (pacienteId && !isEdit) {
-        const tipoF = formData.tipo_programa || esquema.titulo;
+      if (!isEdit) {
         try {
-          await apiRequest(
-            `/borradores/limpiar/${pacienteId}/${encodeURIComponent(tipoF)}`,
-            { method: "DELETE" }
-          );
+          if (borradorId) {
+            await apiRequest(`/borradores/${borradorId}`, { method: "DELETE" });
+          } else if (pacienteId) {
+            await apiRequest(
+              `/borradores/limpiar/${pacienteId}/${encodeURIComponent(esquema.titulo)}`,
+              { method: "DELETE" }
+            );
+          }
         } catch (e) {
           console.error("Error al borrar draft al cancelar:", e);
         }
