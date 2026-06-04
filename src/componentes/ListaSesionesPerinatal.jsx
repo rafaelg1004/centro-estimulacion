@@ -174,7 +174,7 @@ export default function ListaSesionesPerinatal() {
           const blob = await (await fetch(firmaFinal)).blob();
           formData.append('imagen', blob, `firma_paciente_sesion_${sesionEditando._id}.png`);
 
-          const uploadRes = await fetch(`${API_CONFIG.BASE_URL}/api/upload?origen=sesion_perinatal`, {
+          const uploadRes = await fetch(`${API_CONFIG.BASE_URL}/api/upload?origen=sesion_perinatal&id=${id}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${sessionStorage.getItem("token")}`

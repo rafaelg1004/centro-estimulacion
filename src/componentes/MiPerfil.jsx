@@ -53,7 +53,7 @@ export default function MiPerfil() {
       const formData = new FormData();
       formData.append("imagen", blob, "firma.png");
 
-      const uploadRes = await apiRequest("/upload?origen=perfil_medico", {
+      const uploadRes = await apiRequest(`/upload?origen=perfil_medico&id=${perfil.id}`, {
         method: "POST",
         body: formData
       });

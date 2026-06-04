@@ -526,7 +526,7 @@ export default function DynamicFormBuilder({
 
             const token = sessionStorage.getItem("token");
             const uploadResponse = await fetch(
-              `${API_CONFIG.BASE_URL}/api/upload?origen=firma_paciente`,
+              `${API_CONFIG.BASE_URL}/api/upload?origen=firma_paciente&id=${pacienteId || 'nuevo'}`,
               {
                 method: "POST",
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
