@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import logo from "../assents/LOGO.png"; // Ajusta la ruta si es necesario
-import { UserGroupIcon } from "@heroicons/react/24/outline";
-import { ClipboardDocumentListIcon, AcademicCapIcon, ChartBarIcon } from "@heroicons/react/24/outline";
+import { UserGroupIcon, ClipboardDocumentListIcon, AcademicCapIcon, ChartBarIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import { apiRequest } from "../config/api";
 
 export default function Home() {
   const navigate = useNavigate();
   const [borradores, setBorradores] = useState([]);
+  const [faltaFirma, setFaltaFirma] = useState(false);
 
   useEffect(() => {
     const fetchBorradores = async () => {
@@ -51,8 +51,20 @@ export default function Home() {
         console.error("Error consultando borradores", error);
       }
     };
+
+    const fetchPerfil = async () => {
+      try {
+        const p = await apiRequest("/auth/me");
+        if (p && !p.firmaUrl) {
+          setFaltaFirma(true);
+        }
+      } catch (e) {
+        console.error("Error verificando perfil", e);
+      }
+    };
     
     fetchBorradores();
+    fetchPerfil();
   }, [navigate]);
 
   return (
@@ -66,6 +78,19 @@ export default function Home() {
           Bienvenido al sistema de gestión de valoraciones y sesiones.<br />
           ¡Tu desarrollo y bienestar es nuestra prioridad!
         </p>
+        
+        {faltaFirma && (
+          <div className="w-full bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm animate-pulse">
+            <div>
+              <p className="font-bold text-sm">⚠️ Atención: Falta tu firma digital</p>
+              <p className="text-xs mt-1">Configura tu firma para que aparezca en los reportes clínicos y PDFs.</p>
+            </div>
+            <Link to="/mi-perfil" className="whitespace-nowrap bg-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors shadow">
+              Configurar Firma
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4 w-full">
           <Link
             to="/pacientes"
@@ -90,6 +115,12 @@ export default function Home() {
             className="flex items-center justify-center gap-2 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 font-bold py-3 rounded-xl text-center transition transform hover:scale-105 shadow"
           >
             <ChartBarIcon className="h-6 w-6" /> Reporte de Paquetes
+          </Link>
+          <Link
+            to="/mi-perfil"
+            className="flex items-center justify-center gap-2 bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-3 rounded-xl text-center transition transform hover:scale-105 shadow"
+          >
+            <UserCircleIcon className="h-6 w-6" /> Mi Perfil Clínico
           </Link>
         </div>
       </div>
