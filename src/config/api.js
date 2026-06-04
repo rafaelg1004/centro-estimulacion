@@ -55,6 +55,11 @@ export const apiRequest = async (endpoint, options = {}) => {
     }),
   };
 
+  // Si enviamos FormData, remover Content-Type para que el navegador asigne el boundary
+  if (options.body instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+
   console.log(`🌐 ${config.method || "GET"} ${url}`);
 
   try {

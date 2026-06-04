@@ -36,12 +36,34 @@ export default function MiPerfil() {
     reader.readAsDataURL(file);
   };
 
+  const dataURLtoBlob = (dataurl) => {
+    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+  };
+
   const guardarFirma = async (base64) => {
     setGuardando(true);
     try {
+      // 1. Subir la imagen a S3
+      const blob = dataURLtoBlob(base64);
+      const formData = new FormData();
+      formData.append("imagen", blob, "firma.png");
+
+      const uploadRes = await apiRequest("/upload?origen=perfil_medico", {
+        method: "POST",
+        body: formData
+      });
+      
+      const firmaUrlS3 = uploadRes.url;
+
+      // 2. Guardar la URL en el perfil
       const data = await apiRequest("/auth/me", {
         method: "PUT",
-        body: JSON.stringify({ firmaUrl: base64 }),
+        body: JSON.stringify({ firmaUrl: firmaUrlS3 }),
       });
       setPerfil((prev) => ({ ...prev, firmaUrl: data.firmaUrl }));
       Swal.fire(
@@ -74,6 +96,17 @@ export default function MiPerfil() {
     if (!result.isConfirmed) return;
     setGuardando(true);
     try {
+      if (perfil.firmaUrl && perfil.firmaUrl.includes("s3.amazonaws.com")) {
+        try {
+          await apiRequest("/delete-image", {
+            method: "DELETE",
+            body: JSON.stringify({ imageUrl: perfil.firmaUrl })
+          });
+        } catch (e) {
+          console.warn("No se pudo borrar la imagen de S3:", e);
+        }
+      }
+
       await apiRequest("/auth/me", {
         method: "PUT",
         body: JSON.stringify({ firmaUrl: null }),
