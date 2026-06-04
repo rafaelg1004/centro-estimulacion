@@ -40,6 +40,8 @@ export default function DynamicFormBuilder({
   isPaginado = false,
   initialData = null,
   isModalLayout = false,
+  pacienteId,
+  borradorId
 }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
@@ -122,6 +124,47 @@ export default function DynamicFormBuilder({
       setFormData(defaultData);
     }
   }, [esquema, initialData, isEdit]);
+
+  // Cargar borrador si existe borradorId
+  useEffect(() => {
+    if (borradorId && !isEdit) {
+      const cargarBorrador = async () => {
+        try {
+          const data = await apiRequest(`/borradores/${borradorId}`);
+          if (data && data.datos) {
+            setFormData(prev => ({ ...prev, ...data.datos }));
+            console.log("Borrador cargado exitosamente.");
+          }
+        } catch (error) {
+          console.error("Error al cargar el borrador:", error);
+        }
+      };
+      cargarBorrador();
+    }
+  }, [borradorId, isEdit]);
+
+  // Autoguardado
+  useEffect(() => {
+    if (isEdit || !pacienteId || Object.keys(formData).length === 0) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await apiRequest("/borradores", {
+          method: "POST",
+          body: JSON.stringify({
+            pacienteId,
+            tipoFormulario: esquema.titulo,
+            nombrePaciente: formData["firmas.pacienteOAcudiente.nombre"] || formData["paciente"] || "Paciente", // Intento de extraer un nombre visible
+            datos: formData
+          })
+        });
+      } catch (error) {
+        console.warn("Fallo el autoguardado silencioso:", error);
+      }
+    }, 4000); // Guardar cada 4 segundos de inactividad
+
+    return () => clearTimeout(timer);
+  }, [formData, isEdit, pacienteId, esquema]);
 
   // Efecto para autocompletar descripciones CIE-10 que solo traen el código (retrocompatibilidad)
   useEffect(() => {
@@ -442,6 +485,17 @@ export default function DynamicFormBuilder({
         method,
         body: JSON.stringify({ ...unflattenedData, permitirDuplicado: true }),
       });
+
+      // Limpiar borrador si era un formulario nuevo
+      if (!isEdit && pacienteId) {
+        try {
+          await apiRequest(`/borradores/limpiar/${pacienteId}/${encodeURIComponent(esquema.titulo)}`, {
+            method: "DELETE"
+          });
+        } catch (e) {
+          console.warn("No se pudo limpiar el borrador post-guardado", e);
+        }
+      }
 
       Swal.fire(
         "¡Éxito!",

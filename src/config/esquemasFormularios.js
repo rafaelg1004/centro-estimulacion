@@ -164,7 +164,15 @@ export const ESQUEMA_PACIENTE_ADULTO = {
                     nombre: "semanasGestacion",
                     etiqueta: "Semanas de gestación",
                     tipo: "text",
-                    dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" }
+                    dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" },
+                    autoCalc: { formula: "semanasGestacion", fum: "fum" }
+                },
+                {
+                    nombre: "fechaProbableParto",
+                    etiqueta: "Fecha probable de parto (FPP)",
+                    tipo: "date",
+                    dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" },
+                    autoCalc: { formula: "fpp", fum: "fum" }
                 }
             ]
         }

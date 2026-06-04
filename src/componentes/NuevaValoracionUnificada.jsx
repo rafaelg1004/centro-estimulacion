@@ -13,6 +13,7 @@ export default function NuevaValoracionUnificada() {
     const query = new URLSearchParams(search);
     const paramPacienteId = query.get("paciente");
     const paramTipo = query.get("tipo");
+    const paramBorradorId = query.get("borradorId");
 
     const [pacienteId, setPacienteId] = useState(paramPacienteId || null);
     const [pacientes, setPacientes] = useState([]);
@@ -71,7 +72,7 @@ export default function NuevaValoracionUnificada() {
         (p.numDocumentoIdentificacion?.includes(filtro))
     );
 
-    const pacienteElegido = pacientes.find(p => p._id === pacienteId);
+    const pacienteElegido = pacientes.find(p => (p._id || p.id) === pacienteId);
 
     // Pantalla de carga
     if (pacienteId && cargando) {
@@ -277,6 +278,7 @@ export default function NuevaValoracionUnificada() {
                     <DynamicFormBuilder
                         esquema={esquemaConPaciente}
                         pacienteId={pacienteId}
+                        borradorId={paramBorradorId}
                         onSubmitSuccess={() => {
                             if (tipoValoracionAdulto === 'perinatal') {
                                 navigate(`/pacientes/${pacienteId}/sesiones-perinatal`);
@@ -321,8 +323,8 @@ export default function NuevaValoracionUnificada() {
                         ) : (
                             pacientesFiltrados.map(p => (
                                 <button
-                                    key={p._id}
-                                    onClick={() => setPacienteId(p._id)}
+                                    key={p._id || p.id}
+                                    onClick={() => setPacienteId(p._id || p.id)}
                                     className="flex justify-between items-center bg-white border border-gray-100 p-6 rounded-[2rem] shadow-sm hover:shadow-xl hover:border-indigo-400 transition-all text-left group relative overflow-hidden"
                                 >
                                     <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
