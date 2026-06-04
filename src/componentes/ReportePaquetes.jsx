@@ -60,11 +60,11 @@ export default function ReportePaquetes() {
   const exportarAExcel = () => {
     try {
       const datosExcel = paquetesFiltrados.map((paquete) => ({
-        Paciente: paquete.paciente.nombres,
-        "Registro Civil": paquete.paciente.registroCivil,
-        Género: paquete.paciente.genero,
-        Edad: paquete.paciente.edad + " meses",
-        Celular: paquete.paciente.celular,
+        Paciente: paquete.paciente.nombres + (paquete.paciente.apellidos ? ' ' + paquete.paciente.apellidos : ''),
+        "Documento": paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil || 'N/A',
+        Género: paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero || 'N/A',
+        Edad: paquete.paciente.fecha_nacimiento || paquete.paciente.fechaNacimiento || (paquete.paciente.edad + " meses"),
+        Celular: (paquete.paciente.datos_contacto || paquete.paciente.datosContacto)?.telefono || paquete.paciente.celular || paquete.paciente.telefono || 'N/A',
         "N° Factura": paquete.numero_factura,
         "Clases Pagadas": paquete.clases_pagadas,
         "Clases Usadas": paquete.clases_usadas,
@@ -99,7 +99,8 @@ export default function ReportePaquetes() {
     const cumpleBusqueda =
       busqueda === "" ||
       paquete.paciente.nombres.toLowerCase().includes(busqueda.toLowerCase()) ||
-      paquete.paciente.registroCivil
+      (paquete.paciente.apellidos || "").toLowerCase().includes(busqueda.toLowerCase()) ||
+      (paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil || "")
         .toLowerCase()
         .includes(busqueda.toLowerCase()) ||
       paquete.numero_factura.toLowerCase().includes(busqueda.toLowerCase());
@@ -290,7 +291,7 @@ export default function ReportePaquetes() {
                         Paciente
                       </th>
                       <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                        Registro Civil
+                        Documento
                       </th>
                       <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                         Factura
@@ -323,14 +324,14 @@ export default function ReportePaquetes() {
                       <tr key={paquete.id} className="hover:bg-gray-50">
                         <td className="px-2 py-2">
                           <div className="font-semibold text-gray-900 text-xs">
-                            {paquete.paciente.nombres}
+                            {paquete.paciente.nombres} {paquete.paciente.apellidos}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {paquete.paciente.genero} • {paquete.paciente.edad}m
+                            {paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero} 
                           </div>
                         </td>
                         <td className="px-2 py-2 text-xs text-gray-800">
-                          {paquete.paciente.registroCivil}
+                          {paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil}
                         </td>
                         <td className="px-2 py-2 text-xs font-mono text-gray-800">
                           {paquete.numero_factura}
@@ -444,14 +445,13 @@ export default function ReportePaquetes() {
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 text-lg">
-                          {paquete.paciente.nombres}
+                          {paquete.paciente.nombres} {paquete.paciente.apellidos}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {paquete.paciente.genero} • {paquete.paciente.edad}{" "}
-                          meses
+                          {paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero}
                         </p>
                         <p className="text-sm text-gray-600">
-                          RC: {paquete.paciente.registroCivil}
+                          DOC: {paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil}
                         </p>
                       </div>
                       <span

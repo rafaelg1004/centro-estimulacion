@@ -286,28 +286,28 @@ export default function DynamicDetailBuilder({
                 />
                 <Field
                   label="Identificación"
-                  value={`${data.paciente.tipoDocumentoIdentificacion || "CC"}: ${data.paciente.numDocumentoIdentificacion || "S.D"}`}
+                  value={`${data.paciente.tipo_documento_identificacion || data.paciente.tipoDocumentoIdentificacion || "CC"}: ${data.paciente.num_documento_identificacion || data.paciente.numDocumentoIdentificacion || "S.D"}`}
                 />
                 <Field
                   label="Fecha de Nacimiento"
                   value={
-                    data.paciente.fechaNacimiento
-                      ? new Date(data.paciente.fechaNacimiento).toLocaleDateString("es-CO", { year: 'numeric', month: 'long', day: 'numeric' })
+                    (data.paciente.fecha_nacimiento || data.paciente.fechaNacimiento)
+                      ? new Date(data.paciente.fecha_nacimiento || data.paciente.fechaNacimiento).toLocaleDateString("es-CO", { year: 'numeric', month: 'long', day: 'numeric' })
                       : "No registrado"
                   }
                 />
                 <Field
                   label="Edad Actual"
-                  value={calcularEdad(data.paciente.fechaNacimiento)}
+                  value={calcularEdad(data.paciente.fecha_nacimiento || data.paciente.fechaNacimiento)}
                 />
                 <Field
                   label="Sexo / Género"
                   value={
-                    data.paciente.codSexo === "M"
+                    (data.paciente.cod_sexo || data.paciente.codSexo) === "M"
                       ? "Masculino"
-                      : data.paciente.codSexo === "F"
+                      : (data.paciente.cod_sexo || data.paciente.codSexo) === "F"
                         ? "Femenino"
-                        : data.paciente.codSexo
+                        : (data.paciente.cod_sexo || data.paciente.codSexo)
                   }
                 />
                 <Field
@@ -319,26 +319,26 @@ export default function DynamicDetailBuilder({
                   value={
                     data.paciente.telefono ||
                     data.paciente.celular ||
-                    data.paciente.datosContacto?.telefono ||
+                    (data.paciente.datos_contacto || data.paciente.datosContacto)?.telefono ||
                     "S.D"
                   }
                 />
 
                 {/* Campos Extra para Niños */}
-                {!data.paciente.esAdulto && (
+                {!(data.paciente.es_adulto || data.paciente.esAdulto) && (
                   <>
                     <Field label="Pediatra" value={data.paciente.pediatra} />
-                    <Field label="Madre" value={data.paciente.nombreMadre} />
-                    <Field label="Padre" value={data.paciente.nombrePadre} />
+                    <Field label="Madre" value={data.paciente.nombre_madre || data.paciente.nombreMadre} />
+                    <Field label="Padre" value={data.paciente.nombre_padre || data.paciente.nombrePadre} />
                   </>
                 )}
 
                 {/* Campos Extra para Adultos/Materno */}
-                {data.paciente.esAdulto && (
+                {(data.paciente.es_adulto || data.paciente.esAdulto) && (
                   <>
                     <Field
                       label="Sem. Gestación"
-                      value={data.paciente.semanasGestacion}
+                      value={data.paciente.semanas_gestacion || data.paciente.semanasGestacion}
                     />
                     <Field label="FUM" value={data.paciente.fum} />
                     <Field label="Ocupación" value={data.paciente.ocupacion} />
@@ -350,7 +350,7 @@ export default function DynamicDetailBuilder({
                     label="Dirección de Residencia"
                     value={
                       data.paciente.direccion ||
-                      data.paciente.datosContacto?.direccion
+                      (data.paciente.datos_contacto || data.paciente.datosContacto)?.direccion
                     }
                   />
                 </div>
