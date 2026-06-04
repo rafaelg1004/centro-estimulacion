@@ -90,7 +90,9 @@ export const apiRequest = async (endpoint, options = {}) => {
       }
 
       // Si el token venció o es inválido, cerrar sesión automáticamente
-      if (response.status === 401) {
+      // Excepción: no disparar session:expired si estamos intentando hacer login, para poder mostrar el error real de credenciales
+      const isLoginEndpoint = endpoint.includes("/auth/login") || endpoint.includes("/auth/verify-2fa");
+      if (response.status === 401 && !isLoginEndpoint) {
         window.dispatchEvent(new CustomEvent("session:expired"));
       }
 
