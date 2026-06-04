@@ -29,7 +29,7 @@ export default function NuevaValoracionUnificada() {
             .then((data) => {
                 const combinados = Array.isArray(data) ? data.map(p => ({
                     ...p,
-                    tipoModulo: p.esAdulto ? 'adulto' : 'pediatria'
+                    tipoModulo: (p.es_adulto || p.esAdulto) ? 'adulto' : 'pediatria'
                 })) : [];
                 combinados.sort((a, b) => (a.nombres || "").localeCompare(b.nombres || ""));
                 setPacientes(combinados);
@@ -210,7 +210,7 @@ export default function NuevaValoracionUnificada() {
                                 return { ...campo, valorPorDefecto: `${pacienteElegido.nombres} ${pacienteElegido.apellidos}` };
                             }
                             if (campo.nombre === "firmas.pacienteOAcudiente.cedula") {
-                                return { ...campo, valorPorDefecto: pacienteElegido.numDocumentoIdentificacion };
+                                return { ...campo, valorPorDefecto: pacienteElegido.num_documento_identificacion || pacienteElegido.numDocumentoIdentificacion };
                             }
                             return campo;
                         })
@@ -234,7 +234,7 @@ export default function NuevaValoracionUnificada() {
                                     {pacienteElegido.nombres} {pacienteElegido.apellidos}
                                 </h2>
                                 <p className="text-[11px] font-bold text-indigo-400 tracking-widest uppercase">
-                                    {pacienteElegido.tipoDocumentoIdentificacion || "HC"}: {pacienteElegido.numDocumentoIdentificacion} • {pacienteElegido.tipoModulo === 'pediatria' ? 'PROGRAMA PEDIÁTRICO' : 'PROGRAMA MATERNO'}
+                                    {pacienteElegido.tipo_documento_identificacion || pacienteElegido.tipoDocumentoIdentificacion || "HC"}: {pacienteElegido.num_documento_identificacion || pacienteElegido.numDocumentoIdentificacion} • {pacienteElegido.tipoModulo === 'pediatria' ? 'PROGRAMA PEDIÁTRICO' : 'PROGRAMA MATERNO'}
                                 </p>
                             </div>
                         </div>
@@ -242,21 +242,21 @@ export default function NuevaValoracionUnificada() {
                         <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs">
                             <div className="flex flex-col">
                                 <span className="text-gray-400 font-bold uppercase text-[9px]">Edad / Sexo</span>
-                                <span className="font-bold text-gray-700">{calcularEdad(pacienteElegido.fechaNacimiento)} • {pacienteElegido.codSexo === 'M' ? 'Masc' : 'Fem'}</span>
+                                <span className="font-bold text-gray-700">{calcularEdad(pacienteElegido.fecha_nacimiento || pacienteElegido.fechaNacimiento)} • {(pacienteElegido.cod_sexo || pacienteElegido.codSexo) === 'M' ? 'Masc' : 'Fem'}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-gray-400 font-bold uppercase text-[9px]">Contacto</span>
-                                <span className="font-bold text-gray-700">📞 {pacienteElegido.datosContacto?.telefono || "N/A"}</span>
+                                <span className="font-bold text-gray-700">📞 {(pacienteElegido.datos_contacto || pacienteElegido.datosContacto)?.telefono || "N/A"}</span>
                             </div>
                             {pacienteElegido.tipoModulo === 'pediatria' ? (
                                 <div className="flex flex-col">
                                     <span className="text-gray-400 font-bold uppercase text-[9px]">Pediatra / Madre</span>
-                                    <span className="font-bold text-gray-700">{pacienteElegido.pediatra || "S.D"} • {pacienteElegido.nombreMadre || "S.D"}</span>
+                                    <span className="font-bold text-gray-700">{pacienteElegido.pediatra || "S.D"} • {pacienteElegido.nombre_madre || pacienteElegido.nombreMadre || "S.D"}</span>
                                 </div>
                             ) : (
                                 <div className="flex flex-col">
                                     <span className="text-gray-400 font-bold uppercase text-[9px]">Gestación / FUM</span>
-                                    <span className="font-bold text-gray-700">Sem: {pacienteElegido.semanasGestacion || "N/A"} • FUM: {pacienteElegido.fum || "N/A"}</span>
+                                    <span className="font-bold text-gray-700">Sem: {pacienteElegido.semanas_gestacion || pacienteElegido.semanasGestacion || "N/A"} • FUM: {pacienteElegido.fum || "N/A"}</span>
                                 </div>
                             )}
                             <div className="flex flex-col">
