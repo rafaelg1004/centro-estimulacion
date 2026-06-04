@@ -279,6 +279,7 @@ export default function NuevaValoracionUnificada() {
                         esquema={esquemaConPaciente}
                         pacienteId={pacienteId}
                         borradorId={paramBorradorId}
+                        pacienteNombre={`${pacienteElegido.nombres} ${pacienteElegido.apellidos}`}
                         onSubmitSuccess={() => {
                             if (tipoValoracionAdulto === 'perinatal') {
                                 navigate(`/pacientes/${pacienteId}/sesiones-perinatal`);

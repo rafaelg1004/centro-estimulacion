@@ -41,7 +41,8 @@ export default function DynamicFormBuilder({
   initialData = null,
   isModalLayout = false,
   pacienteId,
-  borradorId
+  borradorId,
+  pacienteNombre
 }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
@@ -214,7 +215,7 @@ export default function DynamicFormBuilder({
           body: JSON.stringify({
             pacienteId,
             tipoFormulario: esquema.titulo,
-            nombrePaciente: formData["firmas.pacienteOAcudiente.nombre"] || formData["paciente"] || "Paciente", // Intento de extraer un nombre visible
+            nombrePaciente: pacienteNombre || formData["firmas.pacienteOAcudiente.nombre"] || "Paciente", // Intento de extraer un nombre visible
             datos: formData
           })
         });
