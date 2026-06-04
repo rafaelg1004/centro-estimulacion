@@ -56,6 +56,36 @@ export default function DynamicFormBuilder({
   const [cie10DropUp, setCie10DropUp] = useState({});
   const cie10Timers = useRef({});
 
+  // Lógica de cancelación
+  const handleCancel = async () => {
+    const confirmar = await Swal.fire({
+      title: '¿Cancelar valoración?',
+      text: 'Se descartará esta valoración y se eliminará cualquier borrador guardado automáticamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cancelar y borrar',
+      cancelButtonText: 'Seguir editando',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6366f1'
+    });
+
+    if (confirmar.isConfirmed) {
+      if (pacienteId && !isEdit) {
+        const tipoF = formData.tipo_programa || esquema.titulo;
+        try {
+          await apiRequest(
+            `/borradores/limpiar/${pacienteId}/${encodeURIComponent(tipoF)}`,
+            { method: "DELETE" }
+          );
+        } catch (e) {
+          console.error("Error al borrar draft al cancelar:", e);
+        }
+      }
+      if (onCancel) onCancel();
+      else navigate(esquema.redireccion);
+    }
+  };
+
   // Ciudades API (api-colombia.com)
   const [ciudadesApi, setCiudadesApi] = useState([]);
   const [cargandoCiudades, setCargandoCiudades] = useState(false);
@@ -1336,12 +1366,7 @@ export default function DynamicFormBuilder({
             <>
               <button
                 type="button"
-                onClick={
-                  pasoActual === 0
-                    ? () =>
-                        onCancel ? onCancel() : navigate(esquema.redireccion)
-                    : anteriorPaso
-                }
+                onClick={pasoActual === 0 ? handleCancel : anteriorPaso}
                 className="w-full sm:w-auto px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-wider hover:bg-slate-200 transition-all text-xs border border-slate-200 order-2 sm:order-1 mt-2 sm:mt-0"
               >
                 {pasoActual === 0 ? "✕ Cancelar" : "← Anterior"}
@@ -1376,9 +1401,7 @@ export default function DynamicFormBuilder({
             >
               <button
                 type="button"
-                onClick={() =>
-                  onCancel ? onCancel() : navigate(esquema.redireccion)
-                }
+                onClick={handleCancel}
                 className={
                   isModalLayout
                     ? "w-full sm:w-auto px-6 py-2.5 font-bold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
