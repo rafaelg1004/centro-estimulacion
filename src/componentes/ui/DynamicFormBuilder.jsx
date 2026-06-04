@@ -304,6 +304,46 @@ export default function DynamicFormBuilder({
             }
           }
         }
+
+        if (campo.autoCalc?.formula === "edad") {
+          const fnacVal = formData[campo.autoCalc.fechaNacimiento];
+          if (fnacVal) {
+            const parts = String(fnacVal).split("-");
+            if (parts.length === 3) {
+              const y = parseInt(parts[0], 10);
+              const m = parseInt(parts[1], 10) - 1;
+              const d = parseInt(parts[2], 10);
+              const fnacDate = new Date(y, m, d);
+              const hoy = new Date();
+              
+              let edadAnos = hoy.getFullYear() - fnacDate.getFullYear();
+              let edadMeses = hoy.getMonth() - fnacDate.getMonth();
+              if (hoy.getDate() < fnacDate.getDate()) {
+                  edadMeses--;
+              }
+              if (edadMeses < 0) {
+                  edadAnos--;
+                  edadMeses += 12;
+              }
+              
+              let strEdad = "";
+              if (campo.autoCalc.formato === "nino") {
+                  if (edadAnos < 2) {
+                      const totalMeses = (edadAnos * 12) + edadMeses;
+                      strEdad = `${edadAnos} años (${totalMeses} meses)`;
+                  } else {
+                      strEdad = `${edadAnos} años`;
+                  }
+              } else {
+                  strEdad = `${edadAnos} años`;
+              }
+
+              if (formData[campo.nombre] !== strEdad) {
+                updates[campo.nombre] = strEdad;
+              }
+            }
+          }
+        }
       });
     });
     if (Object.keys(updates).length > 0) {

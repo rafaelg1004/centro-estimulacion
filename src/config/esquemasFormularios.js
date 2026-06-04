@@ -46,6 +46,7 @@ export const ESQUEMA_PACIENTE_NINO = {
                 },
                 { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "ciudad-api", requerido: true },
                 { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true },
+                { nombre: "edadActual", etiqueta: "Edad Calculada", tipo: "text", lecsolo: true, autoCalc: { formula: "edad", fechaNacimiento: "fechaNacimiento", formato: "nino" } },
                 { nombre: "peso", etiqueta: "Peso (kg)", tipo: "number", paso: "0.01", min: "0", requerido: true },
                 { nombre: "talla", etiqueta: "Talla (cm)", tipo: "number", paso: "0.1", min: "0", requerido: true },
             ]
@@ -132,6 +133,7 @@ export const ESQUEMA_PACIENTE_ADULTO = {
                 },
                 { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "ciudad-api", requerido: true },
                 { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true },
+                { nombre: "edadActual", etiqueta: "Edad Calculada", tipo: "text", lecsolo: true, autoCalc: { formula: "edad", fechaNacimiento: "fechaNacimiento", formato: "adulto" } },
                 { nombre: "estadoCivil", etiqueta: "Estado Civil", tipo: "text", requerido: true },
                 { nombre: "ocupacion", etiqueta: "Ocupación", tipo: "text", requerido: true },
                 { nombre: "nivelEducativo", etiqueta: "Nivel Educativo", tipo: "text", requerido: true },
@@ -173,6 +175,7 @@ export const ESQUEMA_PACIENTE_ADULTO = {
                     nombre: "semanasGestacion",
                     etiqueta: "Semanas de gestación",
                     tipo: "text",
+                    lecsolo: true,
                     dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" },
                     autoCalc: { formula: "semanasGestacion", fum: "fum" }
                 },
@@ -180,6 +183,7 @@ export const ESQUEMA_PACIENTE_ADULTO = {
                     nombre: "fechaProbableParto",
                     etiqueta: "Fecha probable de parto (FPP)",
                     tipo: "date",
+                    lecsolo: true,
                     dependeDe: { campo: "estadoEmbarazo", valor: "gestacion" },
                     autoCalc: { formula: "fpp", fum: "fum" }
                 }
