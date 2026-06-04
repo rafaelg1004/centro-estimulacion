@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/solid";
 import FirmaCanvas from "./ui/FirmaCanvas";
 import Swal from "sweetalert2";
-import { apiRequest } from "../config/api";
+import { apiRequest, API_CONFIG } from "../config/api";
 
 export default function DetalleSesionMensual() {
   const { id } = useParams();
@@ -98,9 +98,35 @@ export default function DetalleSesionMensual() {
 
   const guardarCambios = async () => {
     setGuardando(true);
+
+    let firmaS3 = sesion.firmaFisioterapeuta;
+    if (firmaS3 && firmaS3.startsWith("data:image")) {
+      try {
+        const formData = new FormData();
+        const blob = await (await fetch(firmaS3)).blob();
+        formData.append("imagen", blob, `firma_fisioterapeuta_${id}.png`);
+        
+        const uploadRes = await fetch(`${API_CONFIG.BASE_URL}/api/upload?origen=reporte_asistencia&id=${id}`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.url) {
+          firmaS3 = uploadData.url;
+        }
+      } catch (e) {
+        console.error("Error al subir firma a S3:", e);
+        Swal.fire("Error", "No se pudo subir la firma al servidor.", "error");
+        setGuardando(false);
+        return;
+      }
+    }
+
     // Limpiar el objeto para enviar solo IDs al backend en el campo nino
     const sesionParaGuardar = {
       ...sesion,
+      firmaFisioterapeuta: firmaS3,
       asistentes: sesion.asistentes.map(a => ({
         nino: a.nino._id || a.nino,
         observaciones: a.observaciones

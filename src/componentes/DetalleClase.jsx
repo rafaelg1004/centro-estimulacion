@@ -9,7 +9,7 @@ import {
   CreditCardIcon,
 } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
-import { apiRequest } from "../config/api";
+import { apiRequest, API_CONFIG } from "../config/api";
 
 export default function DetalleClase() {
   const { id } = useParams();
@@ -115,13 +115,35 @@ export default function DetalleClase() {
       alert("Selecciona un niño para firmar");
       return;
     }
-    const firma = sigRef.current.toDataURL("image/png");
+    const firmaBase64 = sigRef.current.toDataURL("image/png");
     const numero_factura = getFacturaDeNino(firmaNinoId);
+
+    let firmaFinal = firmaBase64;
+    if (firmaBase64 && firmaBase64.startsWith("data:image")) {
+      try {
+        const formData = new FormData();
+        const blob = await (await fetch(firmaBase64)).blob();
+        formData.append("imagen", blob, `firma_nino_${firmaNinoId}.png`);
+        const uploadRes = await fetch(`${API_CONFIG.BASE_URL}/api/upload?origen=asistencia_clase&id=${firmaNinoId}`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${sessionStorage.getItem("token")}` },
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.url) {
+          firmaFinal = uploadData.url;
+        }
+      } catch (e) {
+        console.error("Error al subir firma a S3:", e);
+        alert("Hubo un error al guardar la firma en el servidor.");
+        return;
+      }
+    }
 
     await apiRequest(`/clases/${id}/firma-nino`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paciente_id: firmaNinoId, firma, numero_factura: numero_factura }),
+      body: JSON.stringify({ paciente_id: firmaNinoId, firma: firmaFinal, numero_factura: numero_factura }),
     });
 
     apiRequest(`/clases/${id}`).then(setClase);
