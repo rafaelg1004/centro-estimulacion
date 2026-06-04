@@ -31,7 +31,7 @@ export default function Home() {
           }).then((result) => {
             if (result.isConfirmed) {
               // Redirigir a NuevaValoracionUnificada con los parámetros
-              navigate(`/nueva-valoracion?paciente=${borrador.pacienteId}&tipo=${borrador.tipoFormulario === 'Piso Pélvico' ? 'pisopelvico' : (borrador.tipoFormulario.includes('Perinatal') ? 'perinatal' : 'lactancia')}&borradorId=${borrador.id}`);
+              navigate(`/valoracion?paciente=${borrador.pacienteId}&tipo=${borrador.tipoFormulario === 'Piso Pélvico' ? 'pisopelvico' : (borrador.tipoFormulario.includes('Perinatal') ? 'perinatal' : 'lactancia')}&borradorId=${borrador.id}`);
             }
           });
         }
