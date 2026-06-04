@@ -56,6 +56,10 @@ export default function DynamicFormBuilder({
   const [cie10DropUp, setCie10DropUp] = useState({});
   const cie10Timers = useRef({});
 
+  // Ciudades API (api-colombia.com)
+  const [ciudadesApi, setCiudadesApi] = useState([]);
+  const [cargandoCiudades, setCargandoCiudades] = useState(false);
+
   const isEdit = !!initialData;
 
   // Referencias para las firmas (Canvas)
@@ -142,6 +146,32 @@ export default function DynamicFormBuilder({
       cargarBorrador();
     }
   }, [borradorId, isEdit]);
+
+  // Cargar ciudades desde API Colombia si el esquema lo requiere
+  useEffect(() => {
+    const usaCiudadesApi = esquema.secciones.some(sec => sec.campos?.some(c => c.tipo === "ciudad-api"));
+    if (usaCiudadesApi && ciudadesApi.length === 0) {
+      setCargandoCiudades(true);
+      fetch("https://api-colombia.com/api/v1/City")
+        .then(r => r.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            // Ordenar por nombre y formatear para el datalist: "ID - Nombre (Departamento)"
+            const formatoCiudades = data
+              .map(c => ({
+                id: c.id,
+                nombre: c.name,
+                departamento: c.department?.name || "",
+                textoCompleto: `${c.id} - ${c.name} (${c.department?.name || ""})`
+              }))
+              .sort((a, b) => a.nombre.localeCompare(b.nombre));
+            setCiudadesApi(formatoCiudades);
+          }
+        })
+        .catch(err => console.error("Error cargando ciudades desde api-colombia:", err))
+        .finally(() => setCargandoCiudades(false));
+    }
+  }, [esquema, ciudadesApi.length]);
 
   // Autoguardado
   useEffect(() => {
@@ -656,6 +686,51 @@ export default function DynamicFormBuilder({
       );
     }
 
+    // Campo de Ciudad consumiendo api-colombia.com
+    if (campo.tipo === "ciudad-api") {
+      const datalistId = `${campo.nombre}-ciudades-list`;
+      return (
+        <div className="flex flex-col gap-1 w-full">
+          <label className="text-sm font-semibold text-gray-700" htmlFor={campo.nombre}>
+            {campo.etiqueta} {campo.requerido && <span className="text-pink-600">*</span>}
+          </label>
+          <div className="relative">
+            <input
+              id={campo.nombre}
+              name={campo.nombre}
+              type="text"
+              list={datalistId}
+              value={formData[campo.nombre] ?? ""}
+              onChange={handleChange}
+              required={campo.requerido}
+              readOnly={campo.lecsolo}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.preventDefault();
+              }}
+              className={`px-4 py-3 rounded-xl border ${campo.lecsolo ? "bg-gray-100" : "bg-white"} border-indigo-200 focus:ring-2 focus:ring-indigo-300 w-full pr-10`}
+              placeholder={cargandoCiudades ? "Cargando ciudades..." : "Buscar ciudad o escribir código..."}
+              disabled={cargandoCiudades}
+            />
+            {cargandoCiudades && (
+              <span className="absolute right-3 top-3 text-indigo-400 text-xs font-bold animate-pulse">
+                Cargando...
+              </span>
+            )}
+          </div>
+          <datalist id={datalistId}>
+            {ciudadesApi.map(city => (
+              <option key={city.id} value={city.textoCompleto} />
+            ))}
+          </datalist>
+          {formData[campo.nombre] && (
+            <span className="text-xs text-indigo-500 font-semibold mt-1">
+              Código RIPS extraído: {formData[campo.nombre].split(' - ')[0]}
+            </span>
+          )}
+        </div>
+      );
+    }
+
     // Campo CUPS buscable (Procedimientos, Consulta desde API Mongoose en Excel)
     if (campo.tipo === "cups") {
       const query = cie10Search[campo.nombre] ?? (formData[campo.nombre] || "");
@@ -1004,6 +1079,12 @@ export default function DynamicFormBuilder({
   const renderCampoConEstilo = (campo, esRequerido, isSidebar = false) => {
     const contenido = renderCampo(campo);
     if (!contenido) return null;
+    
+    // Si el campo es hidden, no lo envolvemos en el div con padding y borde
+    if (campo.tipo === "hidden") {
+      return contenido;
+    }
+
     return (
       <div
         className={`rounded-xl p-3 border ${

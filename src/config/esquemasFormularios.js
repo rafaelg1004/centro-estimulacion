@@ -9,6 +9,15 @@ export const EPS_LIST = [
     "Particular"
 ];
 
+export const CIUDADES_COLOMBIA = [
+    "Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", "Cúcuta", "Bucaramanga", 
+    "Pereira", "Santa Marta", "Ibagué", "Bello", "Pasto", "Manizales", "Neiva", "Soledad",
+    "Villavicencio", "Armenia", "Soacha", "Valledupar", "Montería", "Sincelejo", "Popayán",
+    "Floridablanca", "Palmira", "Buenaventura", "Tunja", "Riohacha", "Quibdó", "Envigado",
+    "Dosquebradas", "Tuluá", "Girardot", "Yopal", "Florencia", "Flandes", "Tumaco", 
+    "Sogamoso", "Duitama", "Chía", "Zipaquirá", "Facatativá", "Fusagasugá"
+].sort();
+
 export const ESQUEMA_PACIENTE_NINO = {
     titulo: "Registrar Paciente Niño",
     endpoint: "/pacientes",
@@ -35,7 +44,7 @@ export const ESQUEMA_PACIENTE_NINO = {
                         { valor: "F", etiqueta: "Femenino" }
                     ], requerido: true
                 },
-                { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "text", requerido: true },
+                { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "ciudad-api", requerido: true },
                 { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true },
                 { nombre: "peso", etiqueta: "Peso (kg)", tipo: "number", paso: "0.01", min: "0", requerido: true },
                 { nombre: "talla", etiqueta: "Talla (cm)", tipo: "number", paso: "0.1", min: "0", requerido: true },
@@ -121,7 +130,7 @@ export const ESQUEMA_PACIENTE_ADULTO = {
                         { valor: "F", etiqueta: "Femenino" }
                     ], requerido: true
                 },
-                { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "text", requerido: true },
+                { nombre: "lugarNacimiento", etiqueta: "Lugar de Nacimiento", tipo: "ciudad-api", requerido: true },
                 { nombre: "fechaNacimiento", etiqueta: "Fecha de Nacimiento", tipo: "date", requerido: true },
                 { nombre: "estadoCivil", etiqueta: "Estado Civil", tipo: "text", requerido: true },
                 { nombre: "ocupacion", etiqueta: "Ocupación", tipo: "text", requerido: true },
