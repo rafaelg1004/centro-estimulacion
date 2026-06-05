@@ -13,6 +13,7 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
           tipo: "cups",
           requerido: true,
           placeholder: "Buscar procedimiento...",
+          valorPorDefecto: "890211 - CONSULTA DE PRIMERA VEZ POR FISIOTERAPIA"
         },
         {
           nombre: "fecha_inicio_atencion",
