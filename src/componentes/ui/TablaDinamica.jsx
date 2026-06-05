@@ -106,8 +106,8 @@ export default function TablaDinamica({
     const totalPaginas = Math.ceil(datosAMostrar.length / itemsPorPagina);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-10 px-4">
-            <div className="w-full max-w-7xl 2xl:max-w-[95%] bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
+        <div className="w-full h-full bg-transparent py-6 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-[98%] mx-auto bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-indigo-100">
 
                 {/* Header y Botón Creación */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-indigo-100 pb-4">
@@ -193,7 +193,7 @@ export default function TablaDinamica({
                             <thead className="bg-indigo-600 text-white rounded-t-xl">
                                 <tr>
                                     {columnas.map((col, i) => (
-                                        <th key={i} className="px-5 py-4 text-left font-bold tracking-wider">{col.header}</th>
+                                        <th key={i} className="px-5 py-4 text-center font-bold tracking-wider">{col.header}</th>
                                     ))}
                                     {acciones && (acciones.ver || acciones.editar || acciones.eliminar) && (
                                         <th className="px-5 py-4 text-center font-bold tracking-wider rounded-tr-xl sticky right-0 bg-indigo-600 shadow-md z-10">Acciones</th>
@@ -209,7 +209,7 @@ export default function TablaDinamica({
                                             className={`border-b last:border-b-0 hover:bg-indigo-50/50 transition-colors ${rIdx % 2 === 0 ? 'bg-gray-50/30' : ''}`}
                                         >
                                             {columnas.map((col, cIdx) => (
-                                                <td key={cIdx} className="px-5 py-4 whitespace-nowrap">
+                                                <td key={cIdx} className="px-5 py-4 text-center whitespace-nowrap">
                                                     {col.format ? col.format(row[col.accessor], row) : row[col.accessor]}
                                                 </td>
                                             ))}
