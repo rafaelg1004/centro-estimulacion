@@ -98,9 +98,9 @@ export default function MiPerfil() {
     try {
       if (perfil.firmaUrl && perfil.firmaUrl.includes("s3.amazonaws.com")) {
         try {
-          await apiRequest("/delete-image", {
-            method: "DELETE",
-            body: JSON.stringify({ imageUrl: perfil.firmaUrl })
+          await apiRequest("/eliminar-firmas-s3", {
+            method: "POST",
+            body: JSON.stringify({ urls: [perfil.firmaUrl] })
           });
         } catch (e) {
           console.warn("No se pudo borrar la imagen de S3:", e);
