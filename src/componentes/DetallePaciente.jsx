@@ -94,7 +94,7 @@ export default function DetallePacienteUnificado() {
       await apiRequest("/pagoPaquete", {
         method: "POST",
         body: JSON.stringify({
-          paciente: id,
+          paciente_id: id,
           numero_factura,
           clases_pagadas,
           fecha_pago,
