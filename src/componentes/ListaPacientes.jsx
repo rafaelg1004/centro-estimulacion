@@ -86,7 +86,7 @@ export default function ListaPacientesUnificada() {
   ];
 
   return (
-    <div className="p-4 relative">
+    <div className="w-full relative">
       <TablaDinamica
         key={refreshKey}
         titulo="Lista Maestra de Pacientes"

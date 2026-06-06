@@ -106,8 +106,8 @@ export default function TablaDinamica({
     const totalPaginas = Math.ceil(datosAMostrar.length / itemsPorPagina);
 
     return (
-        <div className="w-full h-full bg-transparent py-6 px-4 sm:px-6 lg:px-8">
-            <div className="w-full max-w-[98%] mx-auto bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-indigo-100">
+        <div className="w-full py-6 px-4 flex justify-center items-center">
+            <div className="w-full max-w-7xl bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-indigo-100">
 
                 {/* Header y Botón Creación */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-indigo-100 pb-4">

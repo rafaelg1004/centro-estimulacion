@@ -21,7 +21,7 @@ export default function RegistrarPaquete() {
     e.preventDefault();
     await apiRequest("/pagoPaquete", {
       method: "POST",
-      body: JSON.stringify({ paciente: id, numero_factura, clases_pagadas, fecha_pago }),
+      body: JSON.stringify({ paciente_id: id, numero_factura, clases_pagadas, fecha_pago }),
     });
     setNumeroFactura("");
     setClasesPagadas(1);
