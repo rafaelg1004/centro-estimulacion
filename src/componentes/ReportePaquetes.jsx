@@ -125,14 +125,15 @@ export default function ReportePaquetes() {
       (filtro === "activos" && paquete.estado === "Activo") ||
       (filtro === "agotados" && paquete.estado === "Agotado");
 
+    const termino = busqueda.toLowerCase().trim();
     const cumpleBusqueda =
-      busqueda === "" ||
-      paquete.paciente.nombres.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (paquete.paciente.apellidos || "").toLowerCase().includes(busqueda.toLowerCase()) ||
-      (paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil || "")
+      termino === "" ||
+      (paquete.paciente?.nombres || "").toLowerCase().includes(termino) ||
+      (paquete.paciente?.apellidos || "").toLowerCase().includes(termino) ||
+      (paquete.paciente?.num_documento_identificacion || paquete.paciente?.numDocumentoIdentificacion || paquete.paciente?.registroCivil || "")
         .toLowerCase()
-        .includes(busqueda.toLowerCase()) ||
-      paquete.numero_factura.toLowerCase().includes(busqueda.toLowerCase());
+        .includes(termino) ||
+      (paquete.numero_factura || "").toLowerCase().includes(termino);
 
     const cumpleMes =
       mesSeleccionado === "todos" ||
