@@ -21,7 +21,21 @@ export default function ReportePaquetes() {
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
+  const [mesSeleccionado, setMesSeleccionado] = useState("todos");
   const navigate = useNavigate();
+
+  // Obtener meses disponibles de los paquetes
+  const mesesDisponibles = React.useMemo(() => {
+    const mesesMap = new Map();
+    paquetes.forEach((p) => {
+      if (!p.fecha_pago) return;
+      const fecha = new Date(p.fecha_pago);
+      const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+      const label = fecha.toLocaleDateString("es-CO", { year: "numeric", month: "long" });
+      mesesMap.set(key, { key, label });
+    });
+    return Array.from(mesesMap.values()).sort((a, b) => b.key.localeCompare(a.key));
+  }, [paquetes]);
 
   const editarPaquete = async (paquete) => {
     const result = await Swal.fire({
@@ -36,7 +50,7 @@ export default function ReportePaquetes() {
     });
 
     if (result.isConfirmed) {
-      navigate(`/paquetes/editar/${paquete._id}`);
+      navigate(`/paquetes/editar/${paquete.id}`);
     }
   };
 
@@ -89,7 +103,7 @@ export default function ReportePaquetes() {
     }
   };
 
-  // Filtrar paquetes según criterios
+  // Filtrar paquetes según criterios y mes
   const paquetesFiltrados = paquetes.filter((paquete) => {
     const cumpleFiltro =
       filtro === "todos" ||
@@ -105,7 +119,16 @@ export default function ReportePaquetes() {
         .includes(busqueda.toLowerCase()) ||
       paquete.numero_factura.toLowerCase().includes(busqueda.toLowerCase());
 
-    return cumpleFiltro && cumpleBusqueda;
+    const cumpleMes =
+      mesSeleccionado === "todos" ||
+      (() => {
+        if (!paquete.fecha_pago) return false;
+        const fecha = new Date(paquete.fecha_pago);
+        const key = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+        return key === mesSeleccionado;
+      })();
+
+    return cumpleFiltro && cumpleBusqueda && cumpleMes;
   });
 
   // Estadísticas
@@ -233,7 +256,7 @@ export default function ReportePaquetes() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar por paciente, registro civil o factura
+                Buscar por paciente, documento o factura
               </label>
               <input
                 type="text"
@@ -261,6 +284,23 @@ export default function ReportePaquetes() {
                 </option>
               </select>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Mes de pago
+              </label>
+              <select
+                value={mesSeleccionado}
+                onChange={(e) => setMesSeleccionado(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="todos">Todos los meses</option>
+                {mesesDisponibles.map((mes) => (
+                  <option key={mes.key} value={mes.key}>
+                    {mes.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -270,12 +310,12 @@ export default function ReportePaquetes() {
             <div className="text-center py-16">
               <ChartBarIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-700 mb-2">
-                {busqueda || filtro !== "todos"
+                {busqueda || filtro !== "todos" || mesSeleccionado !== "todos"
                   ? "No se encontraron resultados"
                   : "No hay paquetes registrados"}
               </h3>
               <p className="text-gray-500">
-                {busqueda || filtro !== "todos"
+                {busqueda || filtro !== "todos" || mesSeleccionado !== "todos"
                   ? "Intenta cambiar los filtros de búsqueda"
                   : "Los paquetes comprados aparecerán aquí"}
               </p>
@@ -284,37 +324,37 @@ export default function ReportePaquetes() {
             <>
               {/* Vista de tabla para desktop */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-xs">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
                   <thead className="bg-indigo-50">
                     <tr>
-                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Paciente
                       </th>
-                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Documento
                       </th>
-                      <th className="px-2 py-1 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Factura
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Pagadas
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Usadas
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Disponibles
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         % Uso
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Estado
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Clases
                       </th>
-                      <th className="px-2 py-1 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-indigo-700 uppercase tracking-wider">
                         Acciones
                       </th>
                     </tr>
@@ -322,33 +362,33 @@ export default function ReportePaquetes() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paquetesFiltrados.map((paquete) => (
                       <tr key={paquete.id} className="hover:bg-gray-50">
-                        <td className="px-2 py-2">
-                          <div className="font-semibold text-gray-900 text-xs">
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-gray-900 text-sm">
                             {paquete.paciente.nombres} {paquete.paciente.apellidos}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero} 
+                          <div className="text-sm text-gray-500">
+                            {paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero}
                           </div>
                         </td>
-                        <td className="px-2 py-2 text-xs text-gray-800">
+                        <td className="px-4 py-3 text-sm text-gray-800">
                           {paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil}
                         </td>
-                        <td className="px-2 py-2 text-xs font-mono text-gray-800">
+                        <td className="px-4 py-3 text-sm font-mono text-gray-800">
                           {paquete.numero_factura}
                         </td>
-                        <td className="px-2 py-2 text-center">
-                          <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-xs font-semibold">
+                        <td className="px-4 py-3 text-center">
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">
                             {paquete.clases_pagadas}
                           </span>
                         </td>
-                        <td className="px-2 py-2 text-center">
-                          <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded text-xs font-semibold">
+                        <td className="px-4 py-3 text-center">
+                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm font-semibold">
                             {paquete.clases_usadas}
                           </span>
                         </td>
-                        <td className="px-2 py-2 text-center">
+                        <td className="px-4 py-3 text-center">
                           <span
-                            className={`px-1 py-0.5 rounded text-xs font-semibold ${
+                            className={`px-2 py-1 rounded text-sm font-semibold ${
                               paquete.clasesDisponibles > 0
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
@@ -357,14 +397,14 @@ export default function ReportePaquetes() {
                             {paquete.clasesDisponibles}
                           </span>
                         </td>
-                        <td className="px-2 py-2 text-center">
+                        <td className="px-4 py-3 text-center">
                           <div className="flex flex-col items-center">
-                            <span className="text-xs font-semibold text-gray-700">
+                            <span className="text-sm font-semibold text-gray-700">
                               {paquete.porcentajeUso}%
                             </span>
-                            <div className="w-full bg-gray-200 rounded-full h-1 mt-0.5">
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                               <div
-                                className={`h-1 rounded-full ${
+                                className={`h-2 rounded-full ${
                                   paquete.porcentajeUso === 100
                                     ? "bg-red-500"
                                     : paquete.porcentajeUso >= 80
@@ -376,9 +416,9 @@ export default function ReportePaquetes() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-2 py-2 text-center">
+                        <td className="px-4 py-3 text-center">
                           <span
-                            className={`px-1 py-0.5 rounded text-xs font-bold ${
+                            className={`px-2 py-1 rounded text-sm font-bold ${
                               paquete.estado === "Activo"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-red-100 text-red-800"
@@ -387,17 +427,17 @@ export default function ReportePaquetes() {
                             {paquete.estado}
                           </span>
                         </td>
-                        <td className="px-2 py-2 text-center">
-                          <div className="flex flex-col gap-0.5">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex flex-col gap-1">
                             {paquete.clasesConPaquete &&
                               paquete.clasesConPaquete.length > 0 && (
-                                <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded text-xs">
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
                                   ✓{paquete.clasesConPaquete.length}
                                 </span>
                               )}
                             {paquete.clasesSinPaquete &&
                               paquete.clasesSinPaquete.length > 0 && (
-                                <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded text-xs">
+                                <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
                                   ⚠️{paquete.clasesSinPaquete.length}
                                 </span>
                               )}
@@ -405,27 +445,27 @@ export default function ReportePaquetes() {
                               paquete.clasesConPaquete.length === 0) &&
                               (!paquete.clasesSinPaquete ||
                                 paquete.clasesSinPaquete.length === 0) && (
-                                <span className="text-gray-500 text-xs">-</span>
+                                <span className="text-gray-500 text-sm">-</span>
                               )}
                           </div>
                         </td>
-                        <td className="px-2 py-2 text-center">
-                          <div className="flex gap-1 justify-center">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex gap-2 justify-center">
                             <button
                               onClick={() =>
-                                navigate(`/pacientes/${paquete.paciente._id}`)
+                                navigate(`/pacientes/${paquete.paciente.id}`)
                               }
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs font-medium transition"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
                               title="Ver paciente"
                             >
-                              <EyeIcon className="h-3 w-3" />
+                              <EyeIcon className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => editarPaquete(paquete)}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs font-medium transition"
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm font-medium transition"
                               title="Editar paquete"
                             >
-                              <PencilSquareIcon className="h-3 w-3" />
+                              <PencilSquareIcon className="h-4 w-4" />
                             </button>
                           </div>
                         </td>
@@ -439,7 +479,7 @@ export default function ReportePaquetes() {
               <div className="lg:hidden space-y-4 p-4">
                 {paquetesFiltrados.map((paquete) => (
                   <div
-                    key={paquete._id}
+                    key={paquete.id}
                     className="bg-gray-50 rounded-xl p-4 border border-gray-200"
                   >
                     <div className="flex justify-between items-start mb-3">
@@ -555,7 +595,7 @@ export default function ReportePaquetes() {
                     <div className="flex gap-2">
                       <button
                         onClick={() =>
-                          navigate(`/pacientes/${paquete.paciente._id}`)
+                          navigate(`/pacientes/${paquete.paciente.id}`)
                         }
                         className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
                       >
@@ -580,6 +620,11 @@ export default function ReportePaquetes() {
         {/* Footer con información */}
         <div className="mt-6 text-center text-gray-500 text-sm">
           Mostrando {paquetesFiltrados.length} de {paquetes.length} paquetes
+          {mesSeleccionado !== "todos" && (
+            <span className="ml-1 font-medium text-indigo-600">
+              ({mesesDisponibles.find((m) => m.key === mesSeleccionado)?.label || mesSeleccionado})
+            </span>
+          )}
         </div>
       </div>
     </div>
