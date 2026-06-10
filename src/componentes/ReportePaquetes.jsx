@@ -388,17 +388,17 @@ export default function ReportePaquetes() {
                       <tr key={paquete.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3">
                           <div className="font-semibold text-gray-900 text-sm">
-                            {paquete.paciente.nombres} {paquete.paciente.apellidos}
+                            {paquete.paciente?.nombres || ""} {paquete.paciente?.apellidos || ""}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero}
+                            {paquete.paciente?.cod_sexo || paquete.paciente?.codSexo || paquete.paciente?.genero || ""}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-800">
-                          {paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil}
+                          {paquete.paciente?.num_documento_identificacion || paquete.paciente?.numDocumentoIdentificacion || paquete.paciente?.registroCivil || "N/A"}
                         </td>
                         <td className="px-4 py-3 text-sm font-mono text-gray-800">
-                          {paquete.numero_factura}
+                          {paquete.numero_factura || "N/A"}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-semibold">
@@ -509,13 +509,13 @@ export default function ReportePaquetes() {
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 text-lg">
-                          {paquete.paciente.nombres} {paquete.paciente.apellidos}
+                          {paquete.paciente?.nombres || ""} {paquete.paciente?.apellidos || ""}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {paquete.paciente.cod_sexo || paquete.paciente.codSexo || paquete.paciente.genero}
+                          {paquete.paciente?.cod_sexo || paquete.paciente?.codSexo || paquete.paciente?.genero || ""}
                         </p>
                         <p className="text-sm text-gray-600">
-                          DOC: {paquete.paciente.num_documento_identificacion || paquete.paciente.numDocumentoIdentificacion || paquete.paciente.registroCivil}
+                          DOC: {paquete.paciente?.num_documento_identificacion || paquete.paciente?.numDocumentoIdentificacion || paquete.paciente?.registroCivil || "N/A"}
                         </p>
                       </div>
                       <span
