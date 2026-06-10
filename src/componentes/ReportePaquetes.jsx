@@ -23,6 +23,7 @@ export default function ReportePaquetes() {
   const [filtro, setFiltro] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
   const [mesSeleccionado, setMesSeleccionado] = useState("todos");
+  const [diagnostico, setDiagnostico] = useState(null);
   const navigate = useNavigate();
 
   // Obtener meses disponibles de los paquetes
@@ -81,6 +82,19 @@ export default function ReportePaquetes() {
     } catch (error) {
       console.error("Error al recalcular:", error);
       Swal.fire("Error", "No se pudo recalcular los contadores", "error");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const verDiagnostico = async (numero_factura) => {
+    try {
+      setCargando(true);
+      const data = await apiRequest(`/pagoPaquete/diagnostico/${numero_factura}`);
+      setDiagnostico(data);
+    } catch (error) {
+      console.error("Error al cargar diagnóstico:", error);
+      Swal.fire("Error", "No se pudo cargar el diagnóstico", "error");
     } finally {
       setCargando(false);
     }
@@ -477,7 +491,7 @@ export default function ReportePaquetes() {
                           <div className="flex gap-2 justify-center">
                             <button
                               onClick={() =>
-                                navigate(`/pacientes/${paquete.paciente.id}`)
+                                navigate(`/pacientes/${paquete.paciente?.id}`)
                               }
                               className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
                               title="Ver paciente"
@@ -490,6 +504,13 @@ export default function ReportePaquetes() {
                               title="Editar paquete"
                             >
                               <PencilSquareIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => verDiagnostico(paquete.numero_factura)}
+                              className="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1.5 rounded text-sm font-medium transition"
+                              title="Ver diagnóstico"
+                            >
+                              <ChartBarIcon className="h-4 w-4" />
                             </button>
                           </div>
                         </td>
@@ -640,6 +661,76 @@ export default function ReportePaquetes() {
             </>
           )}
         </div>
+
+        {/* Panel de Diagnóstico */}
+        {diagnostico && (
+          <div className="bg-white rounded-2xl shadow-lg border border-cyan-200 overflow-hidden mt-6">
+            <div className="bg-cyan-50 px-6 py-4 border-b border-cyan-100 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-cyan-800">
+                  🔍 Diagnóstico Factura {diagnostico.paquete?.numero_factura}
+                </h3>
+                <p className="text-sm text-cyan-600">
+                  Paciente: {diagnostico.paquete?.paciente?.nombres} {diagnostico.paquete?.paciente?.apellidos}
+                </p>
+              </div>
+              <button
+                onClick={() => setDiagnostico(null)}
+                className="text-cyan-600 hover:text-cyan-800 font-bold text-xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-blue-50 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-700">{diagnostico.paquete?.clases_pagadas}</div>
+                  <div className="text-xs text-gray-600">Pagadas</div>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-700">{diagnostico.paquete?.clases_usadas_real}</div>
+                  <div className="text-xs text-gray-600">Usadas (real)</div>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-gray-700">{diagnostico.paquete?.clases_usadas_guardado}</div>
+                  <div className="text-xs text-gray-600">Contador DB</div>
+                </div>
+                <div className={`rounded-xl p-4 text-center ${diagnostico.paquete?.diferencia !== 0 ? 'bg-red-50' : 'bg-green-50'}`}>
+                  <div className={`text-2xl font-bold ${diagnostico.paquete?.diferencia !== 0 ? 'text-red-700' : 'text-green-700'}`}>
+                    {diagnostico.paquete?.diferencia || 0}
+                  </div>
+                  <div className="text-xs text-gray-600">Diferencia</div>
+                </div>
+              </div>
+
+              <h4 className="font-bold text-gray-800 mb-3">Sesiones registradas ({diagnostico.sesiones?.length || 0}):</h4>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Clase</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Fecha Clase</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Creado</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Paciente</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {(diagnostico.sesiones || []).map((s) => (
+                      <tr key={s.id} className="hover:bg-gray-50">
+                        <td className="px-3 py-2 text-sm">{s.clase_nombre || "Sin nombre"}</td>
+                        <td className="px-3 py-2 text-sm">{s.clase_fecha || "-"}</td>
+                        <td className="px-3 py-2 text-sm text-gray-500">
+                          {s.created_at ? new Date(s.created_at).toLocaleString("es-CO") : "-"}
+                        </td>
+                        <td className="px-3 py-2 text-sm">{s.paciente_nombre || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer con información */}
         <div className="mt-6 text-center text-gray-500 text-sm">
