@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../config/api";
 import * as XLSX from "xlsx";
@@ -24,7 +24,15 @@ export default function ReportePaquetes() {
   const [busqueda, setBusqueda] = useState("");
   const [mesSeleccionado, setMesSeleccionado] = useState("todos");
   const [diagnostico, setDiagnostico] = useState(null);
+  const [cargandoDiagnostico, setCargandoDiagnostico] = useState(false);
   const navigate = useNavigate();
+  const panelDiagnosticoRef = useRef(null);
+
+  useEffect(() => {
+    if (diagnostico && panelDiagnosticoRef.current) {
+      panelDiagnosticoRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [diagnostico]);
 
   // Obtener meses disponibles de los paquetes
   const mesesDisponibles = React.useMemo(() => {
@@ -88,15 +96,17 @@ export default function ReportePaquetes() {
   };
 
   const verDiagnostico = async (numero_factura) => {
+    console.log("[DEBUG] verDiagnostico llamado con factura:", numero_factura);
     try {
-      setCargando(true);
+      setCargandoDiagnostico(true);
       const data = await apiRequest(`/pagoPaquete/diagnostico/${numero_factura}`);
+      console.log("[DEBUG] Diagnóstico recibido:", data);
       setDiagnostico(data);
     } catch (error) {
-      console.error("Error al cargar diagnóstico:", error);
-      Swal.fire("Error", "No se pudo cargar el diagnóstico", "error");
+      console.error("[DEBUG] Error al cargar diagnóstico:", error);
+      Swal.fire("Error", error.message || "No se pudo cargar el diagnóstico", "error");
     } finally {
-      setCargando(false);
+      setCargandoDiagnostico(false);
     }
   };
 
@@ -670,8 +680,14 @@ export default function ReportePaquetes() {
         </div>
 
         {/* Panel de Diagnóstico */}
+        {cargandoDiagnostico && (
+          <div className="bg-cyan-50 rounded-2xl border border-cyan-200 p-6 mt-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-cyan-600 border-solid mx-auto mb-2"></div>
+            <span className="text-cyan-700 font-bold">Cargando diagnóstico...</span>
+          </div>
+        )}
         {diagnostico && (
-          <div className="bg-white rounded-2xl shadow-lg border border-cyan-200 overflow-hidden mt-6">
+          <div ref={panelDiagnosticoRef} className="bg-white rounded-2xl shadow-lg border border-cyan-200 overflow-hidden mt-6">
             <div className="bg-cyan-50 px-6 py-4 border-b border-cyan-100 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-cyan-800">
