@@ -12,6 +12,7 @@ import {
   CreditCardIcon,
   PlayIcon,
   PencilSquareIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
 
@@ -66,6 +67,20 @@ export default function ReportePaquetes() {
     } catch (error) {
       console.error("Error al cargar reporte de paquetes:", error);
       setError("Error al cargar el reporte de paquetes");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const recalcularContadores = async () => {
+    try {
+      setCargando(true);
+      const result = await apiRequest("/pagoPaquete/recalcular", { method: "POST" });
+      await cargarReportePaquetes();
+      Swal.fire("Recálculo completado", result.mensaje, "success");
+    } catch (error) {
+      console.error("Error al recalcular:", error);
+      Swal.fire("Error", "No se pudo recalcular los contadores", "error");
     } finally {
       setCargando(false);
     }
@@ -182,7 +197,7 @@ export default function ReportePaquetes() {
                 Seguimiento de paquetes de clases comprados por los pacientes
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <button
                 onClick={exportarAExcel}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
@@ -190,6 +205,14 @@ export default function ReportePaquetes() {
               >
                 <DocumentArrowDownIcon className="h-5 w-5" />
                 Exportar Excel
+              </button>
+              <button
+                onClick={recalcularContadores}
+                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
+                title="Recalcular contadores de clases usadas desde las sesiones reales"
+              >
+                <ArrowPathIcon className="h-5 w-5" />
+                Recalcular
               </button>
               <button
                 onClick={() => navigate("/")}

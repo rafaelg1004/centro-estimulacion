@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ClipboardDocumentListIcon,
   ArrowLeftIcon,
@@ -27,6 +27,22 @@ export default function DetallePacienteUnificado() {
   const [clases_pagadas, setClasesPagadas] = useState(1);
   const [fecha_pago, setFechaPago] = useState("");
   const navigate = useNavigate();
+
+  // Contar usos reales por factura desde las clases del paciente
+  const usosPorFactura = React.useMemo(() => {
+    const map = {};
+    clases.forEach((c) => {
+      const infoPaciente = c.ninos?.find(
+        (n) => (n.paciente?.id || n.paciente) === id,
+      );
+      const factura =
+        infoPaciente?.numero_factura || infoPaciente?.paquete?.numero_factura;
+      if (factura) {
+        map[factura] = (map[factura] || 0) + 1;
+      }
+    });
+    return map;
+  }, [clases, id]);
 
   useEffect(() => {
     // Cargar datos básicos del paciente (unificado en /pacientes)
@@ -429,36 +445,50 @@ export default function DetallePacienteUnificado() {
                       (paginaPaquetes - 1) * itemsPorPagina,
                       paginaPaquetes * itemsPorPagina,
                     )
-                    .map((p) => (
-                      <div
-                        key={p.id}
-                        className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-bold text-indigo-700">
-                            Factura: {p.numero_factura}
-                          </span>
-                          <span
-                            className={`text-xs font-bold px-2 py-1 rounded-full ${p.clases_usadas >= p.clases_pagadas ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
-                          >
-                            {p.clases_usadas >= p.clases_pagadas
-                              ? "Agotado"
-                              : "Activo"}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          Fecha de pago:{" "}
-                          {new Date(p.fecha_pago).toLocaleDateString("es-ES", {
-                            timeZone: "UTC",
-                          })}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1 mb-3">
-                          Usadas: <strong>{p.clases_usadas}</strong> / Pagadas:{" "}
-                          <strong>{p.clases_pagadas}</strong>
-                        </p>
+                    .map((p) => {
+                      const usadasReales = usosPorFactura[p.numero_factura] || 0;
+                      const disponibles = p.clases_pagadas - usadasReales;
+                      const estadoReal = usadasReales >= p.clases_pagadas ? "Agotado" : "Activo";
+                      const hayInconsistencia = usadasReales !== p.clases_usadas;
 
-                      </div>
-                    ))}
+                      return (
+                        <div
+                          key={p.id}
+                          className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-sm font-bold text-indigo-700">
+                              Factura: {p.numero_factura}
+                            </span>
+                            <span
+                              className={`text-xs font-bold px-2 py-1 rounded-full ${estadoReal === "Agotado" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
+                            >
+                              {estadoReal}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Fecha de pago:{" "}
+                            {new Date(p.fecha_pago).toLocaleDateString("es-ES", {
+                              timeZone: "UTC",
+                            })}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1 mb-1">
+                            Usadas: <strong>{usadasReales}</strong> / Pagadas:{" "}
+                            <strong>{p.clases_pagadas}</strong>
+                          </p>
+                          {hayInconsistencia && (
+                            <p className="text-xs text-amber-600 font-semibold mb-1">
+                              ⚠️ Contador DB: {p.clases_usadas}
+                            </p>
+                          )}
+                          {disponibles < 0 && (
+                            <p className="text-xs text-red-600 font-semibold">
+                              ⚠️ Excedido en {Math.abs(disponibles)} clase(s)
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
 
                 {Math.ceil(paquetes.length / itemsPorPagina) > 1 && (
