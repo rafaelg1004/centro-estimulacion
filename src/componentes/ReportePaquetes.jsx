@@ -640,7 +640,7 @@ export default function ReportePaquetes() {
                     <div className="flex gap-2">
                       <button
                         onClick={() =>
-                          navigate(`/pacientes/${paquete.paciente.id}`)
+                          navigate(`/pacientes/${paquete.paciente?.id}`)
                         }
                         className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
                       >
@@ -653,6 +653,13 @@ export default function ReportePaquetes() {
                       >
                         <PencilSquareIcon className="h-4 w-4" />
                         Editar
+                      </button>
+                      <button
+                        onClick={() => verDiagnostico(paquete.numero_factura)}
+                        className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2"
+                      >
+                        <ChartBarIcon className="h-4 w-4" />
+                        Auditar
                       </button>
                     </div>
                   </div>
