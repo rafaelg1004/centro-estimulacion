@@ -109,6 +109,138 @@ function mapearDatosPerinatal(data) {
   return newData;
 }
 
+// Función para mapear datos legacy (migrados de Mongo) a la estructura moderna de Pediatría
+function mapearDatosLegacy(data) {
+  const legacy = data.datosLegacy || data._datosLegacy;
+  if (!legacy || Object.keys(legacy).length === 0) return data;
+
+  const newData = { ...data };
+  
+  // Si es programa de Pediatría, mapeamos al esquema de Pediatría
+  if (newData.tipoPrograma === "Pediatría" || newData.tipoPrograma === "Pediatria" || (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría")) {
+    if (!newData.moduloPediatria) newData.moduloPediatria = {};
+
+    newData.motivoConsulta = newData.motivoConsulta || legacy.motivoDeConsulta || "";
+    newData.diagnosticoFisioterapeutico = newData.diagnosticoFisioterapeutico || legacy.diagnosticoFisioterapeutico || legacy.diagnostico || "";
+    newData.planTratamiento = newData.planTratamiento || legacy.planTratamiento || "";
+
+    // Antecedentes prenatales
+    if (!newData.moduloPediatria.prenatales) newData.moduloPediatria.prenatales = {};
+    const pren = legacy.antecedentesPrenatales || [];
+    if (Array.isArray(pren)) {
+      const pString = pren.join(" ").toLowerCase();
+      newData.moduloPediatria.prenatales.gestacionPlaneada = pString.includes("planeada");
+      newData.moduloPediatria.prenatales.gestacionControlada = pString.includes("controlada");
+      newData.moduloPediatria.prenatales.metodosAnticonceptivos = pString.includes("anticonceptivos");
+      newData.moduloPediatria.prenatales.vomito1erTrim = pString.includes("vómito") || pString.includes("vomito");
+      newData.moduloPediatria.prenatales.sustancias = pString.includes("fármacos") || pString.includes("alcohol") || pString.includes("drogas");
+      newData.moduloPediatria.prenatales.rayosX = pString.includes("rayos");
+      newData.moduloPediatria.prenatales.convulsiones = pString.includes("convulsiones");
+      newData.moduloPediatria.prenatales.desnutricion = pString.includes("desnutrición");
+      newData.moduloPediatria.prenatales.anemia = pString.includes("anemia");
+      newData.moduloPediatria.prenatales.maltrato = pString.includes("maltrato");
+      newData.moduloPediatria.prenatales.hipertension = pString.includes("hipertensión") || pString.includes("hipertension");
+      newData.moduloPediatria.prenatales.diabetes = pString.includes("diabetes");
+    }
+
+    // Perinatales
+    if (!newData.moduloPediatria.perinatales) newData.moduloPediatria.perinatales = {};
+    newData.moduloPediatria.perinatales.tipoParto = legacy.tipoParto || "";
+    newData.moduloPediatria.perinatales.tiempoGestacion = legacy.tiempoGestacion || "";
+    newData.moduloPediatria.perinatales.lugarParto = legacy.lugarParto || "";
+    newData.moduloPediatria.perinatales.medicoTratante = legacy.medicoParto || "";
+    newData.moduloPediatria.perinatales.pesoAlNacer = legacy.pesoNacimiento || "";
+    newData.moduloPediatria.perinatales.tallaAlNacer = legacy.tallaNacimiento || "";
+    newData.moduloPediatria.perinatales.recibioCurso = legacy.recibioCurso || "";
+    newData.moduloPediatria.perinatales.atendidaOportunamente = legacy.atendida || "";
+
+    // Recién nacido
+    if (!newData.moduloPediatria.recienNacido) newData.moduloPediatria.recienNacido = {};
+    const rn = legacy.recienNacido || [];
+    if (Array.isArray(rn)) {
+      const rnStr = rn.join(" ").toLowerCase();
+      newData.moduloPediatria.recienNacido.llantoAlNacer = rnStr.includes("llanto");
+      newData.moduloPediatria.recienNacido.problemasRespiratorios = rnStr.includes("respiratorios");
+      newData.moduloPediatria.recienNacido.incubadora = rnStr.includes("incubadora");
+    }
+    newData.moduloPediatria.recienNacido.lactanciaMaterna = legacy.lactancia || "";
+    newData.moduloPediatria.recienNacido.tiempoLactancia = legacy.tiempoLactancia || "";
+    newData.moduloPediatria.recienNacido.hospitalarios = legacy.hospitalarios || "";
+    newData.moduloPediatria.recienNacido.patologicos = legacy.patologicos || "";
+    newData.moduloPediatria.recienNacido.familiares = legacy.familiares || "";
+    newData.moduloPediatria.recienNacido.traumaticos = legacy.traumaticos || "";
+    newData.moduloPediatria.recienNacido.farmacologicos = legacy.farmacologicos || "";
+    newData.moduloPediatria.recienNacido.quirurgicos = legacy.quirurgicos || "";
+    newData.moduloPediatria.recienNacido.toxicosAlergicos = legacy.toxicos || "";
+
+    // Hábitos
+    if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
+    newData.moduloPediatria.habitos.recomendacionesMedicas = legacy.dieta || "";
+    newData.moduloPediatria.habitos.problemasSueno = legacy.problemasSueno || "";
+    newData.moduloPediatria.habitos.duermeCon = legacy.duermeCon || "";
+    newData.moduloPediatria.habitos.patronSueno = legacy.patronSueno || legacy.siesta || "";
+    newData.moduloPediatria.habitos.pesadillas = legacy.pesadillas || "";
+    newData.moduloPediatria.habitos.siesta = legacy.siesta || "";
+    newData.moduloPediatria.habitos.cambioAlimentacion = legacy.cambioAlimentacion || "";
+    newData.moduloPediatria.habitos.problemasComer = legacy.dificultadesComer || "";
+    newData.moduloPediatria.habitos.alimentosPreferidos = legacy.alimentosPreferidos || "";
+    newData.moduloPediatria.habitos.alimentosNoGustan = legacy.alimentosNoLeGustan || "";
+
+    // Desarrollo social
+    if (!newData.moduloPediatria.desarrolloSocial) newData.moduloPediatria.desarrolloSocial = {};
+    newData.moduloPediatria.desarrolloSocial.viveConPadres = legacy.viveConPadres || "";
+    newData.moduloPediatria.desarrolloSocial.permaneceCon = legacy.permaneceCon || "";
+    newData.moduloPediatria.desarrolloSocial.prefiereA = legacy.prefiereA || "";
+    newData.moduloPediatria.desarrolloSocial.relacionHermanos = legacy.relacionHermanos || "";
+    newData.moduloPediatria.desarrolloSocial.emociones = legacy.emociones || "";
+    newData.moduloPediatria.desarrolloSocial.juegaCon = legacy.juegaCon || "";
+    newData.moduloPediatria.desarrolloSocial.juegosPrefiere = legacy.juegosPreferidos || "";
+    newData.moduloPediatria.desarrolloSocial.relacionDesconocidos = legacy.relacionDesconocidos || "";
+    newData.moduloPediatria.rutinaDiaria = legacy.rutinaDiaria || "";
+
+    // Examen Físico
+    if (!newData.moduloPediatria.examen) newData.moduloPediatria.examen = {};
+    newData.moduloPediatria.examen.fc = legacy.frecuenciaCardiaca || "";
+    newData.moduloPediatria.examen.fr = legacy.frecuenciaRespiratoria || "";
+    newData.moduloPediatria.examen.temperatura = legacy.temperatura || "";
+    newData.moduloPediatria.examen.tejidoTegumentario = legacy.tejidoTegumentario || "";
+    newData.moduloPediatria.examen.reflejos = legacy.reflejosOsteotendinosos || "";
+    newData.moduloPediatria.examen.anormales = legacy.reflejosAnormales || "";
+    newData.moduloPediatria.examen.patologicos = legacy.reflejosPatologicos || "";
+    newData.moduloPediatria.examen.tonoMuscular = legacy.tonoMuscular || "";
+    newData.moduloPediatria.examen.controlMotor = legacy.controlMotor || "";
+    newData.moduloPediatria.examen.desplazamientos = legacy.desplazamientos || "";
+    newData.moduloPediatria.examen.sensibilidad = legacy.sensibilidad || "";
+    newData.moduloPediatria.examen.perfilSensorial = legacy.perfilSensorial || "";
+    newData.moduloPediatria.examen.deformidades = legacy.deformidades || "";
+    newData.moduloPediatria.examen.aparatosOrtopedicos = legacy.aparatosOrtopedicos || "";
+    newData.moduloPediatria.examen.sistemaPulmonar = legacy.sistemaPulmonar || "";
+    newData.moduloPediatria.examen.problemasAsociados = legacy.problemasAsociados || "";
+  }
+
+  // Si es programa Perinatal
+  if (newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal")) {
+    if (!newData.moduloPerinatal) newData.moduloPerinatal = {};
+    newData.antecedentes = {
+      patologicos: legacy.patologicos || "",
+      quirurgicos: legacy.quirurgicos || "",
+      farmacologicos: legacy.farmacologicos || "",
+      traumaticos: legacy.traumaticos || "",
+      familiares: legacy.familiares || "",
+      ginecoObstetricos: {
+        embarazoAltoRiesgo: legacy.embarazoAltoRiesgo || "",
+        diabetesNoControlada: legacy.diabetesNoControlada || "",
+        historiaAborto: legacy.historiaAborto || "",
+        semanasGestacion: legacy.semanasGestacion || "",
+        fum: legacy.fum || "",
+        tipoParto: legacy.tipoParto || ""
+      }
+    };
+  }
+
+  return newData;
+}
+
 // Función para convertir objeto anidado a campos planos legibles
 function flattenObject(obj, prefix = "") {
   let result = [];
@@ -295,6 +427,8 @@ export default function DetalleValoracion() {
 
         // Convertir a camelCase para los esquemas del frontend
         let converted = convertKeysToCamelCase(data);
+        // Mapear datos legacy a la estructura moderna para que se vean en el formulario
+        converted = mapearDatosLegacy(converted);
         // Aplicar mapeo específico para perinatal
         converted = mapearDatosPerinatal(converted);
         // Crear secciones dinámicas con TODA la información de cada módulo
