@@ -116,8 +116,10 @@ function mapearDatosLegacy(data) {
 
   const newData = { ...data };
   
+  const esPediatria = newData.tipoPrograma === "Pediatría" || newData.tipoPrograma === "Pediatria" || (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría") || newData.codConsulta === "890201";
+  
   // Si es programa de Pediatría, mapeamos al esquema de Pediatría
-  if (newData.tipoPrograma === "Pediatría" || newData.tipoPrograma === "Pediatria" || (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría")) {
+  if (esPediatria) {
     if (!newData.moduloPediatria) newData.moduloPediatria = {};
 
     newData.motivoConsulta = newData.motivoConsulta || legacy.motivoDeConsulta || "";
@@ -218,8 +220,10 @@ function mapearDatosLegacy(data) {
     newData.moduloPediatria.examen.problemasAsociados = legacy.problemasAsociados || "";
   }
 
+  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || newData.codConsulta === "890204";
+
   // Si es programa Perinatal
-  if (newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal")) {
+  if (esPerinatal) {
     if (!newData.moduloPerinatal) newData.moduloPerinatal = {};
     newData.antecedentes = {
       patologicos: legacy.patologicos || "",
