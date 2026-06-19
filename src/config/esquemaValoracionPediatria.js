@@ -517,6 +517,138 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
       ],
     },
     {
+      titulo: "Lenguaje y Comunicación",
+      campos: [
+        {
+          nombre: "moduloPediatria.lenguaje.balbucea",
+          etiqueta: "Balbucea",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.lenguaje.diceMamaPapa",
+          etiqueta: "Dice mamá / papá",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.lenguaje.entiendeOrdenes",
+          etiqueta: "Entiende órdenes simples",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.lenguaje.senalaQueQuiere",
+          etiqueta: "Señala lo que quiere",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.lenguaje.usaFrases",
+          etiqueta: "Usa frases de 2 palabras",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.lenguaje.dice5a10Palabras",
+          etiqueta: "Dice 5 a 10 palabras",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.lenguaje.observaciones",
+          etiqueta: "Observaciones de Lenguaje",
+          tipo: "textarea",
+        },
+      ],
+    },
+    {
+      titulo: "Desarrollo Socioemocional",
+      campos: [
+        {
+          nombre: "moduloPediatria.socioemocional.sonrieSocialmente",
+          etiqueta: "Sonríe socialmente",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.socioemocional.respondeNombre",
+          etiqueta: "Responde a su nombre",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.socioemocional.seDespide",
+          etiqueta: "Se despide / lanza besos",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.socioemocional.juegoSimbolico",
+          etiqueta: "Juego simbólico",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.socioemocional.interesaOtrosNinos",
+          etiqueta: "Se interesa por otros niños",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.socioemocional.observaciones",
+          etiqueta: "Observaciones Socioemocional",
+          tipo: "textarea",
+        },
+      ],
+    },
+    {
+      titulo: "Motricidad Fina",
+      campos: [
+        {
+          nombre: "moduloPediatria.motricidadFina.sigueObjetos",
+          etiqueta: "Sigue objetos con la mirada",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.motricidadFina.llevaObjetosBoca",
+          etiqueta: "Lleva objetos a la boca",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.motricidadFina.pasaObjetosEntreManos",
+          etiqueta: "Pasa objetos entre manos",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.motricidadFina.pinzaSuperior",
+          etiqueta: "Pinza superior",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.motricidadFina.encajaPiezas",
+          etiqueta: "Encaja piezas grandes",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.motricidadFina.garabatea",
+          etiqueta: "Dibuja / garabatea",
+          tipo: "select",
+          opciones: ["SI", "NO"],
+        },
+        {
+          nombre: "moduloPediatria.motricidadFina.observaciones",
+          etiqueta: "Observaciones Motricidad Fina",
+          tipo: "textarea",
+        },
+      ],
+    },
+    {
       titulo: "Observación General y Examen Físico",
       campos: [
         {
