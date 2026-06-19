@@ -425,6 +425,40 @@ export default function DynamicDetailBuilder({
             ))}
           </div>
 
+          {/* Firmas y Autorizaciones del Módulo Anterior */}
+          {(data.datosLegacy || data._datosLegacy) && (() => {
+            const legacy = data.datosLegacy || data._datosLegacy;
+            const FIRMAS_KEYS = [
+              "firmaProfesional", "firmaAutorizacion", "firmaRepresentante",
+              "consentimiento_firmaFisio", "consentimiento_firmaAcudiente",
+              "nombreAcudiente", "cedulaAcudiente", "nombreFisioterapeuta",
+              "cedulaFisioterapeuta", "autorizacionNombre", "autorizacionRegistro",
+              "cedulaAutorizacion", "consentimiento_nombreNino",
+              "consentimiento_ccAcudiente", "consentimiento_ccFirmaAcudiente",
+              "consentimiento_nombreAcudiente", "consentimiento_registroCivil",
+              "consentimiento_lugarExpedicion", "consentimiento_fecha",
+              "ciudadFirma", "diaFirma", "mesFirma", "anioFirma",
+              "autorizacionRegistro"
+            ];
+            const firmasData = Object.entries(legacy).filter(([k]) => FIRMAS_KEYS.includes(k));
+            if (firmasData.length === 0) return null;
+            return (
+              <Card title="Firmas y Autorizaciones (Módulo Original)">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
+                  {firmasData.map(([key, val]) => {
+                    if (!val) return null;
+                    const isFirma = String(val).startsWith("http");
+                    const etiqueta = key.replace(/([A-Z])/g, " $1").replace(/_/g, " ");
+                    return (
+                      <div key={key} className={isFirma ? "md:col-span-2 lg:col-span-3" : ""}>
+                        <Field label={etiqueta.toUpperCase()} value={val} isImage={isFirma} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            );
+          })()}
 
 
           {/* Sellado de Integridad */}
