@@ -426,10 +426,10 @@ export default function DynamicDetailBuilder({
           </div>
 
           {/* Datos de Migración (Legacy) */}
-          {data._datosLegacy && Object.keys(data._datosLegacy).length > 0 && (
+          {(data.datosLegacy || data._datosLegacy) && Object.keys(data.datosLegacy || data._datosLegacy).length > 0 && (
             <Card title="Datos Adicionales del Formulario Original">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
-                {Object.entries(data._datosLegacy).map(([key, val], idx) => {
+                {Object.entries(data.datosLegacy || data._datosLegacy).map(([key, val], idx) => {
                   // Omitir campos internos y ya mapeados
                   const lowerKey = key.toLowerCase();
                   if (
