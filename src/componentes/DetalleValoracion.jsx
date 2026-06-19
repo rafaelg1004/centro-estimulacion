@@ -175,6 +175,33 @@ function mapearDatosLegacy(data) {
     newData.moduloPediatria.recienNacido.quirurgicos = legacy.quirurgicos || "";
     newData.moduloPediatria.recienNacido.toxicosAlergicos = legacy.toxicos || "";
 
+    // Hitos del desarrollo
+    if (!newData.moduloPediatria.hitos) newData.moduloPediatria.hitos = {};
+    
+    // Control cefálico
+    if (!newData.moduloPediatria.hitos.controlCefalico) newData.moduloPediatria.hitos.controlCefalico = {};
+    newData.moduloPediatria.hitos.controlCefalico.si = legacy.sostieneCabeza_si ? "SI" : (legacy.sostieneCabeza_no ? "NO" : "");
+    
+    // Rolados
+    if (!newData.moduloPediatria.hitos.rolados) newData.moduloPediatria.hitos.rolados = {};
+    newData.moduloPediatria.hitos.rolados.si = legacy.seVoltea_si ? "SI" : (legacy.seVoltea_no ? "NO" : "");
+    
+    // Sedente
+    if (!newData.moduloPediatria.hitos.sedente) newData.moduloPediatria.hitos.sedente = {};
+    newData.moduloPediatria.hitos.sedente.si = legacy.seSientaSinApoyo_si ? "SI" : (legacy.seSientaSinApoyo_no ? "NO" : "");
+    
+    // Gateo
+    if (!newData.moduloPediatria.hitos.gateo) newData.moduloPediatria.hitos.gateo = {};
+    newData.moduloPediatria.hitos.gateo.si = legacy.gatea_si ? "SI" : (legacy.gatea_no ? "NO" : "");
+    
+    // Bípedo
+    if (!newData.moduloPediatria.hitos.bipedo) newData.moduloPediatria.hitos.bipedo = {};
+    newData.moduloPediatria.hitos.bipedo.si = legacy.sePoneDePerApoyado_si ? "SI" : (legacy.sePoneDePerApoyado_no ? "NO" : "");
+    
+    // Marcha
+    if (!newData.moduloPediatria.hitos.marcha) newData.moduloPediatria.hitos.marcha = {};
+    newData.moduloPediatria.hitos.marcha.si = legacy.caminaSolo_si ? "SI" : (legacy.caminaSolo_no ? "NO" : "");
+
     // Hábitos
     if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
     newData.moduloPediatria.habitos.recomendacionesMedicas = legacy.dieta || "";
