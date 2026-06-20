@@ -5,7 +5,7 @@ import DynamicDetailBuilder from "./ui/DynamicDetailBuilder";
 import { ESQUEMA_VALORACION_PEDIATRIA } from "../config/esquemaValoracionPediatria";
 import { ESQUEMA_VALORACION_LACTANCIA } from "../config/esquemaValoracionLactancia";
 import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPisoPelvico";
-import { ESQUEMA_CONSENTIMIENTO_PERINATAL } from "../config/esquemaConsentimientoPerinatal";
+import { ESQUEMA_VALORACION_PERINATAL } from "../config/esquemaValoracionPerinatal";
 import Swal from "sweetalert2";
 
 // Helper: Convertir snake_case a camelCase
@@ -14,6 +14,8 @@ function snakeToCamel(str) {
 }
 
 // Helper: Convertir objeto con snake_case a camelCase recursivamente
+// Para evitar pérdida de datos cuando el esquema usa snake_case o camelCase,
+// conservamos la clave original y la nueva clave en camelCase.
 function convertKeysToCamelCase(obj) {
   if (obj === null || obj === undefined || typeof obj !== "object") {
     return obj;
@@ -25,10 +27,13 @@ function convertKeysToCamelCase(obj) {
   for (const [key, value] of Object.entries(obj)) {
     const camelKey = snakeToCamel(key);
     // Si el valor es un objeto plano (no array), convertir recursivamente
-    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-      newObj[camelKey] = convertKeysToCamelCase(value);
-    } else {
-      newObj[camelKey] = value;
+    const convertedValue = (value !== null && typeof value === "object" && !Array.isArray(value))
+      ? convertKeysToCamelCase(value)
+      : value;
+    
+    newObj[camelKey] = convertedValue;
+    if (camelKey !== key) {
+      newObj[key] = convertedValue; // Conservar también la clave original snake_case
     }
   }
   return newObj;
@@ -277,20 +282,16 @@ function mapearDatosLegacy(data) {
   // Si es programa Perinatal
   if (esPerinatal) {
     if (!newData.moduloPerinatal) newData.moduloPerinatal = {};
-    newData.antecedentes = {
-      patologicos: legacy.patologicos || "",
-      quirurgicos: legacy.quirurgicos || "",
-      farmacologicos: legacy.farmacologicos || "",
-      traumaticos: legacy.traumaticos || "",
-      familiares: legacy.familiares || "",
-      ginecoObstetricos: {
-        embarazoAltoRiesgo: legacy.embarazoAltoRiesgo || "",
-        diabetesNoControlada: legacy.diabetesNoControlada || "",
-        historiaAborto: legacy.historiaAborto || "",
-        semanasGestacion: legacy.semanasGestacion || "",
-        fum: legacy.fum || "",
-        tipoParto: legacy.tipoParto || ""
-      }
+    newData.moduloPerinatal = {
+      ...newData.moduloPerinatal,
+      patologicos: legacy.patologicos || newData.moduloPerinatal.patologicos || "",
+      quirurgicos: legacy.quirurgicos || newData.moduloPerinatal.quirurgicos || "",
+      farmacologicos: legacy.farmacologicos || newData.moduloPerinatal.farmacologicos || "",
+      traumaticos: legacy.traumaticos || newData.moduloPerinatal.traumaticos || "",
+      familiares: legacy.familiares || newData.moduloPerinatal.familiares || "",
+      semanasGestacion: legacy.semanasGestacion || newData.moduloPerinatal.semanasGestacion || "",
+      fum: legacy.fum || newData.moduloPerinatal.fum || "",
+      tipoParto: legacy.tipoParto || newData.moduloPerinatal.tipoParto || ""
     };
   }
 
@@ -442,7 +443,7 @@ export default function DetalleValoracion() {
         const tp = data.tipo_programa || "";
 
         if (codConsulta === "890204") {
-          setEsquema(ESQUEMA_CONSENTIMIENTO_PERINATAL);
+          setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else if (codConsulta === "890202") {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
         } else if (codConsulta === "890201") {
@@ -456,7 +457,7 @@ export default function DetalleValoracion() {
         } else if (tp.includes("Piso")) {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
         } else if (tp === "Perinatal") {
-          setEsquema(ESQUEMA_CONSENTIMIENTO_PERINATAL);
+          setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else if (tp === "Pediatría") {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         } else {
@@ -465,7 +466,7 @@ export default function DetalleValoracion() {
             data.modulo_perinatal &&
             Object.keys(data.modulo_perinatal).length > 0
           ) {
-            setEsquema(ESQUEMA_CONSENTIMIENTO_PERINATAL);
+            setEsquema(ESQUEMA_VALORACION_PERINATAL);
           } else if (
             data.modulo_pediatria &&
             Object.keys(data.modulo_pediatria).length > 0

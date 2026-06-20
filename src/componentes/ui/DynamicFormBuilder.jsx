@@ -928,32 +928,36 @@ export default function DynamicFormBuilder({
             <ul
               className={`absolute left-0 right-0 z-50 bg-white border border-blue-200 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] max-h-56 overflow-y-auto ${isDropUp ? "bottom-full mb-1 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.2)]" : "top-full mt-1"}`}
             >
-              {results.map((d) => (
-                <li
-                  key={d.codigo}
-                  className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-0"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    const fullValue = `${d.codigo} - ${d.nombre || d.descripcion}`;
-                    setFormData((prev) => ({
-                      ...prev,
-                      [campo.nombre]: fullValue,
-                    }));
-                    setCie10Search((p) => ({
-                      ...p,
-                      [campo.nombre]: fullValue,
-                    }));
-                    setCie10Open((p) => ({ ...p, [campo.nombre]: false }));
-                  }}
-                >
-                  <span className="font-bold text-blue-700 mr-2">
-                    {d.codigo}
-                  </span>
-                  <span className="text-gray-600 text-xs">
-                    {d.nombre || d.descripcion}
-                  </span>
-                </li>
-              ))}
+              {results.map((d) => {
+                const cod = d.codigo_cups || d.codigo;
+                const desc = d.nombre || d.descripcion;
+                const fullValue = `${cod} - ${desc}`;
+                return (
+                  <li
+                    key={cod}
+                    className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-0"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setFormData((prev) => ({
+                        ...prev,
+                        [campo.nombre]: fullValue,
+                      }));
+                      setCie10Search((p) => ({
+                        ...p,
+                        [campo.nombre]: fullValue,
+                      }));
+                      setCie10Open((p) => ({ ...p, [campo.nombre]: false }));
+                    }}
+                  >
+                    <span className="font-bold text-blue-700 mr-2">
+                      {cod}
+                    </span>
+                    <span className="text-gray-600 text-xs">
+                      {desc}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
