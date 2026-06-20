@@ -92,7 +92,7 @@ export default function ListaSesionesPerinatal() {
       const valoraciones = await apiRequest(`/valoraciones/paciente/${id}`);
       const valPerinatal = (valoraciones || []).find(v => {
         const cod = v.codConsulta || v.cod_consulta || '';
-        return String(cod).split(' ')[0].trim() === '890204';
+        return String(cod).split(' ')[0].trim() === '890264';
       });
 
       if (valPerinatal) {

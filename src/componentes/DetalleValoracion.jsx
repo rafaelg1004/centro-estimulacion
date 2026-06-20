@@ -277,7 +277,7 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria.motricidadFina.garabatea) newData.moduloPediatria.motricidadFina.garabatea = legacy.dibujaGarabatos_si ? "SI" : (legacy.dibujaGarabatos_no ? "NO" : "");
   }
 
-  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890204";
+  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890264";
 
   // Si es programa Perinatal
   if (esPerinatal) {
@@ -438,11 +438,11 @@ export default function DetalleValoracion() {
         setValoracionRaw(data);
 
         // Determinar el esquema usando campos snake_case de PostgreSQL
-        // Nota: cod_consulta puede incluir descripción (ej. "890204 - CONSULTA..."), extraer solo el código
+        // Nota: cod_consulta puede incluir descripción (ej. "890264 - CONSULTA..."), extraer solo el código
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         const tp = data.tipo_programa || "";
 
-        if (codConsulta === "890204") {
+        if (codConsulta === "890264") {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else if (codConsulta === "890202") {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
@@ -553,7 +553,7 @@ export default function DetalleValoracion() {
         type = "lactancia";
       else if (tp.includes("Piso") || codConsultaRaw === "890202")
         type = "adulto";
-      else if (tp === "Perinatal" || codConsultaRaw === "890204")
+      else if (tp === "Perinatal" || codConsultaRaw === "890264")
         type = "perinatal";
       const blob = await apiDownload(
         `/valoraciones/reporte/exportar-pdf/${id}?type=${type}`,

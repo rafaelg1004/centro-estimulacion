@@ -177,7 +177,7 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria.motricidadFina.garabatea) newData.moduloPediatria.motricidadFina.garabatea = legacy.dibujaGarabatos_si ? "SI" : (legacy.dibujaGarabatos_no ? "NO" : "");
   }
 
-  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890204";
+  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890264";
 
   if (esPerinatal) {
     if (!newData.moduloPerinatal) newData.moduloPerinatal = {};
@@ -236,14 +236,14 @@ export default function EditarValoracion() {
         setValoracion(converted);
 
         // Determinar el esquema usando tipo_programa o cod_consulta
-        // Nota: cod_consulta puede traer descripción adjunta (ej. "890204 - CONSULTA..."), usar startsWith
+        // Nota: cod_consulta puede traer descripción adjunta (ej. "890264 - CONSULTA..."), usar startsWith
         const tp = data.tipo_programa || '';
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         if (tp.includes('Lactancia') || data.modulo_lactancia?.tipo_lactancia || codConsulta === '890203') {
           setEsquema(ESQUEMA_VALORACION_LACTANCIA);
         } else if (tp.includes('Piso') || codConsulta === '890202') {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (tp === 'Perinatal' || codConsulta === '890204') {
+        } else if (tp === 'Perinatal' || codConsulta === '890264') {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);

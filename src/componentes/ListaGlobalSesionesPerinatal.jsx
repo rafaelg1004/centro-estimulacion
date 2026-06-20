@@ -23,7 +23,7 @@ export default function ListaGlobalSesionesPerinatal() {
   const cargarDatos = async () => {
     setCargando(true);
     try {
-      // Carga unificada de valoraciones perinatales (CUPS 890204)
+      // Carga unificada de valoraciones perinatales (CUPS 890264)
       const response = await apiRequest("/valoraciones?modulo=perinatal");
       const data = response.valoraciones || [];
 
