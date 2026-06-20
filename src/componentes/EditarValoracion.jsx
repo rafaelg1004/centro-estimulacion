@@ -219,11 +219,24 @@ export default function EditarValoracion() {
         // Mapear datos legacy si aplica
         converted = mapearDatosLegacy(converted);
 
+        // Convertir fecha_inicio_atencion a formato datetime-local (YYYY-MM-DDTHH:mm) para el input
+        // DEBE hacerse antes de setValoracion para que el estado tenga el valor formateado
+        if (converted.fecha_inicio_atencion) {
+          const d = new Date(converted.fecha_inicio_atencion);
+          if (!isNaN(d.getTime())) {
+            const formatted = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+              .toISOString().substring(0, 16);
+            converted.fecha_inicio_atencion = formatted;
+            converted.fechaInicioAtencion = formatted; // también actualizar alias camelCase
+          }
+        }
+
         setValoracion(converted);
 
         // Determinar el esquema usando tipo_programa o cod_consulta
+        // Nota: cod_consulta puede traer descripción adjunta (ej. "890204 - CONSULTA..."), usar startsWith
         const tp = data.tipo_programa || '';
-        const codConsulta = data.cod_consulta || '';
+        const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         if (tp.includes('Lactancia') || data.modulo_lactancia?.tipo_lactancia || codConsulta === '890203') {
           setEsquema(ESQUEMA_VALORACION_LACTANCIA);
         } else if (tp.includes('Piso') || codConsulta === '890202') {

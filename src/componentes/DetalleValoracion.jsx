@@ -438,8 +438,8 @@ export default function DetalleValoracion() {
         setValoracionRaw(data);
 
         // Determinar el esquema usando campos snake_case de PostgreSQL
-        // Priorizar cod_consulta sobre tipo_programa para mayor precisión
-        const codConsulta = data.cod_consulta || "";
+        // Nota: cod_consulta puede incluir descripción (ej. "890204 - CONSULTA..."), extraer solo el código
+        const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         const tp = data.tipo_programa || "";
 
         if (codConsulta === "890204") {
@@ -544,15 +544,16 @@ export default function DetalleValoracion() {
       });
 
       const tp = valoracionRaw.tipo_programa || "";
+      const codConsultaRaw = String(valoracionRaw.cod_consulta || '').split(' ')[0].trim();
       let type = "nino";
       if (
         tp.includes("Lactancia") ||
         valoracionRaw.modulo_lactancia?.tipo_lactancia
       )
         type = "lactancia";
-      else if (tp.includes("Piso") || valoracionRaw.cod_consulta === "890202")
+      else if (tp.includes("Piso") || codConsultaRaw === "890202")
         type = "adulto";
-      else if (tp === "Perinatal" || valoracionRaw.cod_consulta === "890204")
+      else if (tp === "Perinatal" || codConsultaRaw === "890204")
         type = "perinatal";
       const blob = await apiDownload(
         `/valoraciones/reporte/exportar-pdf/${id}?type=${type}`,
