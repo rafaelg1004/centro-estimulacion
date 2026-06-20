@@ -335,6 +335,14 @@ export default function DetallePacienteUnificado() {
                         ? `(${paciente.edad_madre} años)`
                         : ""}
                     </p>
+                    {(paciente.tipo_documento_madre || paciente.num_documento_madre) && (
+                      <p>
+                        <span className="font-bold text-gray-500 text-xs">
+                          Documento:
+                        </span>{" "}
+                        {paciente.tipo_documento_madre || "N/A"}: {paciente.num_documento_madre || "S.D"}
+                      </p>
+                    )}
                     {paciente.ocupacion_madre && (
                       <p>
                         <span className="font-bold text-gray-500 text-xs">
@@ -352,6 +360,14 @@ export default function DetallePacienteUnificado() {
                         ? `(${paciente.edad_padre} años)`
                         : ""}
                     </p>
+                    {(paciente.tipo_documento_padre || paciente.num_documento_padre) && (
+                      <p>
+                        <span className="font-bold text-gray-500 text-xs">
+                          Documento:
+                        </span>{" "}
+                        {paciente.tipo_documento_padre || "N/A"}: {paciente.num_documento_padre || "S.D"}
+                      </p>
+                    )}
                     {paciente.ocupacion_padre && (
                       <p>
                         <span className="font-bold text-gray-500 text-xs">
