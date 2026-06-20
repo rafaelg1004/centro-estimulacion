@@ -10,7 +10,7 @@ export const ESQUEMA_VALORACION_PERINATAL = {
                 {
                     nombre: "codConsulta", etiqueta: "Código Consulta (CUPS)", tipo: "cups", requerido: true, placeholder: "Buscar procedimiento..."
                 },
-                { nombre: "fecha_inicio_atencion", etiqueta: "Fecha de Consulta", tipo: "datetime-local", requerido: true, autoNow: true },
+                { nombre: "fechaInicioAtencion", etiqueta: "Fecha de Consulta", tipo: "datetime-local", requerido: true, autoNow: true },
                 {
                     nombre: "finalidadTecnologiaSalud", etiqueta: "Finalidad", tipo: "select", opciones: [
                         { valor: "10", etiqueta: "Promoción de la Salud / Preventivo" },
@@ -23,7 +23,7 @@ export const ESQUEMA_VALORACION_PERINATAL = {
                         { valor: "21", etiqueta: "Enfermedad general" }
                     ], requerido: true, valorPorDefecto: "22"
                 },
-                { nombre: "cod_diagnostico_principal", etiqueta: "Diagnóstico CIE-10", tipo: "cie10", requerido: true, placeholder: "Ej. Z349 - Supervisión de embarazo normal" },
+                { nombre: "codDiagnosticoPrincipal", etiqueta: "Diagnóstico CIE-10", tipo: "cie10", requerido: true, placeholder: "Ej. Z349 - Supervisión de embarazo normal" },
             ]
         },
         {

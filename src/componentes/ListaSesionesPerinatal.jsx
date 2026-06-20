@@ -90,7 +90,10 @@ export default function ListaSesionesPerinatal() {
       // 2. Buscar valoración perinatal unificada
       console.log('Buscando valoración perinatal para paciente:', id);
       const valoraciones = await apiRequest(`/valoraciones/paciente/${id}`);
-      const valPerinatal = (valoraciones || []).find(v => v.codConsulta === '890204');
+      const valPerinatal = (valoraciones || []).find(v => {
+        const cod = v.codConsulta || v.cod_consulta || '';
+        return String(cod).split(' ')[0].trim() === '890204';
+      });
 
       if (valPerinatal) {
         console.log('✓ Valoración Perinatal encontrada:', valPerinatal._id);

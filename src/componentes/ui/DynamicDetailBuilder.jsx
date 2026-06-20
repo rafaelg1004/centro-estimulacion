@@ -180,9 +180,24 @@ export default function DynamicDetailBuilder({
   onLock,
 }) {
   // Función para obtener valor anidado usando dot notation (ej. modulo.campo)
+  // Intenta primero la ruta tal como viene, y si falla intenta la versión camelCase
+  const snakeToCamelLocal = (str) => str.replace(/_([a-z])/g, (_, l) => l.toUpperCase());
+
   const getNestedValue = (obj, path) => {
     if (!path) return null;
-    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+    const parts = path.split(".");
+    // Intento 1: ruta directa
+    const direct = parts.reduce((acc, part) => acc && acc[part], obj);
+    if (direct !== undefined && direct !== null && direct !== "") return direct;
+    // Intento 2: último segmento convertido a camelCase (útil cuando el esquema usa snake_case pero el objeto fue convertido)
+    if (parts.length === 1) {
+      const camel = snakeToCamelLocal(path);
+      if (camel !== path) {
+        const alt = obj && obj[camel];
+        if (alt !== undefined && alt !== null && alt !== "") return alt;
+      }
+    }
+    return direct;
   };
 
   const calcularEdad = (fechaNac) => {

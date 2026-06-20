@@ -16,7 +16,7 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
           valorPorDefecto: "890211 - CONSULTA DE PRIMERA VEZ POR FISIOTERAPIA"
         },
         {
-          nombre: "fecha_inicio_atencion",
+          nombre: "fechaInicioAtencion",
           etiqueta: "Fecha y Hora Atención",
           tipo: "datetime-local",
           requerido: true,
@@ -59,7 +59,7 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
           valorPorDefecto: "21",
         },
         {
-          nombre: "cod_diagnostico_principal",
+          nombre: "codDiagnosticoPrincipal",
           etiqueta: "Diagnóstico CIE-10",
           tipo: "cie10",
           requerido: true,
