@@ -59,12 +59,19 @@ export default function DynamicFormBuilder({
 
   // Lógica de cancelación
   const handleCancel = async () => {
+    const esRegistro = esquema.titulo?.toLowerCase().includes("paciente") || esquema.titulo?.toLowerCase().includes("registrar");
+    const titulo = esRegistro ? '¿Cancelar registro?' : '¿Cancelar valoración?';
+    const texto = esRegistro
+      ? 'Se descartará el registro y no se guardará ningún dato del paciente.'
+      : 'Se descartará esta valoración y se eliminará cualquier borrador guardado automáticamente.';
+    const confirmButtonText = esRegistro ? 'Sí, cancelar' : 'Sí, cancelar y borrar';
+
     const confirmar = await Swal.fire({
-      title: '¿Cancelar valoración?',
-      text: 'Se descartará esta valoración y se eliminará cualquier borrador guardado automáticamente.',
+      title: titulo,
+      text: texto,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, cancelar y borrar',
+      confirmButtonText: confirmButtonText,
       cancelButtonText: 'Seguir editando',
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6366f1'

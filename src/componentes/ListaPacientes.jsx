@@ -85,6 +85,8 @@ export default function ListaPacientesUnificada() {
     },
   ];
 
+  console.log("Rendering ListaPacientesUnificada, showModal =", showModal);
+
   return (
     <div className="w-full relative">
       <TablaDinamica
@@ -93,7 +95,10 @@ export default function ListaPacientesUnificada() {
         endpoint="/pacientes"
         columnas={columnasUnificadas}
         acciones={{
-          crear: () => setShowModal(true),
+          crear: () => {
+            console.log("BOTON NUEVO REGISTRO CLICKED!");
+            setShowModal(true);
+          },
           ver: "/pacientes/",
           editar: "/pacientes/editar/",
           eliminar: true,
@@ -103,7 +108,7 @@ export default function ListaPacientesUnificada() {
       {/* Modal Overlay para Nuevo Paciente */}
       {showModal && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4 sm:p-6"
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.55)",
             backdropFilter: "blur(5px)",

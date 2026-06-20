@@ -136,15 +136,15 @@ function Field({ label, value, isImage, audit, options, type }) {
 
   if (typeof enrichedValue === "boolean") {
     return (
-      <div className="flex items-center gap-2 mb-3 p-3 bg-white rounded-xl border border-indigo-50 shadow-sm">
+      <div className="flex flex-wrap items-start gap-2 mb-3 p-3 bg-white rounded-xl border border-indigo-50 shadow-sm">
         <span
-          className={`h-3 w-3 rounded-full ${enrichedValue ? "bg-green-500 animate-pulse" : "bg-gray-300"}`}
+          className={`mt-1 h-3 w-3 flex-shrink-0 rounded-full ${enrichedValue ? "bg-green-500 animate-pulse" : "bg-gray-300"}`}
         ></span>
-        <span className="font-semibold text-gray-600 text-sm whitespace-nowrap">
+        <span className="font-semibold text-gray-600 text-sm break-words flex-1">
           {label}:
         </span>
         <span
-          className={`font-bold ${enrichedValue ? "text-green-700" : "text-gray-400"}`}
+          className={`font-bold flex-shrink-0 ${enrichedValue ? "text-green-700" : "text-gray-400"}`}
         >
           {enrichedValue ? "SÍ" : "NO"}
         </span>
@@ -155,7 +155,7 @@ function Field({ label, value, isImage, audit, options, type }) {
   return (
     <div className="flex flex-col mb-4 p-3 hover:bg-indigo-50/30 rounded-xl transition-colors">
       {label && (
-        <span className="font-bold text-indigo-900 mb-1 text-xs uppercase tracking-tight">
+        <span className="font-bold text-indigo-900 mb-1 text-xs uppercase tracking-tight break-words">
           {label}
         </span>
       )}
