@@ -170,25 +170,59 @@ export default function EdicionHistoriaClinica() {
                     <input name="nombreMadre" value={paciente.nombreMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
+                    <label className="text-xs font-bold text-indigo-400">Tipo Doc. Madre</label>
+                    <select name="tipoDocumentoMadre" value={paciente.tipoDocumentoMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none">
+                      <option value="">Seleccione...</option>
+                      <option value="CC">Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="PA">Pasaporte (PA)</option>
+                      <option value="TI">Tarjeta de Identidad (TI)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">No. Documento Madre</label>
+                    <input name="numDocumentoMadre" value={paciente.numDocumentoMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+
+                  <div>
                     <label className="text-xs font-bold text-indigo-400">Edad Madre</label>
                     <input name="edadMadre" value={paciente.edadMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-indigo-400">OcupaciÃ³n Madre</label>
+                    <label className="text-xs font-bold text-indigo-400">Ocupación Madre</label>
                     <input name="ocupacionMadre" value={paciente.ocupacionMadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
+                  <div></div>
+
                   <div>
                     <label className="text-xs font-bold text-indigo-400">Nombre del Padre</label>
                     <input name="nombrePadre" value={paciente.nombrePadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
+                    <label className="text-xs font-bold text-indigo-400">Tipo Doc. Padre</label>
+                    <select name="tipoDocumentoPadre" value={paciente.tipoDocumentoPadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none">
+                      <option value="">Seleccione...</option>
+                      <option value="CC">Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="PA">Pasaporte (PA)</option>
+                      <option value="TI">Tarjeta de Identidad (TI)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-indigo-400">No. Documento Padre</label>
+                    <input name="numDocumentoPadre" value={paciente.numDocumentoPadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
+                  </div>
+
+                  <div>
                     <label className="text-xs font-bold text-indigo-400">Edad Padre</label>
                     <input name="edadPadre" value={paciente.edadPadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-indigo-400">OcupaciÃ³n Padre</label>
+                    <label className="text-xs font-bold text-indigo-400">Ocupación Padre</label>
                     <input name="ocupacionPadre" value={paciente.ocupacionPadre || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
                   </div>
+                  <div></div>
+
                   <div>
                     <label className="text-xs font-bold text-indigo-400">Pediatra Tratante</label>
                     <input name="pediatra" value={paciente.pediatra || ''} onChange={handleChange} className="w-full bg-white border border-indigo-100 rounded-lg p-2 outline-none" />
