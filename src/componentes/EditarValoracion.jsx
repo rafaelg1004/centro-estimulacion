@@ -219,6 +219,8 @@ export default function EditarValoracion() {
         // Mapear datos legacy si aplica
         converted = mapearDatosLegacy(converted);
 
+        console.log("[EditarValoracion] codConsulta cargado:", converted.codConsulta, "| cod_consulta:", converted.cod_consulta);
+
         // Convertir fecha_inicio_atencion a formato datetime-local (YYYY-MM-DDTHH:mm) para el input
         // DEBE hacerse antes de setValoracion para que el estado tenga el valor formateado
         if (converted.fecha_inicio_atencion) {
@@ -277,25 +279,37 @@ export default function EditarValoracion() {
   );
 
   const paciente = valoracion.paciente || {};
+  console.log("[EditarValoracion] paciente:", paciente);
   const isPediatria = !paciente.esAdulto;
+
+  // Fallback robusto: paciente puede llegar en camelCase o snake_case
+  const pSemGest = paciente.semanasGestacion || paciente.semanas_gestacion || "";
+  const pFum = paciente.fum || "";
+  const pOcupacion = paciente.ocupacion || "";
+  const pTelefono = paciente.datosContacto?.telefono || paciente.datos_contacto?.telefono || paciente.telefono || paciente.celular || "N/A";
+  const pNombreMadre = paciente.nombreMadre || paciente.nombre_madre || "";
+  const pOcupacionMadre = paciente.ocupacionMadre || paciente.ocupacion_madre || "";
+  const pNombrePadre = paciente.nombrePadre || paciente.nombre_padre || "";
+  const pOcupacionPadre = paciente.ocupacionPadre || paciente.ocupacion_padre || "";
+  const pPediatra = paciente.pediatra || "";
 
   const camposFichaGeneral = [
     { nombre: "paciente_info_nombre", etiqueta: "Nombre del Paciente", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.nombres || ""} ${paciente.apellidos || ""}` },
-    { nombre: "paciente_info_doc", etiqueta: "Identificación", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.tipoDocumentoIdentificacion || "Doc"}: ${paciente.numDocumentoIdentificacion || "S.D"}` },
-    { nombre: "paciente_info_edad", etiqueta: "Edad / Sexo / Teléfono", tipo: "text", lecsolo: true, valorPorDefecto: `${calcularEdad(paciente.fechaNacimiento)} - ${paciente.codSexo === 'M' ? 'Masc' : 'Fem'} - Tel: ${paciente.datosContacto?.telefono || "N/A"}` }
+    { nombre: "paciente_info_doc", etiqueta: "Identificación", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.tipoDocumentoIdentificacion || paciente.tipo_documento_identificacion || "Doc"}: ${paciente.numDocumentoIdentificacion || paciente.num_documento_identificacion || "S.D"}` },
+    { nombre: "paciente_info_edad", etiqueta: "Edad / Sexo / Teléfono", tipo: "text", lecsolo: true, valorPorDefecto: `${calcularEdad(paciente.fechaNacimiento || paciente.fecha_nacimiento)} - ${(paciente.codSexo || paciente.cod_sexo) === 'M' ? 'Masc' : 'Fem'} - Tel: ${pTelefono}` }
   ];
 
   const camposExtra = [];
   if (isPediatria) {
     camposExtra.push(
-      { nombre: "extra_pediatra", etiqueta: "Pediatra", tipo: "text", lecsolo: true, valorPorDefecto: paciente.pediatra || "No asignado" },
-      { nombre: "extra_madre", etiqueta: "Madre", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.nombreMadre || "S.D"} (${paciente.ocupacionMadre || "S.O"})` },
-      { nombre: "extra_padre", etiqueta: "Padre", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.nombrePadre || "S.D"} (${paciente.ocupacionPadre || "S.O"})` }
+      { nombre: "extra_pediatra", etiqueta: "Pediatra", tipo: "text", lecsolo: true, valorPorDefecto: pPediatra || "No asignado" },
+      { nombre: "extra_madre", etiqueta: "Madre", tipo: "text", lecsolo: true, valorPorDefecto: `${pNombreMadre || "S.D"} (${pOcupacionMadre || "S.O"})` },
+      { nombre: "extra_padre", etiqueta: "Padre", tipo: "text", lecsolo: true, valorPorDefecto: `${pNombrePadre || "S.D"} (${pOcupacionPadre || "S.O"})` }
     );
   } else {
     camposExtra.push(
-      { nombre: "extra_gestacion", etiqueta: "Datos Maternos", tipo: "text", lecsolo: true, valorPorDefecto: `Sem. Gest: ${paciente.semanasGestacion || "N/A"} - FUM: ${paciente.fum || "N/A"}` },
-      { nombre: "extra_ocupacion", etiqueta: "Ocupación / Aseguradora", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.ocupacion || "S.O"} - ${paciente.aseguradora || "Particular"}` }
+      { nombre: "extra_gestacion", etiqueta: "Datos Maternos", tipo: "text", lecsolo: true, valorPorDefecto: `Sem. Gest: ${pSemGest || "N/A"} - FUM: ${pFum || "N/A"}` },
+      { nombre: "extra_ocupacion", etiqueta: "Ocupación / Aseguradora", tipo: "text", lecsolo: true, valorPorDefecto: `${pOcupacion || "S.O"} - ${paciente.aseguradora || "Particular"}` }
     );
   }
 

@@ -142,6 +142,7 @@ export default function DynamicFormBuilder({
           }
         });
       });
+      console.log("[DynamicFormBuilder] flatData inicial:", flatData);
       setFormData(flatData);
     } else {
       const defaultData = {};
@@ -187,6 +188,23 @@ export default function DynamicFormBuilder({
       cargarBorrador();
     }
   }, [borradorId, isEdit]);
+
+  // Sincronizar estado de búsqueda de campos CUPS/CIE-10 con el valor inicial,
+  // para que al editar el input muestre el código guardado correctamente.
+  useEffect(() => {
+    if (!isEdit) return;
+    const initialSearch = {};
+    esquema.secciones.forEach((sec) => {
+      (sec.campos || []).forEach((campo) => {
+        if ((campo.tipo === "cups" || campo.tipo === "cie10") && formData[campo.nombre]) {
+          initialSearch[campo.nombre] = formData[campo.nombre];
+        }
+      });
+    });
+    if (Object.keys(initialSearch).length > 0) {
+      setCie10Search((prev) => ({ ...prev, ...initialSearch }));
+    }
+  }, [isEdit, esquema, formData]);
 
   // Cargar ciudades desde API Colombia si el esquema lo requiere
   useEffect(() => {

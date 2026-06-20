@@ -196,7 +196,7 @@ export default function TablaDinamica({
                                         <th key={i} className="px-5 py-4 text-center font-bold tracking-wider">{col.header}</th>
                                     ))}
                                     {acciones && (acciones.ver || acciones.editar || acciones.eliminar) && (
-                                        <th className="px-5 py-4 text-center font-bold tracking-wider rounded-tr-xl sticky right-0 bg-indigo-600 shadow-md z-10">Acciones</th>
+                                        <th className="px-5 py-4 text-center font-bold tracking-wider rounded-tr-xl sticky right-0 bg-indigo-600 shadow-md z-50 w-32">Acciones</th>
                                     )}
                                 </tr>
                             </thead>
@@ -215,16 +215,17 @@ export default function TablaDinamica({
                                             ))}
 
                                             {acciones && (acciones.ver || acciones.editar || acciones.eliminar) && (
-                                                <td className={`px-5 py-4 text-center whitespace-nowrap sticky right-0 z-10 border-l border-gray-100 ${rIdx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-                                                    <div className="flex items-center justify-center gap-2">
+                                                <td className={`px-5 py-4 text-center whitespace-nowrap sticky right-0 z-50 border-l border-gray-100 min-w-[130px] ${rIdx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                                                    <div className="flex items-center justify-center gap-2 relative">
                                                         {acciones.ver && (
                                                             <button
                                                                 onClick={() => {
                                                                     const target = typeof acciones.ver === 'function' ? acciones.ver(row) : `${acciones.ver}${idRow}`;
                                                                     navigate(target);
                                                                 }}
-                                                                className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition tooltip-trigger shadow-sm hover:shadow"
+                                                                className="p-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition shadow-sm hover:shadow-md relative z-50 min-w-[40px]"
                                                                 title="Ver Detalles"
+                                                                type="button"
                                                             >
                                                                 👁️
                                                             </button>
@@ -235,8 +236,9 @@ export default function TablaDinamica({
                                                                     const targetUrl = typeof acciones.editar === 'function' ? acciones.editar(row) : `${acciones.editar}${idRow}`;
                                                                     navigate(targetUrl);
                                                                 }}
-                                                                className="p-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition shadow-sm hover:shadow"
+                                                                className="p-2.5 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition shadow-sm hover:shadow-md relative z-50 min-w-[40px]"
                                                                 title="Editar"
+                                                                type="button"
                                                             >
                                                                 ✏️
                                                             </button>
@@ -244,8 +246,9 @@ export default function TablaDinamica({
                                                         {acciones.eliminar && (
                                                             <button
                                                                 onClick={() => handleEliminar(idRow)}
-                                                                className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition shadow-sm hover:shadow"
+                                                                className="p-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition shadow-sm hover:shadow-md relative z-50 min-w-[40px]"
                                                                 title="Eliminar permanentemente"
+                                                                type="button"
                                                             >
                                                                 🗑️
                                                             </button>
