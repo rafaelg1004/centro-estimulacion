@@ -462,14 +462,19 @@ export default function DetalleValoracion() {
   const [valoracion, setValoracion] = useState(null);
   const [valoracionRaw, setValoracionRaw] = useState(null);
   const [esquema, setEsquema] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [loadingText, setLoadingText] = useState("Conectando con la base de datos...");
 
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        setLoadingText("Descargando registros clínicos...");
         const data = await apiRequest(`/valoraciones/${id}`);
         console.log("[DEBUG] Datos crudos de valoración:", data);
         console.log("[DEBUG] Paciente en datos crudos:", data.paciente);
         setValoracionRaw(data);
+
+        setLoadingText("Configurando esquema correspondiente...");
 
         // Determinar el esquema usando campos snake_case de PostgreSQL
         // Nota: cod_consulta puede incluir descripción (ej. "890264 - CONSULTA..."), extraer solo el código
@@ -560,9 +565,16 @@ export default function DetalleValoracion() {
           converted.motivoConsulta,
         );
         setValoracion(converted);
+        
+        setLoadingText("Preparando la interfaz...");
+        setTimeout(() => {
+          setIsProcessing(false);
+        }, 800); // Ensure React mounts all fields without race conditions
+
       } catch (err) {
         console.error("Error al cargar valoración:", err);
         Swal.fire("Error", "No se pudo cargar la valoración", "error");
+        setIsProcessing(false);
       }
     };
     cargarDatos();
@@ -640,13 +652,17 @@ export default function DetalleValoracion() {
     }
   };
 
-  if (!valoracion || !esquema || !valoracionRaw)
+  if (isProcessing || !valoracion || !esquema || !valoracionRaw)
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-600"></div>
-        <p className="mt-4 text-indigo-700 font-bold">
-          Cargando Historia Clínica...
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50/50">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600 z-10 absolute inset-0"></div>
+          <div className="rounded-full h-16 w-16 border-4 border-indigo-100"></div>
+        </div>
+        <p className="mt-6 text-indigo-800 font-semibold text-lg tracking-wide animate-pulse">
+          {loadingText}
         </p>
+        <p className="text-sm text-gray-500 mt-2">Asegurando que todos los datos estén sincronizados...</p>
       </div>
     );
 

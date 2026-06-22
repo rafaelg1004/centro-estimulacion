@@ -231,10 +231,13 @@ export default function EditarValoracion() {
   const navigate = useNavigate();
   const [valoracion, setValoracion] = useState(null);
   const [esquema, setEsquema] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [loadingText, setLoadingText] = useState("Conectando con la base de datos...");
 
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        setLoadingText("Descargando registro clínico...");
         const data = await apiRequest(`/valoraciones/${id}`);
 
         if (data.bloqueada) {
@@ -242,6 +245,8 @@ export default function EditarValoracion() {
           navigate(`/valoraciones/${id}`);
           return;
         }
+
+        setLoadingText("Mapeando y configurando esquemas...");
 
         // Convertir a camelCase para los esquemas del frontend
         let converted = convertKeysToCamelCase(data);
@@ -277,9 +282,17 @@ export default function EditarValoracion() {
         } else {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         }
-      } catch (err) {
-        console.error("Error al cargar valoración para editar:", err);
+        setValoracion(converted);
+
+        setLoadingText("Preparando la interfaz de edición...");
+        setTimeout(() => {
+          setIsProcessing(false);
+        }, 800);
+
+      } catch (error) {
+        console.error("Error cargando valoración para edición:", error);
         Swal.fire("Error", "No se pudo cargar la valoración", "error");
+        setIsProcessing(false);
       }
     };
     cargarDatos();
@@ -300,12 +313,19 @@ export default function EditarValoracion() {
     return `${edadAnos} años`;
   };
 
-  if (!valoracion || !esquema) return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-600"></div>
-      <p className="mt-4 text-indigo-700 font-bold">Cargando editor...</p>
-    </div>
-  );
+  if (isProcessing || !valoracion || !esquema)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50/50">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600 z-10 absolute inset-0"></div>
+          <div className="rounded-full h-16 w-16 border-4 border-indigo-100"></div>
+        </div>
+        <p className="mt-6 text-indigo-800 font-semibold text-lg tracking-wide animate-pulse">
+          {loadingText}
+        </p>
+        <p className="text-sm text-gray-500 mt-2">Asegurando la carga de la información clínica...</p>
+      </div>
+    );
 
   const paciente = valoracion.paciente || {};
   console.log("[EditarValoracion] paciente:", paciente);
