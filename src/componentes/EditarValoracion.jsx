@@ -50,8 +50,18 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria) newData.moduloPediatria = {};
 
     newData.motivoConsulta = newData.motivoConsulta || legacy.motivoDeConsulta || "";
-    newData.diagnosticoFisioterapeutico = newData.diagnosticoFisioterapeutico || legacy.diagnosticoFisioterapeutico || legacy.diagnostico || "";
-    newData.planTratamiento = newData.planTratamiento || legacy.planTratamiento || "";
+    
+    const diagModerno = newData.diagnosticoFisioterapeutico;
+    const esPlaceholderDiag = diagModerno && diagModerno.includes("Migrado");
+    newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null) 
+      || legacy.diagnosticoFisioterapeutico || legacy.diagnostico || diagModerno || "";
+
+    const planModerno = newData.planTratamiento;
+    const esPlaceholderPlan = planModerno && planModerno.includes("pendiente de actualizaci");
+    newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null) 
+      || legacy.planTratamiento || planModerno || "";
+
+    newData.moduloPediatria.autorizacionImagen = newData.moduloPediatria.autorizacionImagen ?? (!!legacy.autorizacionNombre);
 
     if (!newData.moduloPediatria.prenatales) newData.moduloPediatria.prenatales = {};
     const pren = legacy.antecedentesPrenatales || [];
@@ -100,18 +110,21 @@ function mapearDatosLegacy(data) {
     newData.moduloPediatria.recienNacido.toxicosAlergicos = legacy.toxicos || "";
 
     if (!newData.moduloPediatria.hitos) newData.moduloPediatria.hitos = {};
-    if (!newData.moduloPediatria.hitos.controlCefalico) newData.moduloPediatria.hitos.controlCefalico = {};
-    newData.moduloPediatria.hitos.controlCefalico.si = legacy.sostieneCabeza_si ? "SI" : (legacy.sostieneCabeza_no ? "NO" : "");
-    if (!newData.moduloPediatria.hitos.rolados) newData.moduloPediatria.hitos.rolados = {};
-    newData.moduloPediatria.hitos.rolados.si = legacy.seVoltea_si ? "SI" : (legacy.seVoltea_no ? "NO" : "");
-    if (!newData.moduloPediatria.hitos.sedente) newData.moduloPediatria.hitos.sedente = {};
-    newData.moduloPediatria.hitos.sedente.si = legacy.seSientaSinApoyo_si ? "SI" : (legacy.seSientaSinApoyo_no ? "NO" : "");
-    if (!newData.moduloPediatria.hitos.gateo) newData.moduloPediatria.hitos.gateo = {};
-    newData.moduloPediatria.hitos.gateo.si = legacy.gatea_si ? "SI" : (legacy.gatea_no ? "NO" : "");
-    if (!newData.moduloPediatria.hitos.bipedo) newData.moduloPediatria.hitos.bipedo = {};
-    newData.moduloPediatria.hitos.bipedo.si = legacy.sePoneDePerApoyado_si ? "SI" : (legacy.sePoneDePerApoyado_no ? "NO" : "");
-    if (!newData.moduloPediatria.hitos.marcha) newData.moduloPediatria.hitos.marcha = {};
-    newData.moduloPediatria.hitos.marcha.si = legacy.caminaSolo_si ? "SI" : (legacy.caminaSolo_no ? "NO" : "");
+    const setHito = (sub, legacySiKey, legacyNoKey, legacyObsKey) => {
+      if (!newData.moduloPediatria.hitos[sub]) newData.moduloPediatria.hitos[sub] = {};
+      if (!newData.moduloPediatria.hitos[sub].si) {
+        newData.moduloPediatria.hitos[sub].si = legacy[legacySiKey] ? "SI" : (legacy[legacyNoKey] ? "NO" : "");
+      }
+      if (!newData.moduloPediatria.hitos[sub].obs && legacyObsKey && legacy[legacyObsKey]) {
+        newData.moduloPediatria.hitos[sub].obs = legacy[legacyObsKey];
+      }
+    };
+    setHito("controlCefalico", "sostieneCabeza_si", "sostieneCabeza_no", "sostieneCabeza_observaciones");
+    setHito("rolados",        "seVoltea_si",        "seVoltea_no", "seVoltea_observaciones");
+    setHito("sedente",        "seSientaSinApoyo_si","seSientaSinApoyo_no", "seSientaSinApoyo_observaciones");
+    setHito("gateo",          "gatea_si",           "gatea_no", "gatea_observaciones");
+    setHito("bipedo",         "sePoneDePerApoyado_si","sePoneDePerApoyado_no", "sePoneDePerApoyado_observaciones");
+    setHito("marcha",         "caminaSolo_si",      "caminaSolo_no", "caminaSolo_observaciones");
 
     if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
     newData.moduloPediatria.habitos.recomendacionesMedicas = legacy.dieta || "";

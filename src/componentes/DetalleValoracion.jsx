@@ -134,8 +134,18 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria) newData.moduloPediatria = {};
 
     newData.motivoConsulta = newData.motivoConsulta || legacy.motivoDeConsulta || "";
-    newData.diagnosticoFisioterapeutico = newData.diagnosticoFisioterapeutico || legacy.diagnosticoFisioterapeutico || legacy.diagnostico || "";
-    newData.planTratamiento = newData.planTratamiento || legacy.planTratamiento || "";
+
+    const diagModerno = newData.diagnosticoFisioterapeutico;
+    const esPlaceholderDiag = diagModerno && diagModerno.includes("Migrado");
+    newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null) 
+      || legacy.diagnosticoFisioterapeutico || legacy.diagnostico || diagModerno || "";
+
+    const planModerno = newData.planTratamiento;
+    const esPlaceholderPlan = planModerno && planModerno.includes("pendiente de actualizaci");
+    newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null) 
+      || legacy.planTratamiento || planModerno || "";
+
+    newData.moduloPediatria.autorizacionImagen = newData.moduloPediatria.autorizacionImagen ?? (!!legacy.autorizacionNombre);
 
     // Antecedentes prenatales
     if (!newData.moduloPediatria.prenatales) newData.moduloPediatria.prenatales = {};
