@@ -374,27 +374,27 @@ export default function DynamicFormBuilder({
               const d = parseInt(parts[2], 10);
               const fnacDate = new Date(y, m, d);
               const hoy = new Date();
-              
+
               let edadAnos = hoy.getFullYear() - fnacDate.getFullYear();
               let edadMeses = hoy.getMonth() - fnacDate.getMonth();
               if (hoy.getDate() < fnacDate.getDate()) {
-                  edadMeses--;
+                edadMeses--;
               }
               if (edadMeses < 0) {
-                  edadAnos--;
-                  edadMeses += 12;
+                edadAnos--;
+                edadMeses += 12;
               }
-              
+
               let strEdad = "";
               if (campo.autoCalc.formato === "nino") {
-                  if (edadAnos < 2) {
-                      const totalMeses = (edadAnos * 12) + edadMeses;
-                      strEdad = `${edadAnos} años (${totalMeses} meses)`;
-                  } else {
-                      strEdad = `${edadAnos} años`;
-                  }
-              } else {
+                if (edadAnos < 2) {
+                  const totalMeses = (edadAnos * 12) + edadMeses;
+                  strEdad = `${edadAnos} años (${totalMeses} meses)`;
+                } else {
                   strEdad = `${edadAnos} años`;
+                }
+              } else {
+                strEdad = `${edadAnos} años`;
               }
 
               if (formData[campo.nombre] !== strEdad) {
@@ -480,8 +480,8 @@ export default function DynamicFormBuilder({
     const seccionesAValidar = validarTodo
       ? esquema.secciones
       : [esquema.secciones.filter((s) => !s.siempreVisible)[pasoActual]].filter(
-          Boolean,
-        );
+        Boolean,
+      );
 
     // También incluir siempre las secciones fijas (siempreVisible) si estamos validando por pasos
     const seccionesFijas = esquema.secciones.filter((s) => s.siempreVisible);
@@ -860,7 +860,7 @@ export default function DynamicFormBuilder({
             ...p,
             [campo.nombre]: [
               {
-                codigo: "890264",
+                codigo: "890211",
                 descripcion:
                   "CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FISICA Y REHABILITACION",
               },
@@ -879,7 +879,7 @@ export default function DynamicFormBuilder({
             ...p,
             [campo.nombre]: [
               {
-                codigo: "890264",
+                codigo: "890211",
                 descripcion:
                   "CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FISICA Y REHABILITACION",
               },
@@ -1182,7 +1182,7 @@ export default function DynamicFormBuilder({
   const renderCampoConEstilo = (campo, esRequerido, isSidebar = false) => {
     const contenido = renderCampo(campo);
     if (!contenido) return null;
-    
+
     // Si el campo es hidden, no lo envolvemos en el div con padding y borde
     if (campo.tipo === "hidden") {
       return contenido;
@@ -1190,11 +1190,10 @@ export default function DynamicFormBuilder({
 
     return (
       <div
-        className={`rounded-xl p-3 border ${
-          esRequerido
+        className={`rounded-xl p-3 border ${esRequerido
             ? "border-indigo-200 bg-indigo-50/40"
             : "border-gray-100 bg-gray-50/50"
-        }`}
+          }`}
       >
         {contenido}
       </div>

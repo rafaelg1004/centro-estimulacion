@@ -30,7 +30,7 @@ function convertKeysToCamelCase(obj) {
     const convertedValue = (value !== null && typeof value === "object" && !Array.isArray(value))
       ? convertKeysToCamelCase(value)
       : value;
-    
+
     newObj[camelKey] = convertedValue;
     if (camelKey !== key) {
       newObj[key] = convertedValue; // Conservar también la clave original snake_case
@@ -128,7 +128,7 @@ function mapearDatosLegacy(data) {
     newData.tipoPrograma === "Pediatria" ||
     (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría") ||
     codConsultaLimpio === "890201";
-  
+
   // Si es programa de Pediatría, mapeamos al esquema de Pediatría
   if (esPediatria) {
     if (!newData.moduloPediatria) newData.moduloPediatria = {};
@@ -153,12 +153,12 @@ function mapearDatosLegacy(data) {
 
     const diagModerno = newData.diagnosticoFisioterapeutico;
     const esPlaceholderDiag = diagModerno && diagModerno.includes("Migrado");
-    newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null) 
+    newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null)
       || diagLegacy || diagModerno || "";
 
     const planModerno = newData.planTratamiento;
     const esPlaceholderPlan = planModerno && planModerno.includes("pendiente de actualizaci");
-    newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null) 
+    newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null)
       || planLegacy || planModerno || "";
 
     newData.moduloPediatria.autorizacionImagen = newData.moduloPediatria.autorizacionImagen ?? (!!legacy.autorizacionNombre);
@@ -216,7 +216,7 @@ function mapearDatosLegacy(data) {
 
     // Hitos del desarrollo
     if (!newData.moduloPediatria.hitos) newData.moduloPediatria.hitos = {};
-    
+
     // Hitos — solo aplicar legacy si no hay valor moderno guardado
     const setHito = (sub, legacySiKey, legacyNoKey, legacyObsKey) => {
       if (!newData.moduloPediatria.hitos[sub]) newData.moduloPediatria.hitos[sub] = {};
@@ -228,11 +228,11 @@ function mapearDatosLegacy(data) {
       }
     };
     setHito("controlCefalico", "sostieneCabeza_si", "sostieneCabeza_no", "sostieneCabeza_observaciones");
-    setHito("rolados",        "seVoltea_si",        "seVoltea_no", "seVoltea_observaciones");
-    setHito("sedente",        "seSientaSinApoyo_si","seSientaSinApoyo_no", "seSientaSinApoyo_observaciones");
-    setHito("gateo",          "gatea_si",           "gatea_no", "gatea_observaciones");
-    setHito("bipedo",         "sePoneDePerApoyado_si","sePoneDePerApoyado_no", "sePoneDePerApoyado_observaciones");
-    setHito("marcha",         "caminaSolo_si",      "caminaSolo_no", "caminaSolo_observaciones");
+    setHito("rolados", "seVoltea_si", "seVoltea_no", "seVoltea_observaciones");
+    setHito("sedente", "seSientaSinApoyo_si", "seSientaSinApoyo_no", "seSientaSinApoyo_observaciones");
+    setHito("gateo", "gatea_si", "gatea_no", "gatea_observaciones");
+    setHito("bipedo", "sePoneDePerApoyado_si", "sePoneDePerApoyado_no", "sePoneDePerApoyado_observaciones");
+    setHito("marcha", "caminaSolo_si", "caminaSolo_no", "caminaSolo_observaciones");
 
     // Hábitos — preferir valores modernos
     if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
@@ -310,7 +310,7 @@ function mapearDatosLegacy(data) {
   const esPerinatal =
     newData.tipoPrograma === "Perinatal" ||
     (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") ||
-    codConsultaLimpio === "890264";
+    codConsultaLimpio === "890211";
 
   // Si es programa Perinatal — DB moderna tiene prioridad sobre legacy
   if (esPerinatal) {
@@ -318,14 +318,14 @@ function mapearDatosLegacy(data) {
     const mp = newData.moduloPerinatal;
     newData.moduloPerinatal = {
       ...mp,
-      patologicos:      mp.patologicos      || legacy.patologicos      || "",
-      quirurgicos:      mp.quirurgicos      || legacy.quirurgicos      || "",
-      farmacologicos:   mp.farmacologicos   || legacy.farmacologicos   || "",
-      traumaticos:      mp.traumaticos      || legacy.traumaticos      || "",
-      familiares:       mp.familiares       || legacy.familiares       || "",
+      patologicos: mp.patologicos || legacy.patologicos || "",
+      quirurgicos: mp.quirurgicos || legacy.quirurgicos || "",
+      farmacologicos: mp.farmacologicos || legacy.farmacologicos || "",
+      traumaticos: mp.traumaticos || legacy.traumaticos || "",
+      familiares: mp.familiares || legacy.familiares || "",
       semanasGestacion: mp.semanasGestacion || legacy.semanasGestacion || "",
-      fum:              mp.fum              || legacy.fum              || "",
-      tipoParto:        mp.tipoParto        || legacy.tipoParto        || "",
+      fum: mp.fum || legacy.fum || "",
+      tipoParto: mp.tipoParto || legacy.tipoParto || "",
     };
   }
 
@@ -477,11 +477,11 @@ export default function DetalleValoracion() {
         setLoadingText("Configurando esquema correspondiente...");
 
         // Determinar el esquema usando campos snake_case de PostgreSQL
-        // Nota: cod_consulta puede incluir descripción (ej. "890264 - CONSULTA..."), extraer solo el código
+        // Nota: cod_consulta puede incluir descripción (ej. "890211 - CONSULTA..."), extraer solo el código
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         const tp = data.tipo_programa || "";
 
-        if (codConsulta === "890264") {
+        if (codConsulta === "890211") {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else if (codConsulta === "890202") {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
@@ -565,7 +565,7 @@ export default function DetalleValoracion() {
           converted.motivoConsulta,
         );
         setValoracion(converted);
-        
+
         setLoadingText("Preparando la interfaz...");
         setTimeout(() => {
           setIsProcessing(false);
@@ -599,7 +599,7 @@ export default function DetalleValoracion() {
         type = "lactancia";
       else if (tp.includes("Piso") || codConsultaRaw === "890202")
         type = "adulto";
-      else if (tp === "Perinatal" || codConsultaRaw === "890264")
+      else if (tp === "Perinatal" || codConsultaRaw === "890211")
         type = "perinatal";
       const blob = await apiDownload(
         `/valoraciones/reporte/exportar-pdf/${id}?type=${type}`,

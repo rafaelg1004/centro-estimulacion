@@ -28,7 +28,7 @@ function convertKeysToCamelCase(obj) {
     const convertedValue = (value !== null && typeof value === "object" && !Array.isArray(value))
       ? convertKeysToCamelCase(value)
       : value;
-    
+
     newObj[camelKey] = convertedValue;
     if (camelKey !== key) {
       newObj[key] = convertedValue;
@@ -43,14 +43,14 @@ function mapearDatosLegacy(data) {
   if (!legacy || Object.keys(legacy).length === 0) return data;
 
   const newData = { ...data };
-  
+
   const esPediatria = newData.tipoPrograma === "Pediatría" || newData.tipoPrograma === "Pediatria" || (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría") || String(newData.codConsulta) === "890201";
-  
+
   if (esPediatria) {
     if (!newData.moduloPediatria) newData.moduloPediatria = {};
 
     newData.motivoConsulta = newData.motivoConsulta || legacy.motivoDeConsulta || "";
-    
+
     const TEXTOS_DIAGNOSTICO = {
       "opcion1": "Paciente que presenta desarrollo neuromotor acorde a su edad cronológica, evidenciando habilidades motoras apropiadas para su etapa del desarrollo. Se recomienda inicio de programa de estimulación adecuada, con el objetivo de favorecer, potenciar y acompañar su desarrollo integral, promoviendo la adquisición progresiva de habilidades motoras y la interacción con el entorno.",
       "opcion2": "Paciente que presenta alteraciones en el desarrollo neuromotor, evidenciándose dificultades en la adquisición de habilidades motoras esperadas para su edad. Se recomienda intervención desde fisioterapia, mediante un programa de tratamiento personalizado e individualizado, con el objetivo de favorecer su desarrollo integral, potenciar sus habilidades motoras y mejorar su funcionalidad."
@@ -66,15 +66,15 @@ function mapearDatosLegacy(data) {
 
     const rawPlanLegacy = legacy.planTratamiento || "";
     const planLegacy = TEXTOS_PLAN[rawPlanLegacy] || rawPlanLegacy;
-    
+
     const diagModerno = newData.diagnosticoFisioterapeutico;
     const esPlaceholderDiag = diagModerno && diagModerno.includes("Migrado");
-    newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null) 
+    newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null)
       || diagLegacy || diagModerno || "";
 
     const planModerno = newData.planTratamiento;
     const esPlaceholderPlan = planModerno && planModerno.includes("pendiente de actualizaci");
-    newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null) 
+    newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null)
       || planLegacy || planModerno || "";
 
     newData.moduloPediatria.autorizacionImagen = newData.moduloPediatria.autorizacionImagen ?? (!!legacy.autorizacionNombre);
@@ -136,11 +136,11 @@ function mapearDatosLegacy(data) {
       }
     };
     setHito("controlCefalico", "sostieneCabeza_si", "sostieneCabeza_no", "sostieneCabeza_observaciones");
-    setHito("rolados",        "seVoltea_si",        "seVoltea_no", "seVoltea_observaciones");
-    setHito("sedente",        "seSientaSinApoyo_si","seSientaSinApoyo_no", "seSientaSinApoyo_observaciones");
-    setHito("gateo",          "gatea_si",           "gatea_no", "gatea_observaciones");
-    setHito("bipedo",         "sePoneDePerApoyado_si","sePoneDePerApoyado_no", "sePoneDePerApoyado_observaciones");
-    setHito("marcha",         "caminaSolo_si",      "caminaSolo_no", "caminaSolo_observaciones");
+    setHito("rolados", "seVoltea_si", "seVoltea_no", "seVoltea_observaciones");
+    setHito("sedente", "seSientaSinApoyo_si", "seSientaSinApoyo_no", "seSientaSinApoyo_observaciones");
+    setHito("gateo", "gatea_si", "gatea_no", "gatea_observaciones");
+    setHito("bipedo", "sePoneDePerApoyado_si", "sePoneDePerApoyado_no", "sePoneDePerApoyado_observaciones");
+    setHito("marcha", "caminaSolo_si", "caminaSolo_no", "caminaSolo_observaciones");
 
     if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
     newData.moduloPediatria.habitos.recomendacionesMedicas = legacy.dieta || "";
@@ -206,7 +206,7 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria.motricidadFina.garabatea) newData.moduloPediatria.motricidadFina.garabatea = legacy.dibujaGarabatos_si ? "SI" : (legacy.dibujaGarabatos_no ? "NO" : "");
   }
 
-  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890264";
+  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890211";
 
   if (esPerinatal) {
     if (!newData.moduloPerinatal) newData.moduloPerinatal = {};
@@ -270,14 +270,14 @@ export default function EditarValoracion() {
         setValoracion(converted);
 
         // Determinar el esquema usando tipo_programa o cod_consulta
-        // Nota: cod_consulta puede traer descripción adjunta (ej. "890264 - CONSULTA..."), usar startsWith
+        // Nota: cod_consulta puede traer descripción adjunta (ej. "890211 - CONSULTA..."), usar startsWith
         const tp = data.tipo_programa || '';
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         if (tp.includes('Lactancia') || data.modulo_lactancia?.tipo_lactancia || codConsulta === '890203') {
           setEsquema(ESQUEMA_VALORACION_LACTANCIA);
         } else if (tp.includes('Piso') || codConsulta === '890202') {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (tp === 'Perinatal' || codConsulta === '890264') {
+        } else if (tp === 'Perinatal' || codConsulta === '890211') {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
