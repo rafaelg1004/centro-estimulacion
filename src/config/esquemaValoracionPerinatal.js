@@ -234,10 +234,6 @@ export const ESQUEMA_VALORACION_PERINATAL = {
                     requerido: true
                 },
             ]
-        },
-        {
-            titulo: "Información Adicional (Registro Completo)",
-            camposDinamicos: "moduloPerinatalCompleto"
         }
     ]
 };

@@ -1075,9 +1075,5 @@ export const ESQUEMA_VALORACION_PISO_PELVICO = {
         },
       ],
     },
-    {
-      titulo: "Información Adicional (Registro Completo)",
-      camposDinamicos: "moduloPisoPelvicoCompleto"
-    }
   ],
 };
