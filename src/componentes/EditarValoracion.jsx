@@ -51,15 +51,31 @@ function mapearDatosLegacy(data) {
 
     newData.motivoConsulta = newData.motivoConsulta || legacy.motivoDeConsulta || "";
     
+    const TEXTOS_DIAGNOSTICO = {
+      "opcion1": "Paciente que presenta desarrollo neuromotor acorde a su edad cronológica, evidenciando habilidades motoras apropiadas para su etapa del desarrollo. Se recomienda inicio de programa de estimulación adecuada, con el objetivo de favorecer, potenciar y acompañar su desarrollo integral, promoviendo la adquisición progresiva de habilidades motoras y la interacción con el entorno.",
+      "opcion2": "Paciente que presenta alteraciones en el desarrollo neuromotor, evidenciándose dificultades en la adquisición de habilidades motoras esperadas para su edad. Se recomienda intervención desde fisioterapia, mediante un programa de tratamiento personalizado e individualizado, con el objetivo de favorecer su desarrollo integral, potenciar sus habilidades motoras y mejorar su funcionalidad."
+    };
+
+    const TEXTOS_PLAN = {
+      "opcion1": "Programa Grupal de Estimulación Adecuada: Se recomienda el ingreso al programa de estimulación adecuada en modalidad grupal, con el objetivo de favorecer y potenciar el desarrollo integral del niño, fortaleciendo habilidades motoras, sensoriales, cognitivas y de interacción con el entorno, mediante actividades acordes a su etapa del desarrollo. Se brindará además orientación a los padres o cuidadores para continuar la estimulación en el hogar.",
+      "opcion2": "Fisioterapia Personalizada: Se recomienda inicio de programa de fisioterapia pediátrica en modalidad individualizada, orientado a abordar las alteraciones identificadas en el desarrollo neuromotor. El tratamiento se realizará mediante intervenciones terapéuticas específicas y personalizadas, con el objetivo de favorecer la adquisición de habilidades motoras, mejorar el control postural y promover el desarrollo integral del niño, incluyendo orientación a los padres para apoyo en casa."
+    };
+
+    const rawDiagLegacy = legacy.diagnosticoFisioterapeutico || legacy.diagnostico || "";
+    const diagLegacy = TEXTOS_DIAGNOSTICO[rawDiagLegacy] || rawDiagLegacy;
+
+    const rawPlanLegacy = legacy.planTratamiento || "";
+    const planLegacy = TEXTOS_PLAN[rawPlanLegacy] || rawPlanLegacy;
+    
     const diagModerno = newData.diagnosticoFisioterapeutico;
     const esPlaceholderDiag = diagModerno && diagModerno.includes("Migrado");
     newData.diagnosticoFisioterapeutico = (!esPlaceholderDiag && diagModerno ? diagModerno : null) 
-      || legacy.diagnosticoFisioterapeutico || legacy.diagnostico || diagModerno || "";
+      || diagLegacy || diagModerno || "";
 
     const planModerno = newData.planTratamiento;
     const esPlaceholderPlan = planModerno && planModerno.includes("pendiente de actualizaci");
     newData.planTratamiento = (!esPlaceholderPlan && planModerno ? planModerno : null) 
-      || legacy.planTratamiento || planModerno || "";
+      || planLegacy || planModerno || "";
 
     newData.moduloPediatria.autorizacionImagen = newData.moduloPediatria.autorizacionImagen ?? (!!legacy.autorizacionNombre);
 
