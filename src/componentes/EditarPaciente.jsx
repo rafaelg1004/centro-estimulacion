@@ -11,27 +11,39 @@ export default function EdicionHistoriaClinica() {
   const [paciente, setPaciente] = useState(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [loadingText, setLoadingText] = useState("Conectando con la base de datos...");
 
   useEffect(() => {
+    setLoadingText("Descargando expediente del paciente...");
     apiRequest(`/pacientes/${id}`)
       .then(data => {
+        setLoadingText("Mapeando datos de contacto y adicionales...");
         // Asegurar que existan objetos anidados
         setPaciente({
           ...data,
           datosContacto: data.datosContacto || {},
           datosAdicionales: data.datosAdicionales || {}
         });
+
+        setLoadingText("Preparando la interfaz de edición...");
+        setTimeout(() => {
+          setIsProcessing(false);
+        }, 1000);
       })
-      .catch(() => setError("Error al cargar la historia clínica"));
+      .catch(() => {
+        setError("Error al cargar la historia clínica");
+        setIsProcessing(false);
+      });
   }, [id]);
 
   // Un paciente es niÃ±o si esAdulto es explÃcitamente falso (o string "false")
   // o si el campo esAdulto estÃ¡ vacÃo/null pero el tipo de documento es obligatoriamente pediÃ¡trico.
   const isNino = paciente && (
-    paciente.esAdulto === false || 
+    paciente.esAdulto === false ||
     paciente.esAdulto === "false" ||
-    ((paciente.esAdulto === undefined || paciente.esAdulto === null || paciente.esAdulto === "") && 
-     ['RC', 'TI', 'MS', 'CN', 'SC', 'AS'].includes(paciente.tipoDocumentoIdentificacion))
+    ((paciente.esAdulto === undefined || paciente.esAdulto === null || paciente.esAdulto === "") &&
+      ['RC', 'TI', 'MS', 'CN', 'SC', 'AS'].includes(paciente.tipoDocumentoIdentificacion))
   );
 
   const calcularEdad = (fechaNac) => {
@@ -79,7 +91,19 @@ export default function EdicionHistoriaClinica() {
     }
   };
 
-  if (!paciente) return <div className="p-20 text-center font-bold text-indigo-600 animate-pulse">Cargando Historia Clínica...</div>;
+  if (isProcessing || !paciente)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50/50">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600 z-10 absolute inset-0"></div>
+          <div className="rounded-full h-16 w-16 border-4 border-indigo-100"></div>
+        </div>
+        <p className="mt-6 text-indigo-800 font-semibold text-lg tracking-wide animate-pulse">
+          {loadingText}
+        </p>
+        <p className="text-sm text-gray-500 mt-2">Asegurando la carga de la información clínica...</p>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-pink-50 py-10 px-4">
