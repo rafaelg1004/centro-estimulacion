@@ -830,5 +830,9 @@ export const ESQUEMA_VALORACION_PEDIATRIA = {
         },
       ],
     },
+    {
+      titulo: "Información Adicional (Registro Completo)",
+      camposDinamicos: "moduloPediatriaCompleto"
+    }
   ],
 };
