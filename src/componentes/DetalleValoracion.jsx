@@ -192,18 +192,21 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria.hitos) newData.moduloPediatria.hitos = {};
     
     // Hitos — solo aplicar legacy si no hay valor moderno guardado
-    const setHito = (sub, legacySiKey, legacyNoKey) => {
+    const setHito = (sub, legacySiKey, legacyNoKey, legacyObsKey) => {
       if (!newData.moduloPediatria.hitos[sub]) newData.moduloPediatria.hitos[sub] = {};
       if (!newData.moduloPediatria.hitos[sub].si) {
         newData.moduloPediatria.hitos[sub].si = legacy[legacySiKey] ? "Sí" : (legacy[legacyNoKey] ? "No" : "");
       }
+      if (!newData.moduloPediatria.hitos[sub].obs && legacyObsKey && legacy[legacyObsKey]) {
+        newData.moduloPediatria.hitos[sub].obs = legacy[legacyObsKey];
+      }
     };
-    setHito("controlCefalico", "sostieneCabeza_si", "sostieneCabeza_no");
-    setHito("rolados",        "seVoltea_si",        "seVoltea_no");
-    setHito("sedente",        "seSientaSinApoyo_si","seSientaSinApoyo_no");
-    setHito("gateo",          "gatea_si",           "gatea_no");
-    setHito("bipedo",         "sePoneDePerApoyado_si","sePoneDePerApoyado_no");
-    setHito("marcha",         "caminaSolo_si",      "caminaSolo_no");
+    setHito("controlCefalico", "sostieneCabeza_si", "sostieneCabeza_no", "sostieneCabeza_observaciones");
+    setHito("rolados",        "seVoltea_si",        "seVoltea_no", "seVoltea_observaciones");
+    setHito("sedente",        "seSientaSinApoyo_si","seSientaSinApoyo_no", "seSientaSinApoyo_observaciones");
+    setHito("gateo",          "gatea_si",           "gatea_no", "gatea_observaciones");
+    setHito("bipedo",         "sePoneDePerApoyado_si","sePoneDePerApoyado_no", "sePoneDePerApoyado_observaciones");
+    setHito("marcha",         "caminaSolo_si",      "caminaSolo_no", "caminaSolo_observaciones");
 
     // Hábitos — preferir valores modernos
     if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
