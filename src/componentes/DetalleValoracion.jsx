@@ -120,8 +120,14 @@ function mapearDatosLegacy(data) {
   if (!legacy || Object.keys(legacy).length === 0) return data;
 
   const newData = { ...data };
-  
-  const esPediatria = newData.tipoPrograma === "Pediatría" || newData.tipoPrograma === "Pediatria" || (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría") || String(newData.codConsulta) === "890201";
+  // Extraer solo el código numérico (cod_consulta puede venir como "890201 - Descripción")
+  const codConsultaLimpio = String(newData.codConsulta || newData.cod_consulta || "").split(" ")[0].trim();
+
+  const esPediatria =
+    newData.tipoPrograma === "Pediatría" ||
+    newData.tipoPrograma === "Pediatria" ||
+    (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría") ||
+    codConsultaLimpio === "890201";
   
   // Si es programa de Pediatría, mapeamos al esquema de Pediatría
   if (esPediatria) {
@@ -150,16 +156,17 @@ function mapearDatosLegacy(data) {
       newData.moduloPediatria.prenatales.diabetes = pString.includes("diabetes");
     }
 
-    // Perinatales
+    // Perinatales — preferir valores modernos ya guardados en DB
     if (!newData.moduloPediatria.perinatales) newData.moduloPediatria.perinatales = {};
-    newData.moduloPediatria.perinatales.tipoParto = legacy.tipoParto || "";
-    newData.moduloPediatria.perinatales.tiempoGestacion = legacy.tiempoGestacion || "";
-    newData.moduloPediatria.perinatales.lugarParto = legacy.lugarParto || "";
-    newData.moduloPediatria.perinatales.medicoTratante = legacy.medicoParto || "";
-    newData.moduloPediatria.perinatales.pesoAlNacer = legacy.pesoNacimiento || "";
-    newData.moduloPediatria.perinatales.tallaAlNacer = legacy.tallaNacimiento || "";
-    newData.moduloPediatria.perinatales.recibioCurso = legacy.recibioCurso || "";
-    newData.moduloPediatria.perinatales.atendidaOportunamente = legacy.atendida || "";
+    const per = newData.moduloPediatria.perinatales;
+    per.tipoParto = per.tipoParto || legacy.tipoParto || "";
+    per.tiempoGestacion = per.tiempoGestacion || legacy.tiempoGestacion || "";
+    per.lugarParto = per.lugarParto || legacy.lugarParto || "";
+    per.medicoTratante = per.medicoTratante || legacy.medicoParto || "";
+    per.pesoAlNacer = per.pesoAlNacer || legacy.pesoNacimiento || "";
+    per.tallaAlNacer = per.tallaAlNacer || legacy.tallaNacimiento || "";
+    per.recibioCurso = per.recibioCurso || legacy.recibioCurso || "";
+    per.atendidaOportunamente = per.atendidaOportunamente || legacy.atendida || "";
 
     // Recién nacido
     if (!newData.moduloPediatria.recienNacido) newData.moduloPediatria.recienNacido = {};
@@ -170,86 +177,80 @@ function mapearDatosLegacy(data) {
       newData.moduloPediatria.recienNacido.problemasRespiratorios = rnStr.includes("respiratorios");
       newData.moduloPediatria.recienNacido.incubadora = rnStr.includes("incubadora");
     }
-    newData.moduloPediatria.recienNacido.lactanciaMaterna = legacy.lactancia || "";
-    newData.moduloPediatria.recienNacido.tiempoLactancia = legacy.tiempoLactancia || "";
-    newData.moduloPediatria.recienNacido.hospitalarios = legacy.hospitalarios || "";
-    newData.moduloPediatria.recienNacido.patologicos = legacy.patologicos || "";
-    newData.moduloPediatria.recienNacido.familiares = legacy.familiares || "";
-    newData.moduloPediatria.recienNacido.traumaticos = legacy.traumaticos || "";
-    newData.moduloPediatria.recienNacido.farmacologicos = legacy.farmacologicos || "";
-    newData.moduloPediatria.recienNacido.quirurgicos = legacy.quirurgicos || "";
-    newData.moduloPediatria.recienNacido.toxicosAlergicos = legacy.toxicos || "";
+    const rnn = newData.moduloPediatria.recienNacido;
+    rnn.lactanciaMaterna = rnn.lactanciaMaterna || legacy.lactancia || "";
+    rnn.tiempoLactancia = rnn.tiempoLactancia || legacy.tiempoLactancia || "";
+    rnn.hospitalarios = rnn.hospitalarios || legacy.hospitalarios || "";
+    rnn.patologicos = rnn.patologicos || legacy.patologicos || "";
+    rnn.familiares = rnn.familiares || legacy.familiares || "";
+    rnn.traumaticos = rnn.traumaticos || legacy.traumaticos || "";
+    rnn.farmacologicos = rnn.farmacologicos || legacy.farmacologicos || "";
+    rnn.quirurgicos = rnn.quirurgicos || legacy.quirurgicos || "";
+    rnn.toxicosAlergicos = rnn.toxicosAlergicos || legacy.toxicos || "";
 
     // Hitos del desarrollo
     if (!newData.moduloPediatria.hitos) newData.moduloPediatria.hitos = {};
     
-    // Control cefálico
-    if (!newData.moduloPediatria.hitos.controlCefalico) newData.moduloPediatria.hitos.controlCefalico = {};
-    newData.moduloPediatria.hitos.controlCefalico.si = legacy.sostieneCabeza_si ? "SI" : (legacy.sostieneCabeza_no ? "NO" : "");
-    
-    // Rolados
-    if (!newData.moduloPediatria.hitos.rolados) newData.moduloPediatria.hitos.rolados = {};
-    newData.moduloPediatria.hitos.rolados.si = legacy.seVoltea_si ? "SI" : (legacy.seVoltea_no ? "NO" : "");
-    
-    // Sedente
-    if (!newData.moduloPediatria.hitos.sedente) newData.moduloPediatria.hitos.sedente = {};
-    newData.moduloPediatria.hitos.sedente.si = legacy.seSientaSinApoyo_si ? "SI" : (legacy.seSientaSinApoyo_no ? "NO" : "");
-    
-    // Gateo
-    if (!newData.moduloPediatria.hitos.gateo) newData.moduloPediatria.hitos.gateo = {};
-    newData.moduloPediatria.hitos.gateo.si = legacy.gatea_si ? "SI" : (legacy.gatea_no ? "NO" : "");
-    
-    // Bípedo
-    if (!newData.moduloPediatria.hitos.bipedo) newData.moduloPediatria.hitos.bipedo = {};
-    newData.moduloPediatria.hitos.bipedo.si = legacy.sePoneDePerApoyado_si ? "SI" : (legacy.sePoneDePerApoyado_no ? "NO" : "");
-    
-    // Marcha
-    if (!newData.moduloPediatria.hitos.marcha) newData.moduloPediatria.hitos.marcha = {};
-    newData.moduloPediatria.hitos.marcha.si = legacy.caminaSolo_si ? "SI" : (legacy.caminaSolo_no ? "NO" : "");
+    // Hitos — solo aplicar legacy si no hay valor moderno guardado
+    const setHito = (sub, legacySiKey, legacyNoKey) => {
+      if (!newData.moduloPediatria.hitos[sub]) newData.moduloPediatria.hitos[sub] = {};
+      if (!newData.moduloPediatria.hitos[sub].si) {
+        newData.moduloPediatria.hitos[sub].si = legacy[legacySiKey] ? "Sí" : (legacy[legacyNoKey] ? "No" : "");
+      }
+    };
+    setHito("controlCefalico", "sostieneCabeza_si", "sostieneCabeza_no");
+    setHito("rolados",        "seVoltea_si",        "seVoltea_no");
+    setHito("sedente",        "seSientaSinApoyo_si","seSientaSinApoyo_no");
+    setHito("gateo",          "gatea_si",           "gatea_no");
+    setHito("bipedo",         "sePoneDePerApoyado_si","sePoneDePerApoyado_no");
+    setHito("marcha",         "caminaSolo_si",      "caminaSolo_no");
 
-    // Hábitos
+    // Hábitos — preferir valores modernos
     if (!newData.moduloPediatria.habitos) newData.moduloPediatria.habitos = {};
-    newData.moduloPediatria.habitos.recomendacionesMedicas = legacy.dieta || "";
-    newData.moduloPediatria.habitos.problemasSueno = legacy.problemasSueno || "";
-    newData.moduloPediatria.habitos.duermeCon = legacy.duermeCon || "";
-    newData.moduloPediatria.habitos.patronSueno = legacy.patronSueno || legacy.siesta || "";
-    newData.moduloPediatria.habitos.pesadillas = legacy.pesadillas || "";
-    newData.moduloPediatria.habitos.siesta = legacy.siesta || "";
-    newData.moduloPediatria.habitos.cambioAlimentacion = legacy.cambioAlimentacion || "";
-    newData.moduloPediatria.habitos.problemasComer = legacy.dificultadesComer || "";
-    newData.moduloPediatria.habitos.alimentosPreferidos = legacy.alimentosPreferidos || "";
-    newData.moduloPediatria.habitos.alimentosNoGustan = legacy.alimentosNoLeGustan || "";
+    const hab = newData.moduloPediatria.habitos;
+    hab.recomendacionesMedicas = hab.recomendacionesMedicas || legacy.dieta || "";
+    hab.problemasSueno = hab.problemasSueno || legacy.problemasSueno || "";
+    hab.duermeCon = hab.duermeCon || legacy.duermeCon || "";
+    hab.patronSueno = hab.patronSueno || legacy.patronSueno || legacy.siesta || "";
+    hab.pesadillas = hab.pesadillas || legacy.pesadillas || "";
+    hab.siesta = hab.siesta || legacy.siesta || "";
+    hab.cambioAlimentacion = hab.cambioAlimentacion || legacy.cambioAlimentacion || "";
+    hab.problemasComer = hab.problemasComer || legacy.dificultadesComer || "";
+    hab.alimentosPreferidos = hab.alimentosPreferidos || legacy.alimentosPreferidos || "";
+    hab.alimentosNoGustan = hab.alimentosNoGustan || legacy.alimentosNoLeGustan || "";
 
-    // Desarrollo social
+    // Desarrollo social — preferir valores modernos
     if (!newData.moduloPediatria.desarrolloSocial) newData.moduloPediatria.desarrolloSocial = {};
-    newData.moduloPediatria.desarrolloSocial.viveConPadres = legacy.viveConPadres || "";
-    newData.moduloPediatria.desarrolloSocial.permaneceCon = legacy.permaneceCon || "";
-    newData.moduloPediatria.desarrolloSocial.prefiereA = legacy.prefiereA || "";
-    newData.moduloPediatria.desarrolloSocial.relacionHermanos = legacy.relacionHermanos || "";
-    newData.moduloPediatria.desarrolloSocial.emociones = legacy.emociones || "";
-    newData.moduloPediatria.desarrolloSocial.juegaCon = legacy.juegaCon || "";
-    newData.moduloPediatria.desarrolloSocial.juegosPrefiere = legacy.juegosPreferidos || "";
-    newData.moduloPediatria.desarrolloSocial.relacionDesconocidos = legacy.relacionDesconocidos || "";
-    newData.moduloPediatria.rutinaDiaria = legacy.rutinaDiaria || "";
+    const ds = newData.moduloPediatria.desarrolloSocial;
+    ds.viveConPadres = ds.viveConPadres || legacy.viveConPadres || "";
+    ds.permaneceCon = ds.permaneceCon || legacy.permaneceCon || "";
+    ds.prefiereA = ds.prefiereA || legacy.prefiereA || "";
+    ds.relacionHermanos = ds.relacionHermanos || legacy.relacionHermanos || "";
+    ds.emociones = ds.emociones || legacy.emociones || "";
+    ds.juegaCon = ds.juegaCon || legacy.juegaCon || "";
+    ds.juegosPrefiere = ds.juegosPrefiere || legacy.juegosPreferidos || "";
+    ds.relacionDesconocidos = ds.relacionDesconocidos || legacy.relacionDesconocidos || "";
+    newData.moduloPediatria.rutinaDiaria = newData.moduloPediatria.rutinaDiaria || legacy.rutinaDiaria || "";
 
-    // Examen Físico
+    // Examen Físico — preferir valores modernos
     if (!newData.moduloPediatria.examen) newData.moduloPediatria.examen = {};
-    newData.moduloPediatria.examen.fc = legacy.frecuenciaCardiaca || "";
-    newData.moduloPediatria.examen.fr = legacy.frecuenciaRespiratoria || "";
-    newData.moduloPediatria.examen.temperatura = legacy.temperatura || "";
-    newData.moduloPediatria.examen.tejidoTegumentario = legacy.tejidoTegumentario || "";
-    newData.moduloPediatria.examen.reflejos = legacy.reflejosOsteotendinosos || "";
-    newData.moduloPediatria.examen.anormales = legacy.reflejosAnormales || "";
-    newData.moduloPediatria.examen.patologicos = legacy.reflejosPatologicos || "";
-    newData.moduloPediatria.examen.tonoMuscular = legacy.tonoMuscular || "";
-    newData.moduloPediatria.examen.controlMotor = legacy.controlMotor || "";
-    newData.moduloPediatria.examen.desplazamientos = legacy.desplazamientos || "";
-    newData.moduloPediatria.examen.sensibilidad = legacy.sensibilidad || "";
-    newData.moduloPediatria.examen.perfilSensorial = legacy.perfilSensorial || "";
-    newData.moduloPediatria.examen.deformidades = legacy.deformidades || "";
-    newData.moduloPediatria.examen.aparatosOrtopedicos = legacy.aparatosOrtopedicos || "";
-    newData.moduloPediatria.examen.sistemaPulmonar = legacy.sistemaPulmonar || "";
-    newData.moduloPediatria.examen.problemasAsociados = legacy.problemasAsociados || "";
+    const ex = newData.moduloPediatria.examen;
+    ex.fc = ex.fc || legacy.frecuenciaCardiaca || "";
+    ex.fr = ex.fr || legacy.frecuenciaRespiratoria || "";
+    ex.temperatura = ex.temperatura || legacy.temperatura || "";
+    ex.tejidoTegumentario = ex.tejidoTegumentario || legacy.tejidoTegumentario || "";
+    ex.reflejos = ex.reflejos || legacy.reflejosOsteotendinosos || "";
+    ex.anormales = ex.anormales || legacy.reflejosAnormales || "";
+    ex.patologicos = ex.patologicos || legacy.reflejosPatologicos || "";
+    ex.tonoMuscular = ex.tonoMuscular || legacy.tonoMuscular || "";
+    ex.controlMotor = ex.controlMotor || legacy.controlMotor || "";
+    ex.desplazamientos = ex.desplazamientos || legacy.desplazamientos || "";
+    ex.sensibilidad = ex.sensibilidad || legacy.sensibilidad || "";
+    ex.perfilSensorial = ex.perfilSensorial || legacy.perfilSensorial || "";
+    ex.deformidades = ex.deformidades || legacy.deformidades || "";
+    ex.aparatosOrtopedicos = ex.aparatosOrtopedicos || legacy.aparatosOrtopedicos || "";
+    ex.sistemaPulmonar = ex.sistemaPulmonar || legacy.sistemaPulmonar || "";
+    ex.problemasAsociados = ex.problemasAsociados || legacy.problemasAsociados || "";
 
     // Lenguaje (campos con _si/_no en legacy)
     if (!newData.moduloPediatria.lenguaje) newData.moduloPediatria.lenguaje = {};
@@ -277,21 +278,25 @@ function mapearDatosLegacy(data) {
     if (!newData.moduloPediatria.motricidadFina.garabatea) newData.moduloPediatria.motricidadFina.garabatea = legacy.dibujaGarabatos_si ? "SI" : (legacy.dibujaGarabatos_no ? "NO" : "");
   }
 
-  const esPerinatal = newData.tipoPrograma === "Perinatal" || (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") || String(newData.codConsulta) === "890264";
+  const esPerinatal =
+    newData.tipoPrograma === "Perinatal" ||
+    (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") ||
+    codConsultaLimpio === "890264";
 
-  // Si es programa Perinatal
+  // Si es programa Perinatal — DB moderna tiene prioridad sobre legacy
   if (esPerinatal) {
     if (!newData.moduloPerinatal) newData.moduloPerinatal = {};
+    const mp = newData.moduloPerinatal;
     newData.moduloPerinatal = {
-      ...newData.moduloPerinatal,
-      patologicos: legacy.patologicos || newData.moduloPerinatal.patologicos || "",
-      quirurgicos: legacy.quirurgicos || newData.moduloPerinatal.quirurgicos || "",
-      farmacologicos: legacy.farmacologicos || newData.moduloPerinatal.farmacologicos || "",
-      traumaticos: legacy.traumaticos || newData.moduloPerinatal.traumaticos || "",
-      familiares: legacy.familiares || newData.moduloPerinatal.familiares || "",
-      semanasGestacion: legacy.semanasGestacion || newData.moduloPerinatal.semanasGestacion || "",
-      fum: legacy.fum || newData.moduloPerinatal.fum || "",
-      tipoParto: legacy.tipoParto || newData.moduloPerinatal.tipoParto || ""
+      ...mp,
+      patologicos:      mp.patologicos      || legacy.patologicos      || "",
+      quirurgicos:      mp.quirurgicos      || legacy.quirurgicos      || "",
+      farmacologicos:   mp.farmacologicos   || legacy.farmacologicos   || "",
+      traumaticos:      mp.traumaticos      || legacy.traumaticos      || "",
+      familiares:       mp.familiares       || legacy.familiares       || "",
+      semanasGestacion: mp.semanasGestacion || legacy.semanasGestacion || "",
+      fum:              mp.fum              || legacy.fum              || "",
+      tipoParto:        mp.tipoParto        || legacy.tipoParto        || "",
     };
   }
 

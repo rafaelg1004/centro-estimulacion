@@ -19,21 +19,34 @@ function Field({ label, value, isImage, audit, options, type }) {
 
   React.useEffect(() => {
     const resolveValue = async () => {
-      if (!value) {
+      // IMPORTANTE: no tratar `false` (booleano) como "sin valor"
+      if (value === null || value === undefined) {
         setEnrichedValue(null);
         return;
       }
 
       // Si es un select, buscar la etiqueta en las opciones
+      // Normaliza para comparación insensible a mayúsculas/acentos (ej: "SI" = "Sí", "NO" = "No")
       if (options && options.length > 0) {
+        const normalize = (s) =>
+          String(s)
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+        const normValue = normalize(value);
         const option = options.find(
           (o) =>
-            String(o.valor) === String(value) || String(o) === String(value),
+            normalize(o.valor ?? o) === normValue ||
+            normalize(o.etiqueta ?? o) === normValue,
         );
         if (option) {
           setEnrichedValue(option.etiqueta || option);
           return;
         }
+        // Si no coincide con ninguna opción pero el valor existe, mostrarlo tal cual
+        setEnrichedValue(value);
+        return;
       }
 
       // Si es CIE-10 y solo viene el código, intentar buscar la descripción
@@ -160,7 +173,7 @@ function Field({ label, value, isImage, audit, options, type }) {
         </span>
       )}
       <span className="text-gray-800 font-medium break-words leading-relaxed">
-        {enrichedValue ? (
+        {enrichedValue !== null && enrichedValue !== undefined && enrichedValue !== "" ? (
           String(enrichedValue)
         ) : (
           <span className="text-gray-300 italic">No registrado</span>
