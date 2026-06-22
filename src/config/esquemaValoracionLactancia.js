@@ -127,5 +127,9 @@ export const ESQUEMA_VALORACION_LACTANCIA = {
         },
       ],
     },
+    {
+      titulo: "Información Adicional (Registro Completo)",
+      camposDinamicos: "moduloLactanciaCompleto"
+    }
   ],
 };
