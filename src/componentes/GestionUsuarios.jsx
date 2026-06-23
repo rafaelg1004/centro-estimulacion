@@ -6,13 +6,16 @@ import {
   ShieldExclamationIcon,
   UserMinusIcon,
   UserPlusIcon,
-  KeyIcon
+  KeyIcon,
+  PencilIcon
 } from "@heroicons/react/24/solid";
 
 export default function GestionUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [qrSetup, setQrSetup] = useState(null);
+  const [editandoUsuario, setEditandoUsuario] = useState(null);
+  const [editFormData, setEditFormData] = useState({ nombre: '', email: '', rol: '', registroMedico: '' });
 
   useEffect(() => {
     cargarUsuarios();
@@ -126,6 +129,31 @@ export default function GestionUsuarios() {
     }
   };
 
+  const handleEditClick = (usuario) => {
+    setEditFormData({
+      nombre: usuario.nombre || '',
+      email: usuario.email || '',
+      rol: usuario.rol || 'auxiliar',
+      registroMedico: usuario.registro_medico || ''
+    });
+    setEditandoUsuario(usuario);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await apiRequest(`/auth/users/${editandoUsuario.id || editandoUsuario._id}`, {
+        method: "PUT",
+        body: JSON.stringify(editFormData)
+      });
+      Swal.fire("Éxito", "Usuario actualizado correctamente", "success");
+      setEditandoUsuario(null);
+      cargarUsuarios();
+    } catch (error) {
+      Swal.fire("Error", "No se pudo actualizar el usuario", "error");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
@@ -149,6 +177,7 @@ export default function GestionUsuarios() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Usuario</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Rol</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Reg. Médico</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">2FA</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Estado</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">Acciones</th>
@@ -156,11 +185,12 @@ export default function GestionUsuarios() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {usuarios.map((usuario) => (
-                  <tr key={usuario._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{usuario.nombre}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.usuario}</td>
+                  <tr key={usuario.id || usuario._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{usuario.nombre || "Sin nombre"}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.username || usuario.usuario}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.email || "N/A"}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{usuario.rol}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.registro_medico || "N/A"}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         usuario.twoFactorEnabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -181,9 +211,16 @@ export default function GestionUsuarios() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex flex-wrap gap-1">
+                      <button
+                        onClick={() => handleEditClick(usuario)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
+                      >
+                        <PencilIcon className="h-3 w-3" />
+                        Editar
+                      </button>
                       {usuario.twoFactorEnabled ? (
                         <button
-                          onClick={() => deshabilitar2FA(usuario._id)}
+                          onClick={() => deshabilitar2FA(usuario.id || usuario._id)}
                           className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
                           <ShieldExclamationIcon className="h-3 w-3" />
@@ -191,7 +228,7 @@ export default function GestionUsuarios() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => habilitar2FA(usuario._id)}
+                          onClick={() => habilitar2FA(usuario.id || usuario._id)}
                           className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
                           <ShieldCheckIcon className="h-3 w-3" />
@@ -201,7 +238,7 @@ export default function GestionUsuarios() {
 
                       {usuario.bloqueadoHasta && usuario.bloqueadoHasta > new Date() ? (
                         <button
-                          onClick={() => desbloquearUsuario(usuario._id)}
+                          onClick={() => desbloquearUsuario(usuario.id || usuario._id)}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
                           <UserPlusIcon className="h-3 w-3" />
@@ -209,7 +246,7 @@ export default function GestionUsuarios() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => bloquearUsuario(usuario._id)}
+                          onClick={() => bloquearUsuario(usuario.id || usuario._id)}
                           className="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                         >
                           <UserMinusIcon className="h-3 w-3" />
@@ -217,7 +254,7 @@ export default function GestionUsuarios() {
                         </button>
                       )}
                       <button
-                        onClick={() => cambiarContrasena(usuario._id)}
+                        onClick={() => cambiarContrasena(usuario.id || usuario._id)}
                         className="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                       >
                         <KeyIcon className="h-3 w-3" />
@@ -252,6 +289,72 @@ export default function GestionUsuarios() {
                   Cerrar
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {editandoUsuario && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full">
+              <h3 className="text-xl font-bold text-indigo-700 mb-4 text-center">Editar Usuario</h3>
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    value={editFormData.nombre}
+                    onChange={(e) => setEditFormData({...editFormData, nombre: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editFormData.email}
+                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                  <select
+                    value={editFormData.rol}
+                    onChange={(e) => setEditFormData({...editFormData, rol: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    required
+                  >
+                    <option value="fisioterapeuta">Fisioterapeuta</option>
+                    <option value="auxiliar">Auxiliar</option>
+                    <option value="administracion">Administración</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Registro Médico</label>
+                  <input
+                    type="text"
+                    value={editFormData.registroMedico}
+                    onChange={(e) => setEditFormData({...editFormData, registroMedico: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setEditandoUsuario(null)}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  >
+                    Guardar Cambios
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
