@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import { apiRequest, API_CONFIG } from "../../config/api";
 import { useNavigate } from "react-router-dom";
 import SignaturePad from "react-signature-canvas";
+import { createPortal } from "react-dom";
 
 // Sugerencias CIE-10 de fisioterapia que aparecen al enfocar el campo (sin escribir)
 const CIE10_FISIO_SUGERENCIAS = [
@@ -42,7 +43,8 @@ export default function DynamicFormBuilder({
   isModalLayout = false,
   pacienteId,
   borradorId,
-  pacienteNombre
+  pacienteNombre,
+  actionsPortalTarget
 }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({});
@@ -56,6 +58,7 @@ export default function DynamicFormBuilder({
   const [cie10Loading, setCie10Loading] = useState({});
   const [cie10DropUp, setCie10DropUp] = useState({});
   const cie10Timers = useRef({});
+  const formId = useRef(`dfb-form-${Date.now()}`).current;
 
   // Lógica de cancelación
   const handleCancel = async () => {
@@ -1312,6 +1315,7 @@ export default function DynamicFormBuilder({
       }
     >
       <form
+        id={formId}
         onSubmit={(e) => {
           e.preventDefault();
           if (!isPaginado || pasoActual === totalPasos - 1) handleSubmit(e);
@@ -1386,7 +1390,8 @@ export default function DynamicFormBuilder({
           </div>
         </div>
 
-        {/* Botones de navegación - AHORA FIJOS AL FONDO o FLAT en Modal, adaptados para mobile */}
+        {/* Botones de navegación - al fondo o via portal al header */}
+        {!actionsPortalTarget && (
         <div
           className={
             isModalLayout
@@ -1456,6 +1461,42 @@ export default function DynamicFormBuilder({
             </div>
           )}
         </div>
+        )}
+
+        {/* Portal: botones compactos en el header del paciente */}
+        {actionsPortalTarget && createPortal(
+          isPaginado ? (
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={pasoActual === 0 ? handleCancel : anteriorPaso}
+                className="bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:border-indigo-200 uppercase tracking-tighter">
+                {pasoActual === 0 ? "✕ Cancelar" : "← Anterior"}
+              </button>
+              {pasoActual < totalPasos - 1 ? (
+                <button type="button" onClick={siguientePaso}
+                  className="bg-indigo-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:bg-indigo-700 uppercase tracking-tighter">
+                  Siguiente →
+                </button>
+              ) : (
+                <button type="submit" form={formId} disabled={guardando || submitLocked}
+                  className="bg-pink-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:bg-pink-700 uppercase tracking-tighter disabled:opacity-50">
+                  {guardando ? "Guardando..." : "✓ Guardar"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={handleCancel}
+                className="bg-white border border-gray-200 text-gray-500 hover:text-red-600 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:border-red-200 uppercase tracking-tighter">
+                ✕ Cancelar
+              </button>
+              <button type="submit" form={formId} disabled={guardando || submitLocked}
+                className="bg-indigo-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:bg-indigo-700 uppercase tracking-tighter disabled:opacity-50">
+                {guardando ? "Guardando..." : "✓ Guardar"}
+              </button>
+            </div>
+          ),
+          actionsPortalTarget
+        )}
       </form>
       {/* Espaciador final solo si NO es modal */}
       {!isModalLayout && <div className="h-20"></div>}

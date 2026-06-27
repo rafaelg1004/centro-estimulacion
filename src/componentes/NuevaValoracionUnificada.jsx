@@ -22,6 +22,7 @@ export default function NuevaValoracionUnificada() {
     const [tipoValoracionAdulto, setTipoValoracionAdulto] = useState(paramTipo || null); // 'lactancia', 'pisopelvico', 'perinatal'
     const [subTipoLactancia, setSubTipoLactancia] = useState(null); // 'prenatal', 'postparto'
     const navigate = useNavigate();
+    const [actionsContainer, setActionsContainer] = useState(null);
 
     // Paso 1: Cargar pacientes
     useEffect(() => {
@@ -265,12 +266,15 @@ export default function NuevaValoracionUnificada() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={() => { setPacienteId(null); setTipoValoracionAdulto(null); setSubTipoLactancia(null); }}
-                            className="bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:border-indigo-200 uppercase tracking-tighter"
-                        >
-                            Cambiar Paciente
-                        </button>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <div ref={setActionsContainer} className="flex items-center gap-2" />
+                            <button
+                                onClick={() => { setPacienteId(null); setTipoValoracionAdulto(null); setSubTipoLactancia(null); }}
+                                className="bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:border-indigo-200 uppercase tracking-tighter"
+                            >
+                                Cambiar Paciente
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -280,6 +284,7 @@ export default function NuevaValoracionUnificada() {
                         pacienteId={pacienteId}
                         borradorId={paramBorradorId}
                         pacienteNombre={`${pacienteElegido.nombres} ${pacienteElegido.apellidos}`}
+                        actionsPortalTarget={actionsContainer}
                         onSubmitSuccess={() => {
                             if (tipoValoracionAdulto === 'perinatal') {
                                 navigate(`/pacientes/${pacienteId}/sesiones-perinatal`);
