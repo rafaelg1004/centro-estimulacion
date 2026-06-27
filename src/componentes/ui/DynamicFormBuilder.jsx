@@ -256,7 +256,7 @@ export default function DynamicFormBuilder({
     }, 4000); // Guardar cada 4 segundos de inactividad
 
     return () => clearTimeout(timer);
-  }, [formData, isEdit, pacienteId, esquema]);
+  }, [formData, isEdit, pacienteId, esquema, pacienteNombre]);
 
   // Efecto para autocompletar descripciones CIE-10 que solo traen el código (retrocompatibilidad)
   useEffect(() => {

@@ -578,6 +578,7 @@ export default function DetalleValoracion() {
       }
     };
     cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleExportPDF = async () => {
