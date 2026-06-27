@@ -610,7 +610,7 @@ export default function DynamicFormBuilder({
 
       const method = isEdit ? "PUT" : "POST";
       const endpoint = isEdit
-        ? `${esquema.endpoint}/${initialData._id}`
+        ? `${esquema.endpoint}/${initialData.id || initialData._id}`
         : esquema.endpoint;
 
       await apiRequest(endpoint, {
