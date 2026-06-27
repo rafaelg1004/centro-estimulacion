@@ -1463,34 +1463,34 @@ export default function DynamicFormBuilder({
         </div>
         )}
 
-        {/* Portal: botones compactos en el header del paciente */}
+        {/* Portal: botones en el header del paciente */}
         {actionsPortalTarget && createPortal(
           isPaginado ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button type="button" onClick={pasoActual === 0 ? handleCancel : anteriorPaso}
-                className="bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:border-indigo-200 uppercase tracking-tighter">
+                className="bg-white border-2 border-gray-200 text-gray-600 hover:text-indigo-600 px-5 py-2.5 rounded-2xl text-xs font-black shadow-sm transition-all hover:border-indigo-300 hover:shadow-md uppercase tracking-tight">
                 {pasoActual === 0 ? "✕ Cancelar" : "← Anterior"}
               </button>
               {pasoActual < totalPasos - 1 ? (
                 <button type="button" onClick={siguientePaso}
-                  className="bg-indigo-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:bg-indigo-700 uppercase tracking-tighter">
+                  className="bg-indigo-600 text-white px-6 py-2.5 rounded-2xl text-xs font-black shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-lg uppercase tracking-tight">
                   Siguiente →
                 </button>
               ) : (
                 <button type="submit" form={formId} disabled={guardando || submitLocked}
-                  className="bg-pink-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:bg-pink-700 uppercase tracking-tighter disabled:opacity-50">
+                  className="bg-pink-600 text-white px-6 py-2.5 rounded-2xl text-xs font-black shadow-md shadow-pink-200 transition-all hover:bg-pink-700 hover:shadow-lg uppercase tracking-tight disabled:opacity-50">
                   {guardando ? "Guardando..." : "✓ Guardar"}
                 </button>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button type="button" onClick={handleCancel}
-                className="bg-white border border-gray-200 text-gray-500 hover:text-red-600 px-3 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:border-red-200 uppercase tracking-tighter">
+                className="bg-white border-2 border-gray-200 text-gray-600 hover:text-red-600 px-5 py-2.5 rounded-2xl text-xs font-black shadow-sm transition-all hover:border-red-300 hover:shadow-md uppercase tracking-tight">
                 ✕ Cancelar
               </button>
               <button type="submit" form={formId} disabled={guardando || submitLocked}
-                className="bg-indigo-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black shadow-sm transition-all hover:bg-indigo-700 uppercase tracking-tighter disabled:opacity-50">
+                className="bg-indigo-600 text-white px-6 py-2.5 rounded-2xl text-xs font-black shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-lg uppercase tracking-tight disabled:opacity-50">
                 {guardando ? "Guardando..." : "✓ Guardar"}
               </button>
             </div>
