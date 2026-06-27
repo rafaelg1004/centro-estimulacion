@@ -1391,7 +1391,7 @@ export default function DynamicFormBuilder({
           className={
             isModalLayout
               ? "shrink-0 border-t border-gray-200 bg-gray-50 px-4 py-4 flex flex-col sm:flex-row justify-end items-center gap-3"
-              : "static lg:sticky lg:bottom-4 z-50 flex flex-col sm:flex-row justify-between items-center bg-white/90 backdrop-blur-md border border-indigo-100 rounded-3xl px-4 py-4 sm:px-8 sm:py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8 gap-4 w-full"
+              : "flex flex-col sm:flex-row justify-between items-center bg-white/90 border border-indigo-100 rounded-3xl px-4 py-4 sm:px-8 sm:py-5 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] mt-8 gap-4 w-full"
           }
         >
           {isPaginado ? (
