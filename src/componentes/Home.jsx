@@ -7,6 +7,7 @@ import { apiRequest } from "../config/api";
 
 export default function Home() {
   const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
   const [borradores, setBorradores] = useState([]);
   const [faltaFirma, setFaltaFirma] = useState(false);
 

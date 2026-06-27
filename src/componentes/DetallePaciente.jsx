@@ -6,7 +6,6 @@ import {
   PencilSquareIcon,
   CreditCardIcon,
   ArrowDownTrayIcon,
-  TrashIcon,
 } from "@heroicons/react/24/solid";
 import { apiRequest } from "../config/api";
 import Swal from "sweetalert2";
@@ -64,6 +63,7 @@ export default function DetallePacienteUnificado() {
       .catch(() => []);
   }, [id]);
 
+  // eslint-disable-next-line no-unused-vars
   const eliminarPaquete = async (paqueteId) => {
     const result = await Swal.fire({
       title: "¿Eliminar paquete?",
