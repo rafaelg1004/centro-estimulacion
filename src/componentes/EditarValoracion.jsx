@@ -409,7 +409,6 @@ export default function EditarValoracion() {
         <DynamicFormBuilder
           esquema={esquemaConPaciente}
           initialData={valoracion}
-          isPaginado={true}
           pacienteId={paciente._id || paciente.id}
           pacienteNombre={`${paciente.nombres || ""} ${paciente.apellidos || ""}`}
           actionsPortalTarget={actionsContainer}
