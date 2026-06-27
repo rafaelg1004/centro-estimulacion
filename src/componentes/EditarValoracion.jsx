@@ -233,6 +233,7 @@ export default function EditarValoracion() {
   const [esquema, setEsquema] = useState(null);
   const [isProcessing, setIsProcessing] = useState(true);
   const [loadingText, setLoadingText] = useState("Conectando con la base de datos...");
+  const [actionsContainer, setActionsContainer] = useState(null);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -334,62 +335,89 @@ export default function EditarValoracion() {
   // Fallback robusto: paciente puede llegar en camelCase o snake_case
   const pSemGest = paciente.semanasGestacion || paciente.semanas_gestacion || "";
   const pFum = paciente.fum || "";
-  const pOcupacion = paciente.ocupacion || "";
   const pTelefono = paciente.datosContacto?.telefono || paciente.datos_contacto?.telefono || paciente.telefono || paciente.celular || "N/A";
   const pNombreMadre = paciente.nombreMadre || paciente.nombre_madre || "";
-  const pOcupacionMadre = paciente.ocupacionMadre || paciente.ocupacion_madre || "";
-  const pNombrePadre = paciente.nombrePadre || paciente.nombre_padre || "";
-  const pOcupacionPadre = paciente.ocupacionPadre || paciente.ocupacion_padre || "";
   const pPediatra = paciente.pediatra || "";
-
-  const camposFichaGeneral = [
-    { nombre: "paciente_info_nombre", etiqueta: "Nombre del Paciente", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.nombres || ""} ${paciente.apellidos || ""}` },
-    { nombre: "paciente_info_doc", etiqueta: "Identificación", tipo: "text", lecsolo: true, valorPorDefecto: `${paciente.tipoDocumentoIdentificacion || paciente.tipo_documento_identificacion || "Doc"}: ${paciente.numDocumentoIdentificacion || paciente.num_documento_identificacion || "S.D"}` },
-    { nombre: "paciente_info_edad", etiqueta: "Edad / Sexo / Teléfono", tipo: "text", lecsolo: true, valorPorDefecto: `${calcularEdad(paciente.fechaNacimiento || paciente.fecha_nacimiento)} - ${(paciente.codSexo || paciente.cod_sexo) === 'M' ? 'Masc' : 'Fem'} - Tel: ${pTelefono}` }
-  ];
-
-  const camposExtra = [];
-  if (isPediatria) {
-    camposExtra.push(
-      { nombre: "extra_pediatra", etiqueta: "Pediatra", tipo: "text", lecsolo: true, valorPorDefecto: pPediatra || "No asignado" },
-      { nombre: "extra_madre", etiqueta: "Madre", tipo: "text", lecsolo: true, valorPorDefecto: `${pNombreMadre || "S.D"} (${pOcupacionMadre || "S.O"})` },
-      { nombre: "extra_padre", etiqueta: "Padre", tipo: "text", lecsolo: true, valorPorDefecto: `${pNombrePadre || "S.D"} (${pOcupacionPadre || "S.O"})` }
-    );
-  } else {
-    camposExtra.push(
-      { nombre: "extra_gestacion", etiqueta: "Datos Maternos", tipo: "text", lecsolo: true, valorPorDefecto: `Sem. Gest: ${pSemGest || "N/A"} - FUM: ${pFum || "N/A"}` },
-      { nombre: "extra_ocupacion", etiqueta: "Ocupación / Aseguradora", tipo: "text", lecsolo: true, valorPorDefecto: `${pOcupacion || "S.O"} - ${paciente.aseguradora || "Particular"}` }
-    );
-  }
 
   const esquemaConPaciente = {
     ...esquema,
-    titulo: `${esquema.titulo} (Editando) - ${paciente.nombres || ""}`,
-    secciones: [
-      {
-        titulo: "Ficha del Paciente",
-        siempreVisible: true,
-        campos: [
-          ...camposFichaGeneral,
-          ...camposExtra,
-          { nombre: "paciente", tipo: "hidden", valorPorDefecto: paciente._id || paciente.id }
-        ]
-      },
-      ...esquema.secciones
-    ]
+    secciones: esquema.secciones.map((sec, idx) => {
+      if (idx === 0) {
+        return {
+          ...sec,
+          campos: [
+            { nombre: "paciente", tipo: "hidden", valorPorDefecto: paciente._id || paciente.id },
+            ...sec.campos
+          ]
+        };
+      }
+      return sec;
+    })
   };
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <DynamicFormBuilder
-        esquema={esquemaConPaciente}
-        initialData={valoracion}
-        isPaginado={true}
-        pacienteId={paciente._id || paciente.id}
-        onSubmitSuccess={() => {
-          navigate(`/valoraciones/${id}`);
-        }}
-      />
+    <div className="min-h-screen bg-gray-50/50">
+      <div className="sticky top-0 z-[60] bg-white/90 backdrop-blur-md border-b border-indigo-100 shadow-sm px-6 py-3 mb-6">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${isPediatria ? 'bg-indigo-50 text-indigo-500' : 'bg-pink-50 text-pink-500'}`}>
+              {isPediatria ? '👶' : '🤰'}
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-gray-800 leading-tight uppercase tracking-tight">
+                {paciente.nombres || ""} {paciente.apellidos || ""}
+              </h2>
+              <p className="text-[11px] font-bold text-indigo-400 tracking-widest uppercase">
+                {paciente.tipoDocumentoIdentificacion || paciente.tipo_documento_identificacion || "HC"}: {paciente.numDocumentoIdentificacion || paciente.num_documento_identificacion || "S.D"} • {isPediatria ? 'EDITANDO VALORACIÓN PEDIÁTRICA' : 'EDITANDO VALORACIÓN MATERNA'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs">
+            <div className="flex flex-col">
+              <span className="text-gray-400 font-bold uppercase text-[9px]">Edad / Sexo</span>
+              <span className="font-bold text-gray-700">{calcularEdad(paciente.fechaNacimiento || paciente.fecha_nacimiento)} • {(paciente.codSexo || paciente.cod_sexo) === 'M' ? 'Masc' : 'Fem'}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-gray-400 font-bold uppercase text-[9px]">Contacto</span>
+              <span className="font-bold text-gray-700">📞 {pTelefono}</span>
+            </div>
+            {isPediatria ? (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-bold uppercase text-[9px]">Pediatra / Madre</span>
+                <span className="font-bold text-gray-700">{pPediatra || "S.D"} • {pNombreMadre || "S.D"}</span>
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <span className="text-gray-400 font-bold uppercase text-[9px]">Gestación / FUM</span>
+                <span className="font-bold text-gray-700">Sem: {pSemGest || "N/A"} • FUM: {pFum || "N/A"}</span>
+              </div>
+            )}
+            <div className="flex flex-col">
+              <span className="text-gray-400 font-bold uppercase text-[9px]">Aseguradora</span>
+              <span className="font-bold text-indigo-600 underline"> {paciente.aseguradora || "Particular"}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div ref={setActionsContainer} className="flex items-center gap-2" />
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 pb-20">
+        <DynamicFormBuilder
+          esquema={esquemaConPaciente}
+          initialData={valoracion}
+          isPaginado={true}
+          pacienteId={paciente._id || paciente.id}
+          pacienteNombre={`${paciente.nombres || ""} ${paciente.apellidos || ""}`}
+          actionsPortalTarget={actionsContainer}
+          onSubmitSuccess={() => {
+            navigate(`/valoraciones/${id}`);
+          }}
+        />
+      </div>
     </div>
   );
 }
