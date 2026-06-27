@@ -698,7 +698,7 @@ export default function DetallePacienteUnificado() {
                       "Evaluación general"}
                   </p>
                   <button
-                    onClick={() => navigate(v.ruta || `/valoraciones/${v.id}`)}
+                    onClick={() => navigate(v.ruta || `/valoraciones/${v.id || v._id}`)}
                     className="w-full bg-gray-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-600 font-bold py-2 rounded-lg transition"
                   >
                     Ver Detalles

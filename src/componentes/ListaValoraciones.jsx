@@ -121,10 +121,10 @@ export default function HistoriaClinicaDigital() {
           { name: "fechaFin", label: "Hasta", type: "date" },
         ]}
         acciones={{
-          ver: (row) => `/valoraciones/${row.id}`,
+          ver: (row) => `/valoraciones/${row.id || row._id}`,
           editar: (row) => {
             if (row.bloqueada) return null;
-            return `/valoraciones/editar/${row.id}`;
+            return `/valoraciones/editar/${row.id || row._id}`;
           },
           eliminar: false,
         }}
