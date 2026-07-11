@@ -274,12 +274,20 @@ export default function EditarValoracion() {
         // Nota: cod_consulta puede traer descripción adjunta (ej. "890211 - CONSULTA..."), usar startsWith
         const tp = data.tipo_programa || '';
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
-        if (tp.includes('Lactancia') || data.modulo_lactancia?.tipo_lactancia || codConsulta === '890203') {
-          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else if (tp.includes('Piso') || codConsulta === '890202') {
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (tp === 'Perinatal' || codConsulta === '890211') {
+        if (tp === 'Pediatría' || tp === 'Pediatria') {
+          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
+        } else if (tp === 'Perinatal') {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
+        } else if (tp.includes('Piso')) {
+          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
+        } else if (tp.includes('Lactancia') || data.modulo_lactancia?.tipo_lactancia) {
+          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
+        } else if (codConsulta === '890211') {
+          setEsquema(ESQUEMA_VALORACION_PERINATAL);
+        } else if (codConsulta === '890202') {
+          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
+        } else if (codConsulta === '890203') {
+          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
         } else {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         }

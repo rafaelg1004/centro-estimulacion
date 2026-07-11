@@ -127,7 +127,7 @@ function mapearDatosLegacy(data) {
     newData.tipoPrograma === "Pediatría" ||
     newData.tipoPrograma === "Pediatria" ||
     (!newData.tipoPrograma && legacy.tipoPrograma === "Pediatría") ||
-    codConsultaLimpio === "890201";
+    (!newData.tipoPrograma && codConsultaLimpio === "890201");
 
   // Si es programa de Pediatría, mapeamos al esquema de Pediatría
   if (esPediatria) {
@@ -310,7 +310,7 @@ function mapearDatosLegacy(data) {
   const esPerinatal =
     newData.tipoPrograma === "Perinatal" ||
     (!newData.tipoPrograma && legacy.tipoPrograma === "Perinatal") ||
-    codConsultaLimpio === "890211";
+    (!newData.tipoPrograma && codConsultaLimpio === "890211");
 
   // Si es programa Perinatal — DB moderna tiene prioridad sobre legacy
   if (esPerinatal) {
@@ -481,24 +481,25 @@ export default function DetalleValoracion() {
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         const tp = data.tipo_programa || "";
 
-        if (codConsulta === "890211") {
+        if (tp === "Pediatría" || tp === "Pediatria") {
+          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
+        } else if (tp === "Perinatal") {
+          setEsquema(ESQUEMA_VALORACION_PERINATAL);
+        } else if (tp.includes("Piso")) {
+          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
+        } else if (
+          tp.includes("Lactancia") ||
+          data.modulo_lactancia?.tipo_lactancia
+        ) {
+          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
+        } else if (codConsulta === "890211") {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
         } else if (codConsulta === "890202") {
           setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
         } else if (codConsulta === "890201") {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-        } else if (
-          tp.includes("Lactancia") ||
-          data.modulo_lactancia?.tipo_lactancia ||
-          codConsulta === "890203"
-        ) {
+        } else if (codConsulta === "890203") {
           setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else if (tp.includes("Piso")) {
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (tp === "Perinatal") {
-          setEsquema(ESQUEMA_VALORACION_PERINATAL);
-        } else if (tp === "Pediatría") {
-          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         } else {
           // Default según módulos poblados
           if (
