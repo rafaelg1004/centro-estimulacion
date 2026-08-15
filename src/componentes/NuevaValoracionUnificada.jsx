@@ -7,6 +7,7 @@ import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPiso
 import { ESQUEMA_VALORACION_PERINATAL } from "../config/esquemaValoracionPerinatal";
 import { apiRequest } from "../config/api";
 import { useNavigate, useLocation } from "react-router-dom";
+import { parseFechaLocal } from "../utils/dateUtils";
 
 export default function NuevaValoracionUnificada() {
     const { search } = useLocation();
@@ -45,7 +46,7 @@ export default function NuevaValoracionUnificada() {
     const calcularEdad = (fechaNac) => {
         if (!fechaNac) return "N/A";
         const hoy = new Date();
-        const cumple = new Date(fechaNac);
+        const cumple = parseFechaLocal(fechaNac);
 
         let edadAnos = hoy.getFullYear() - cumple.getFullYear();
         let edadMeses = hoy.getMonth() - cumple.getMonth();

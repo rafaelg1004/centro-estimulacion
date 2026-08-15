@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { apiRequest } from "../config/api";
+import { parseFechaLocal } from "../utils/dateUtils";
 
 
 
@@ -49,8 +50,8 @@ export default function EdicionHistoriaClinica() {
   const calcularEdad = (fechaNac) => {
     if (!fechaNac) return '';
     const hoy = new Date();
-    const nacimiento = new Date(fechaNac);
-    if (isNaN(nacimiento.getTime())) return '';
+    const nacimiento = parseFechaLocal(fechaNac);
+    if (!nacimiento || isNaN(nacimiento.getTime())) return '';
 
     if (isNino) {
       const meses = (hoy.getFullYear() - nacimiento.getFullYear()) * 12 + (hoy.getMonth() - nacimiento.getMonth());

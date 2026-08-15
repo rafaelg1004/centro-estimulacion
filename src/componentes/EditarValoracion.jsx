@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest } from "../config/api";
+import { parseFechaLocal } from "../utils/dateUtils";
 import DynamicFormBuilder from "./ui/DynamicFormBuilder";
 import { ESQUEMA_VALORACION_PEDIATRIA } from "../config/esquemaValoracionPediatria";
 import { ESQUEMA_VALORACION_LACTANCIA } from "../config/esquemaValoracionLactancia";
@@ -310,7 +311,7 @@ export default function EditarValoracion() {
   const calcularEdad = (fechaNac) => {
     if (!fechaNac) return "N/A";
     const hoy = new Date();
-    const cumple = new Date(fechaNac);
+    const cumple = parseFechaLocal(fechaNac);
     let edadAnos = hoy.getFullYear() - cumple.getFullYear();
     let edadMeses = hoy.getMonth() - cumple.getMonth();
     if (hoy.getDate() < cumple.getDate()) edadMeses--;

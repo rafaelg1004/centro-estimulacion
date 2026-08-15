@@ -1,4 +1,5 @@
 import React from "react";
+import { parseFechaLocal, formatearFecha } from "../../utils/dateUtils";
 import {
   LockClosedIcon,
   ArrowLeftIcon,
@@ -216,7 +217,7 @@ export default function DynamicDetailBuilder({
   const calcularEdad = (fechaNac) => {
     if (!fechaNac) return "N/A";
     const hoy = new Date();
-    const cumple = new Date(fechaNac);
+    const cumple = parseFechaLocal(fechaNac);
 
     let edadAnos = hoy.getFullYear() - cumple.getFullYear();
     let edadMeses = hoy.getMonth() - cumple.getMonth();
@@ -318,11 +319,7 @@ export default function DynamicDetailBuilder({
                 />
                 <Field
                   label="Fecha de Nacimiento"
-                  value={
-                    (data.paciente.fecha_nacimiento || data.paciente.fechaNacimiento)
-                      ? new Date(data.paciente.fecha_nacimiento || data.paciente.fechaNacimiento).toLocaleDateString("es-CO", { year: 'numeric', month: 'long', day: 'numeric' })
-                      : "No registrado"
-                  }
+                  value={formatearFecha(data.paciente.fecha_nacimiento || data.paciente.fechaNacimiento)}
                 />
                 <Field
                   label="Edad Actual"

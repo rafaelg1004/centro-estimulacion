@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
+import { parseFechaLocal, formatearFecha } from "../utils/dateUtils";
 import {
   ClipboardDocumentListIcon,
   ArrowLeftIcon,
@@ -198,8 +199,8 @@ export default function DetallePacienteUnificado() {
   const calcularEdad = (fechaNac) => {
     if (!fechaNac) return "";
     const hoy = new Date();
-    const nacimiento = new Date(fechaNac);
-    if (isNaN(nacimiento.getTime())) return "";
+    const nacimiento = parseFechaLocal(fechaNac);
+    if (!nacimiento || isNaN(nacimiento.getTime())) return "";
 
     if (isNino) {
       const meses =
