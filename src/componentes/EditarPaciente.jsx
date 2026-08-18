@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { apiRequest } from "../config/api";
-import { parseFechaLocal } from "../utils/dateUtils";
+import { parseFechaLocal, obtenerFechaInput } from "../utils/dateUtils";
 
 
 
@@ -150,7 +150,7 @@ export default function EdicionHistoriaClinica() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400">Fecha Nacimiento</label>
-                <input type="date" name="fechaNacimiento" value={paciente.fechaNacimiento?.split('T')[0] || ''} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                <input type="date" name="fechaNacimiento" value={obtenerFechaInput(paciente.fechaNacimiento || paciente.fecha_nacimiento)} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400">Edad Calculada ({isNino ? 'meses' : 'años'})</label>

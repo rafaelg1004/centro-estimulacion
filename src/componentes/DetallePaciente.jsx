@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { parseFechaLocal, formatearFecha } from "../utils/dateUtils";
+import { parseFechaLocal, formatearFecha, obtenerFechaInput } from "../utils/dateUtils";
 import {
   ClipboardDocumentListIcon,
   ArrowLeftIcon,
@@ -269,7 +269,7 @@ export default function DetallePacienteUnificado() {
               </p>
               <p>
                 <span className="font-bold">F. Nacimiento:</span>{" "}
-                {paciente.fecha_nacimiento?.split("T")[0]}
+                {obtenerFechaInput(paciente.fecha_nacimiento)}
               </p>
             </div>
           </div>

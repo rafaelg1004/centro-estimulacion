@@ -4,6 +4,7 @@ import { apiRequest, API_CONFIG } from "../../config/api";
 import { useNavigate } from "react-router-dom";
 import SignaturePad from "react-signature-canvas";
 import { createPortal } from "react-dom";
+import { obtenerFechaInput } from "../../utils/dateUtils";
 
 // Sugerencias CIE-10 de fisioterapia que aparecen al enfocar el campo (sin escribir)
 const CIE10_FISIO_SUGERENCIAS = [
@@ -1162,7 +1163,9 @@ export default function DynamicFormBuilder({
             name={campo.nombre}
             type={campo.tipo}
             value={
-              campo.tipo === "datetime-local" && formData[campo.nombre]
+              campo.tipo === "date" && formData[campo.nombre]
+                ? obtenerFechaInput(formData[campo.nombre])
+                : campo.tipo === "datetime-local" && formData[campo.nombre]
                 ? String(formData[campo.nombre]).substring(0, 16)
                 : (formData[campo.nombre] ?? "")
             }

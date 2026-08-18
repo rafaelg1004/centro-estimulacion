@@ -3,25 +3,33 @@
  */
 
 /**
- * Convierte un string de fecha (ej: "1995-05-22" o "1995-05-22T00:00:00.000Z")
+ * Convierte un string de fecha (ej: "1995-05-22" o "1995-05-22T00:00:00.000Z" o un objeto Date)
  * a un objeto Date en la zona horaria local a las 00:00:00 horas,
- * evitando que la conversión UTC reste horas y cambie el día.
+ * evitando que la conversión UTC reste horas y cambie el día en zonas horarias negativas.
  */
 export const parseFechaLocal = (dateVal) => {
   if (!dateVal) return null;
-  if (dateVal instanceof Date) return dateVal;
-  
+
+  if (dateVal instanceof Date) {
+    if (isNaN(dateVal.getTime())) return null;
+    // Si fue creado con UTC medianoche (ej: new Date("YYYY-MM-DD"))
+    if (dateVal.getUTCHours() === 0 && dateVal.getUTCMinutes() === 0 && dateVal.getUTCSeconds() === 0) {
+      return new Date(dateVal.getUTCFullYear(), dateVal.getUTCMonth(), dateVal.getUTCDate());
+    }
+    return new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate());
+  }
+
   const str = String(dateVal).trim();
   const soloFecha = str.split('T')[0];
   const partes = soloFecha.split('-');
-  
+
   if (partes.length === 3) {
     const [year, month, day] = partes.map(Number);
     if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
       return new Date(year, month - 1, day);
     }
   }
-  
+
   return new Date(dateVal);
 };
 
@@ -41,8 +49,12 @@ export const formatearFecha = (dateVal, options = { year: 'numeric', month: 'lon
  */
 export const obtenerFechaInput = (dateVal) => {
   if (!dateVal) return "";
-  const str = String(dateVal).trim();
-  return str.split('T')[0];
+  const d = parseFechaLocal(dateVal);
+  if (!d || isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 /**
@@ -53,9 +65,9 @@ export const calcularEdadSegura = (fechaNac, isNino = false) => {
   if (!fechaNac) return "";
   const nacimiento = parseFechaLocal(fechaNac);
   if (!nacimiento || isNaN(nacimiento.getTime())) return "";
-  
+
   const hoy = new Date();
-  
+
   if (isNino) {
     const meses = (hoy.getFullYear() - nacimiento.getFullYear()) * 12 + (hoy.getMonth() - nacimiento.getMonth());
     return meses >= 0 ? meses : 0;
