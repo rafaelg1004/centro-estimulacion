@@ -268,14 +268,18 @@ export default function DynamicFormBuilder({
         .then(r => r.json())
         .then(data => {
           if (Array.isArray(data)) {
-            // Ordenar por nombre y formatear para el datalist: "ID - Nombre (Departamento)"
+            // Ordenar por nombre y formatear para el datalist: "ID - Nombre - Departamento" (sin corchetes ni paréntesis)
             const formatoCiudades = data
-              .map(c => ({
-                id: c.id,
-                nombre: c.name,
-                departamento: c.department?.name || "",
-                textoCompleto: `${c.id} - ${c.name} (${c.department?.name || ""})`
-              }))
+              .map(c => {
+                const depto = c.department?.name ? ` - ${c.department.name}` : "";
+                const cleanTexto = `${c.id} - ${c.name}${depto}`.replace(/[\(\)\[\]]/g, "").trim();
+                return {
+                  id: c.id,
+                  nombre: c.name,
+                  departamento: c.department?.name || "",
+                  textoCompleto: cleanTexto
+                };
+              })
               .sort((a, b) => a.nombre.localeCompare(b.nombre));
             setCiudadesApi(formatoCiudades);
           }
@@ -813,6 +817,12 @@ export default function DynamicFormBuilder({
         }
       }
 
+      if (unflattenedData.lugarNacimiento) {
+        unflattenedData.lugarNacimiento = String(unflattenedData.lugarNacimiento)
+          .replace(/[\(\)\[\]]/g, "")
+          .trim();
+      }
+
       const method = isEdit ? "PUT" : "POST";
       const endpoint = isEdit
         ? `${esquema.endpoint}/${initialData.id || initialData._id}`
@@ -823,12 +833,16 @@ export default function DynamicFormBuilder({
         body: JSON.stringify({ ...unflattenedData, permitirDuplicado: true }),
       });
 
-      // Limpiar borrador si era un formulario nuevo
-      if (!isEdit && pacienteId) {
+      // Limpiar borrador si era un formulario nuevo o si tenía borrador activo
+      if (!isEdit && effectivePacienteId) {
         try {
-          await apiRequest(`/borradores/limpiar/${pacienteId}/${encodeURIComponent(esquema.titulo)}`, {
-            method: "DELETE"
-          });
+          if (borradorId) {
+            await apiRequest(`/borradores/${borradorId}`, { method: "DELETE" });
+          }
+          await apiRequest(
+            `/borradores/limpiar/${effectivePacienteId}/${encodeURIComponent(esquema.titulo)}`,
+            { method: "DELETE" }
+          );
         } catch (e) {
           console.warn("No se pudo limpiar el borrador post-guardado", e);
         }
@@ -1043,7 +1057,7 @@ export default function DynamicFormBuilder({
           </datalist>
           {formData[campo.nombre] && (
             <span className="text-xs text-indigo-500 font-semibold mt-1">
-              Código RIPS extraído: {formData[campo.nombre].split(' - ')[0]}
+              Código RIPS extraído: {formData[campo.nombre].split(' - ')[0].replace(/[\(\)\[\]]/g, '').trim()}
             </span>
           )}
         </div>
