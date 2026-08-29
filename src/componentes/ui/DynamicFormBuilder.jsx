@@ -78,9 +78,9 @@ export default function DynamicFormBuilder({
     const esRegistro = esquema.titulo?.toLowerCase().includes("paciente") || esquema.titulo?.toLowerCase().includes("registrar");
     const titulo = esRegistro ? '¿Cancelar registro?' : '¿Cancelar valoración?';
     const texto = esRegistro
-      ? 'Se descartará el registro y no se guardará ningún dato del paciente.'
+      ? 'Se descartará el registro y se eliminará cualquier borrador guardado automáticamente.'
       : 'Se descartará esta valoración y se eliminará cualquier borrador guardado automáticamente.';
-    const confirmButtonText = esRegistro ? 'Sí, cancelar' : 'Sí, cancelar y borrar';
+    const confirmButtonText = 'Sí, cancelar y borrar';
 
     const confirmar = await Swal.fire({
       title: titulo,
@@ -98,7 +98,8 @@ export default function DynamicFormBuilder({
         try {
           if (borradorId) {
             await apiRequest(`/borradores/${borradorId}`, { method: "DELETE" });
-          } else if (effectivePacienteId) {
+          }
+          if (effectivePacienteId) {
             await apiRequest(
               `/borradores/limpiar/${effectivePacienteId}/${encodeURIComponent(esquema.titulo)}`,
               { method: "DELETE" }
@@ -109,7 +110,7 @@ export default function DynamicFormBuilder({
         }
       }
       if (onCancel) onCancel();
-      else navigate(esquema.redireccion);
+      else if (esquema.redireccion) navigate(esquema.redireccion);
     }
   };
 
