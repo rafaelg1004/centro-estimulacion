@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false CI=false react-scripts build",
+    "build": "DISABLE_ESLINT_PLUGIN=true GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false CI=false react-scripts build",
     "test": "react-scripts test",
     "test:perinatal": "node src/tests/valoracionperinatal.test.js",
     "eject": "react-scripts eject"
