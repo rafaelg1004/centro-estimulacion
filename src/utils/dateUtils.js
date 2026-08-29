@@ -82,3 +82,65 @@ export const calcularEdadSegura = (fechaNac, isNino = false) => {
     return edadAnos >= 0 ? edadAnos : 0;
   }
 };
+
+/**
+ * Formatea una fecha en texto completo en español (ej: "26 de octubre de 2026")
+ * garantizando cero desfasaje de zona horaria.
+ */
+export const formatearFechaEspanol = (dateVal) => {
+  if (!dateVal) return "No registrada";
+  const d = parseFechaLocal(dateVal);
+  if (!d || isNaN(d.getTime())) return "Fecha inválida";
+
+  const meses = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+  ];
+  const dia = d.getDate();
+  const mes = meses[d.getMonth()];
+  const anio = d.getFullYear();
+
+  return `${dia} de ${mes} de ${anio}`;
+};
+
+/**
+ * Calcula la fecha del próximo cumpleaños y los días faltantes.
+ */
+export const calcularProximoCumpleanos = (fechaNac) => {
+  if (!fechaNac) return null;
+  const nacimiento = parseFechaLocal(fechaNac);
+  if (!nacimiento || isNaN(nacimiento.getTime())) return null;
+
+  const hoy = new Date();
+  const hoySinHora = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+  let anioCumple = hoy.getFullYear();
+  let proximoCumple = new Date(anioCumple, nacimiento.getMonth(), nacimiento.getDate());
+
+  // Si el cumpleaños de este año ya pasó (es anterior a hoy)
+  if (proximoCumple.getTime() < hoySinHora.getTime()) {
+    anioCumple++;
+    proximoCumple = new Date(anioCumple, nacimiento.getMonth(), nacimiento.getDate());
+  }
+
+  const diffMs = proximoCumple.getTime() - hoySinHora.getTime();
+  const diasFaltantes = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  const edadACumplir = anioCumple - nacimiento.getFullYear();
+
+  let textoFaltante = "";
+  if (diasFaltantes === 0) {
+    textoFaltante = "¡Hoy es su cumpleaños! 🎉";
+  } else if (diasFaltantes === 1) {
+    textoFaltante = "Mañana";
+  } else {
+    textoFaltante = `Faltan ${diasFaltantes} días`;
+  }
+
+  return {
+    fecha: proximoCumple,
+    fechaFormateada: formatearFechaEspanol(proximoCumple),
+    diasFaltantes,
+    textoFaltante,
+    edadACumplir
+  };
+};

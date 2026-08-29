@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { apiRequest } from "../config/api";
-import { parseFechaLocal, obtenerFechaInput } from "../utils/dateUtils";
-
-
+import { parseFechaLocal, obtenerFechaInput, formatearFechaEspanol, calcularProximoCumpleanos } from "../utils/dateUtils";
 
 export default function EdicionHistoriaClinica() {
   const { id } = useParams();
@@ -38,8 +36,8 @@ export default function EdicionHistoriaClinica() {
       });
   }, [id]);
 
-  // Un paciente es niÃ±o si esAdulto es explÃcitamente falso (o string "false")
-  // o si el campo esAdulto estÃ¡ vacÃo/null pero el tipo de documento es obligatoriamente pediÃ¡trico.
+  // Un paciente es niño si esAdulto es explícitamente falso (o string "false")
+  // o si el campo esAdulto está vacío/null pero el tipo de documento es obligatoriamente pediátrico.
   const isNino = paciente && (
     paciente.esAdulto === false ||
     paciente.esAdulto === "false" ||
@@ -72,6 +70,93 @@ export default function EdicionHistoriaClinica() {
 
   const handleGuardar = async (e) => {
     if (e) e.preventDefault();
+
+    const fechaNac = paciente.fechaNacimiento;
+    const fechaNacFormateada = formatearFechaEspanol(fechaNac);
+    const proxCumple = calcularProximoCumpleanos(fechaNac);
+    const nombres = `${paciente.nombres || ""} ${paciente.apellidos || ""}`.trim() || "Sin nombre";
+    const documento = `${paciente.tipoDocumentoIdentificacion || ""} ${paciente.numDocumentoIdentificacion || ""}`.trim();
+    const sexo = paciente.codSexo === "M" ? "Masculino" : paciente.codSexo === "F" ? "Femenino" : paciente.codSexo || "No especificado";
+    const edad = isNino ? `${calcularEdad(fechaNac)} meses` : `${calcularEdad(fechaNac)} años`;
+    const telefono = paciente.datosContacto?.celular || paciente.datosContacto?.telefono || "No registrado";
+    const direccion = paciente.datosContacto?.direccion || "No registrada";
+
+    const resumenHtml = `
+      <div style="text-align: left; font-size: 14px; line-height: 1.5; color: #374151; max-height: 65vh; overflow-y: auto; padding-right: 4px;">
+        <div style="background: linear-gradient(135deg, #eef2ff, #fdf2f8); border: 1px solid #c7d2fe; border-radius: 16px; padding: 14px; margin-bottom: 14px;">
+          <div style="font-size: 17px; font-weight: 800; color: #4338ca; margin-bottom: 6px;">
+            👤 ${nombres}
+          </div>
+          <div style="font-size: 13px; color: #4b5563; display: flex; flex-wrap: wrap; gap: 6px;">
+            <span style="background: #ffffff; padding: 3px 8px; border-radius: 6px; border: 1px solid #e0e7ff; font-weight: 600; color: #3730a3;">
+              🪪 ${documento}
+            </span>
+            <span style="background: #ffffff; padding: 3px 8px; border-radius: 6px; border: 1px solid #e0e7ff; font-weight: 600; color: #3730a3;">
+              ⚧️ ${sexo}
+            </span>
+          </div>
+        </div>
+
+        <div style="background: #f9fafb; border-radius: 12px; padding: 12px 14px; border: 1px solid #f3f4f6; margin-bottom: 12px;">
+          <div style="font-weight: 700; color: #1e1b4b; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
+            🎂 Cumpleaños y Edad
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <span style="color: #6b7280; font-size: 11px; text-transform: uppercase; font-weight: 600;">Fecha de Nacimiento:</span><br/>
+              <strong style="color: #111827; font-size: 13.5px;">📅 ${fechaNacFormateada}</strong>
+            </div>
+            <div>
+              <span style="color: #6b7280; font-size: 11px; text-transform: uppercase; font-weight: 600;">Edad Actual:</span><br/>
+              <strong style="color: #111827; font-size: 13.5px;">⏳ ${edad}</strong>
+            </div>
+          </div>
+          ${proxCumple ? `
+            <div style="margin-top: 10px; padding: 10px; background: #ecfdf5; border-radius: 10px; border: 1px solid #a7f3d0;">
+              <div style="color: #065f46; font-size: 11px; font-weight: 700; text-transform: uppercase;">🎈 Próximo Cumpleaños:</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-top: 2px;">
+                <strong style="color: #047857; font-size: 14px;">${proxCumple.fechaFormateada}</strong>
+                <span style="background: #10b981; color: white; font-size: 11px; padding: 2px 8px; border-radius: 9999px; font-weight: 700;">
+                  ${proxCumple.textoFaltante} ${proxCumple.edadACumplir ? `(Cumple ${proxCumple.edadACumplir} año${proxCumple.edadACumplir > 1 ? 's' : ''})` : ''}
+                </span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
+        <div style="background: #f9fafb; border-radius: 12px; padding: 12px 14px; border: 1px solid #f3f4f6;">
+          <div style="font-weight: 700; color: #1e1b4b; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
+            📞 Contacto
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+            <div><span style="color: #6b7280; font-size: 11px;">Teléfono:</span><br/><strong>${telefono}</strong></div>
+            <div><span style="color: #6b7280; font-size: 11px;">Dirección:</span><br/><strong>${direccion}</strong></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const confirmacion = await Swal.fire({
+      title: `¿Guardar Cambios del Paciente?`,
+      html: resumenHtml,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "✅ Confirmar y Guardar",
+      cancelButtonText: "✏️ Modificar / Revisar",
+      confirmButtonColor: "#4f46e5",
+      cancelButtonColor: "#6b7280",
+      customClass: {
+        popup: "rounded-3xl shadow-2xl p-6 border border-indigo-100",
+        confirmButton: "rounded-xl font-bold px-6 py-3",
+        cancelButton: "rounded-xl font-bold px-6 py-3",
+      },
+      width: "550px",
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await apiRequest(`/pacientes/${id}`, {
