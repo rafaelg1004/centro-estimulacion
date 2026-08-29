@@ -21,9 +21,14 @@ export default function Home() {
           // Mostrar notificación solo para el más reciente o mostrar una lista
           const borrador = data[0];
           
+          const esRegistroPaciente = borrador.pacienteId?.startsWith("nuevo_paciente") || borrador.tipoFormulario?.toLowerCase().includes("paciente");
+          const tipoPacienteUrl = borrador.pacienteId === "nuevo_paciente_adulto" || borrador.tipoFormulario?.toLowerCase().includes("materno") ? "adulto" : "nino";
+
           Swal.fire({
-            title: '¡Tienes una valoración pendiente!',
-            text: `Dejaste incompleta la valoración de ${borrador.tipoFormulario} para ${borrador.nombrePaciente || 'un paciente'}. ¿Deseas reanudarla?`,
+            title: esRegistroPaciente ? '¡Tienes un registro de paciente pendiente!' : '¡Tienes una valoración pendiente!',
+            text: esRegistroPaciente
+              ? `Dejaste incompleto el registro de paciente ${tipoPacienteUrl === 'adulto' ? 'materno' : 'niño'} para "${borrador.nombrePaciente || 'un nuevo paciente'}". ¿Deseas reanudarlo?`
+              : `Dejaste incompleta la valoración de ${borrador.tipoFormulario} para ${borrador.nombrePaciente || 'un paciente'}. ¿Deseas reanudarla?`,
             icon: 'info',
             showCancelButton: true,
             showDenyButton: true,
@@ -34,8 +39,11 @@ export default function Home() {
             denyButtonColor: '#ef4444'
           }).then(async (result) => {
             if (result.isConfirmed) {
-              // Redirigir a NuevaValoracionUnificada con los parámetros
-              navigate(`/valoracion?paciente=${borrador.pacienteId}&tipo=${borrador.tipoFormulario === 'Piso Pélvico' ? 'pisopelvico' : (borrador.tipoFormulario.includes('Perinatal') ? 'perinatal' : 'lactancia')}&borradorId=${borrador.id}`);
+              if (esRegistroPaciente) {
+                navigate(`/registro?tipo=${tipoPacienteUrl}&borradorId=${borrador.id}`);
+              } else {
+                navigate(`/valoracion?paciente=${borrador.pacienteId}&tipo=${borrador.tipoFormulario === 'Piso Pélvico' ? 'pisopelvico' : (borrador.tipoFormulario.includes('Perinatal') ? 'perinatal' : 'lactancia')}&borradorId=${borrador.id}`);
+              }
             } else if (result.isDenied) {
               // Borrar directamente desde el Home
               try {

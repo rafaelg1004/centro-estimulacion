@@ -65,6 +65,14 @@ export default function DynamicFormBuilder({
   const cie10Timers = useRef({});
   const formId = useRef(`dfb-form-${Date.now()}`).current;
 
+  const effectivePacienteId =
+    pacienteId ||
+    (esquema.titulo?.toLowerCase().includes("paciente") || esquema.endpoint?.includes("/pacientes")
+      ? esquema.titulo?.toLowerCase().includes("niño")
+        ? "nuevo_paciente_nino"
+        : "nuevo_paciente_adulto"
+      : null);
+
   // Lógica de cancelación
   const handleCancel = async () => {
     const esRegistro = esquema.titulo?.toLowerCase().includes("paciente") || esquema.titulo?.toLowerCase().includes("registrar");
@@ -90,9 +98,9 @@ export default function DynamicFormBuilder({
         try {
           if (borradorId) {
             await apiRequest(`/borradores/${borradorId}`, { method: "DELETE" });
-          } else if (pacienteId) {
+          } else if (effectivePacienteId) {
             await apiRequest(
-              `/borradores/limpiar/${pacienteId}/${encodeURIComponent(esquema.titulo)}`,
+              `/borradores/limpiar/${effectivePacienteId}/${encodeURIComponent(esquema.titulo)}`,
               { method: "DELETE" }
             );
           }
@@ -114,10 +122,9 @@ export default function DynamicFormBuilder({
   // Referencias para las firmas (Canvas)
   const signatureRefs = useRef({});
 
-  // Cargar datos (initial o default)
+  // Inicializar estado del formulario con valores por defecto o datos de edición
   useEffect(() => {
     if (isEdit) {
-      // Cuando editamos, intentamos aplanar los datos anidados para el formulario
       const flatData = {};
       const flatten = (obj, prefix = "") => {
         if (!obj) return;
@@ -139,7 +146,6 @@ export default function DynamicFormBuilder({
         });
       };
       flatten(initialData);
-      // Aplicar valorPorDefecto como fallback para campos no presentes en initialData (ej. campos de visualización del paciente)
       esquema.secciones.forEach((sec) => {
         (sec.campos || []).forEach((campo) => {
           if (
@@ -150,9 +156,8 @@ export default function DynamicFormBuilder({
           }
         });
       });
-      console.log("[DynamicFormBuilder] flatData inicial:", flatData);
       setFormData(flatData);
-    } else {
+    } else if (esquema && (!initialData || Object.keys(initialData).length === 0)) {
       const defaultData = {};
       const nowLocal = new Date(
         new Date().getTime() - new Date().getTimezoneOffset() * 60000,
@@ -179,23 +184,63 @@ export default function DynamicFormBuilder({
     }
   }, [esquema, initialData, isEdit]);
 
-  // Cargar borrador si existe borradorId
+  // Cargar borrador si existe borradorId o si hay un borrador previo no guardado
   useEffect(() => {
-    if (borradorId && !isEdit) {
-      const cargarBorrador = async () => {
-        try {
+    if (isEdit) return;
+
+    const verificarYCargarBorrador = async () => {
+      try {
+        if (borradorId) {
           const data = await apiRequest(`/borradores/${borradorId}`);
           if (data && data.datos) {
-            setFormData(prev => ({ ...prev, ...data.datos }));
+            setFormData((prev) => ({ ...prev, ...data.datos }));
             console.log("Borrador cargado exitosamente.");
           }
-        } catch (error) {
-          console.error("Error al cargar el borrador:", error);
+        } else if (effectivePacienteId) {
+          const misBorradores = await apiRequest("/borradores/mis-borradores");
+          const borradorExistente = misBorradores?.find(
+            (b) => b.pacienteId === effectivePacienteId && b.tipoFormulario === esquema.titulo
+          );
+
+          if (
+            borradorExistente &&
+            borradorExistente.datos &&
+            Object.keys(borradorExistente.datos).length > 0
+          ) {
+            const result = await Swal.fire({
+              title: "¿Reanudar borrador guardado?",
+              text: `Encontramos datos guardados anteriormente para "${borradorExistente.nombrePaciente || esquema.titulo}". ¿Deseas recuperarlos?`,
+              icon: "info",
+              showCancelButton: true,
+              confirmButtonText: "Sí, recuperar datos",
+              cancelButtonText: "No, empezar de cero",
+              confirmButtonColor: "#4f46e5",
+              cancelButtonColor: "#9ca3af",
+              customClass: {
+                popup: "rounded-3xl shadow-2xl p-6 border border-indigo-100",
+                confirmButton: "rounded-xl font-bold px-6 py-3",
+                cancelButton: "rounded-xl font-bold px-6 py-3",
+              },
+            });
+
+            if (result.isConfirmed) {
+              setFormData((prev) => ({ ...prev, ...borradorExistente.datos }));
+            } else {
+              try {
+                await apiRequest(`/borradores/${borradorExistente.id}`, { method: "DELETE" });
+              } catch (e) {
+                console.error("Error limpiando borrador anterior:", e);
+              }
+            }
+          }
         }
-      };
-      cargarBorrador();
-    }
-  }, [borradorId, isEdit]);
+      } catch (error) {
+        console.error("Error al verificar borrador:", error);
+      }
+    };
+
+    verificarYCargarBorrador();
+  }, [borradorId, effectivePacienteId, isEdit, esquema.titulo]);
 
   // Sincronizar estado de búsqueda de campos CUPS/CIE-10 con el valor inicial,
   // para que al editar el input muestre el código guardado correctamente.
@@ -242,26 +287,41 @@ export default function DynamicFormBuilder({
 
   // Autoguardado
   useEffect(() => {
-    if (isEdit || !pacienteId || Object.keys(formData).length === 0) return;
+    if (isEdit || !effectivePacienteId || Object.keys(formData).length === 0) return;
+
+    // Solo autoguardar si hay al menos un campo con valor real
+    const tieneDatosReales = Object.entries(formData).some(([k, v]) => {
+      if (k === "esAdulto") return false;
+      return v !== undefined && v !== null && v !== "";
+    });
+    if (!tieneDatosReales) return;
 
     const timer = setTimeout(async () => {
       try {
+        const nombreCalc =
+          pacienteNombre ||
+          (formData.nombres || formData.apellidos
+            ? `${formData.nombres || ""} ${formData.apellidos || ""}`.trim()
+            : null) ||
+          formData["firmas.pacienteOAcudiente.nombre"] ||
+          (esquema.titulo?.toLowerCase().includes("niño") ? "Nuevo Paciente Niño" : "Nuevo Paciente Materno");
+
         await apiRequest("/borradores", {
           method: "POST",
           body: JSON.stringify({
-            pacienteId,
+            pacienteId: effectivePacienteId,
             tipoFormulario: esquema.titulo,
-            nombrePaciente: pacienteNombre || formData["firmas.pacienteOAcudiente.nombre"] || "Paciente", // Intento de extraer un nombre visible
-            datos: formData
-          })
+            nombrePaciente: nombreCalc,
+            datos: formData,
+          }),
         });
       } catch (error) {
         console.warn("Fallo el autoguardado silencioso:", error);
       }
-    }, 4000); // Guardar cada 4 segundos de inactividad
+    }, 3000); // Guardar cada 3 segundos de inactividad
 
     return () => clearTimeout(timer);
-  }, [formData, isEdit, pacienteId, esquema, pacienteNombre]);
+  }, [formData, isEdit, effectivePacienteId, esquema, pacienteNombre]);
 
   // Efecto para autocompletar descripciones CIE-10 que solo traen el código (retrocompatibilidad)
   useEffect(() => {

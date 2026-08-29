@@ -1,9 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import DynamicFormBuilder from "./ui/DynamicFormBuilder";
 import { ESQUEMA_PACIENTE_NINO, ESQUEMA_PACIENTE_ADULTO } from "../config/esquemasFormularios";
 
 export default function RegistroPacienteUnificado({ isModal = false, onClose, onSuccess }) {
+    const [searchParams] = useSearchParams();
     const [tipoPaciente, setTipoPaciente] = useState(null);
+    const [borradorId, setBorradorId] = useState(null);
+
+    useEffect(() => {
+        const tipoParam = searchParams.get("tipo");
+        const bId = searchParams.get("borradorId");
+        if (tipoParam === "nino" || tipoParam === "adulto") {
+            setTipoPaciente(tipoParam);
+        }
+        if (bId) {
+            setBorradorId(bId);
+        }
+    }, [searchParams]);
 
     if (!tipoPaciente) {
         const tarjetaSeleccion = (
@@ -81,6 +95,7 @@ export default function RegistroPacienteUnificado({ isModal = false, onClose, on
             <div className="w-full flex-1 flex flex-col min-h-0 overflow-hidden relative bg-white">
                 <DynamicFormBuilder 
                     esquema={esquemaActivo} 
+                    borradorId={borradorId}
                     onSubmitSuccess={onSuccess}
                     onCancel={onClose} 
                     isModalLayout={isModal}
