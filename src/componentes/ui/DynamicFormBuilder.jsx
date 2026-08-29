@@ -9,6 +9,7 @@ import {
   formatearFechaEspanol,
   calcularProximoCumpleanos,
 } from "../../utils/dateUtils";
+import CustomDatePicker from "./CustomDatePicker";
 
 // Sugerencias CIE-10 de fisioterapia que aparecen al enfocar el campo (sin escribir)
 const CIE10_FISIO_SUGERENCIAS = [
@@ -1388,11 +1389,10 @@ export default function DynamicFormBuilder({
               </option>
             ))}
           </select>
-        ) : (
-          <input
+        ) : campo.tipo === "date" || campo.tipo === "datetime-local" ? (
+          <CustomDatePicker
             id={campo.nombre}
             name={campo.nombre}
-            type={campo.tipo}
             value={
               campo.tipo === "date" && formData[campo.nombre]
                 ? obtenerFechaInput(formData[campo.nombre])
@@ -1400,6 +1400,18 @@ export default function DynamicFormBuilder({
                 ? String(formData[campo.nombre]).substring(0, 16)
                 : (formData[campo.nombre] ?? "")
             }
+            onChange={handleChange}
+            required={campo.requerido}
+            readOnly={campo.lecsolo}
+            includeTime={campo.tipo === "datetime-local"}
+            placeholder={campo.placeholder || "Seleccionar fecha..."}
+          />
+        ) : (
+          <input
+            id={campo.nombre}
+            name={campo.nombre}
+            type={campo.tipo}
+            value={formData[campo.nombre] ?? ""}
             onChange={handleChange}
             required={campo.requerido}
             readOnly={campo.lecsolo}

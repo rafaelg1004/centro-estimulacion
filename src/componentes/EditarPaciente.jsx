@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { apiRequest } from "../config/api";
 import { parseFechaLocal, obtenerFechaInput, formatearFechaEspanol, calcularProximoCumpleanos } from "../utils/dateUtils";
+import CustomDatePicker from "./ui/CustomDatePicker";
 
 export default function EdicionHistoriaClinica() {
   const { id } = useParams();
@@ -235,7 +236,12 @@ export default function EdicionHistoriaClinica() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400">Fecha Nacimiento</label>
-                <input type="date" name="fechaNacimiento" value={obtenerFechaInput(paciente.fechaNacimiento || paciente.fecha_nacimiento)} onChange={handleChange} className="w-full border-b-2 border-gray-100 p-2 focus:border-indigo-400 outline-none transition" />
+                <CustomDatePicker
+                  name="fechaNacimiento"
+                  value={obtenerFechaInput(paciente.fechaNacimiento || paciente.fecha_nacimiento)}
+                  onChange={handleChange}
+                  placeholder="Seleccionar fecha..."
+                />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-400">Edad Calculada ({isNino ? 'meses' : 'años'})</label>
@@ -389,7 +395,12 @@ export default function EdicionHistoriaClinica() {
                   <div className="md:col-span-3 grid grid-cols-3 gap-4 border-t border-pink-100 pt-4">
                     <div>
                       <label className="text-xs font-bold text-pink-400 italic">FUM (Ult Menstruación)</label>
-                      <input type="date" name="fum" value={paciente.fum || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
+                      <CustomDatePicker
+                        name="fum"
+                        value={paciente.fum || ''}
+                        onChange={handleChange}
+                        placeholder="Seleccionar FUM..."
+                      />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-pink-400 italic">Semanas Gestación</label>
@@ -397,7 +408,12 @@ export default function EdicionHistoriaClinica() {
                     </div>
                     <div>
                       <label className="text-xs font-bold text-pink-400 italic">Fecha Prob Parto</label>
-                      <input type="date" name="fechaProbableParto" value={paciente.fechaProbableParto || ''} onChange={handleChange} className="w-full bg-white border border-pink-100 rounded-lg p-2 outline-none text-xs" />
+                      <CustomDatePicker
+                        name="fechaProbableParto"
+                        value={paciente.fechaProbableParto || ''}
+                        onChange={handleChange}
+                        placeholder="Seleccionar FPP..."
+                      />
                     </div>
                   </div>
                 </>
