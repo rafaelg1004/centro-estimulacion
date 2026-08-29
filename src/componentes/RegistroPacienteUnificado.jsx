@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import Swal from "sweetalert2";
+import { apiRequest } from "../config/api";
 import DynamicFormBuilder from "./ui/DynamicFormBuilder";
 import { ESQUEMA_PACIENTE_NINO, ESQUEMA_PACIENTE_ADULTO } from "../config/esquemasFormularios";
 
