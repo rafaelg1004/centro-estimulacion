@@ -19,6 +19,44 @@ export default function RegistroPacienteUnificado({ isModal = false, onClose, on
         }
     }, [searchParams]);
 
+    const handleCloseModal = async () => {
+        if (!tipoPaciente) {
+            if (onClose) onClose();
+            return;
+        }
+        const confirmar = await Swal.fire({
+            title: "¿Cancelar registro?",
+            text: "Se cerrará el formulario y se eliminará cualquier borrador guardado automáticamente.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, cancelar y borrar",
+            cancelButtonText: "Seguir editando",
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#6366f1",
+            customClass: {
+                popup: "rounded-3xl shadow-2xl p-6 border border-red-100",
+                confirmButton: "rounded-xl font-bold px-6 py-3",
+                cancelButton: "rounded-xl font-bold px-6 py-3",
+            }
+        });
+
+        if (confirmar.isConfirmed) {
+            try {
+                const effectivePacienteId = tipoPaciente === "nino" ? "nuevo_paciente_nino" : "nuevo_paciente_adulto";
+                const tituloEsquema = tipoPaciente === "nino" ? ESQUEMA_PACIENTE_NINO.titulo : ESQUEMA_PACIENTE_ADULTO.titulo;
+                if (borradorId) {
+                    await apiRequest(`/borradores/${borradorId}`, { method: "DELETE" });
+                }
+                await apiRequest(`/borradores/limpiar/${effectivePacienteId}/${encodeURIComponent(tituloEsquema)}`, {
+                    method: "DELETE"
+                });
+            } catch (e) {
+                console.error("Error limpiando borrador:", e);
+            }
+            if (onClose) onClose();
+        }
+    };
+
     if (!tipoPaciente) {
         const tarjetaSeleccion = (
             <div className={isModal ? "bg-white w-full max-w-lg rounded-3xl shadow-2xl p-10 flex flex-col items-center relative animate-fadeIn shrink-0" : "bg-white rounded-3xl shadow-2xl p-10 text-center max-w-md w-full border border-indigo-100 flex flex-col items-center relative animate-fadeIn"}>
@@ -72,7 +110,7 @@ export default function RegistroPacienteUnificado({ isModal = false, onClose, on
                         <h3 className="font-bold text-gray-700">Completando nuevo paciente</h3>
                     </div>
                     <button 
-                        onClick={onClose} 
+                        onClick={handleCloseModal} 
                         className="p-2 bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200 rounded-full transition-colors flex items-center justify-center w-8 h-8 shadow-sm"
                         title="Cerrar modal"
                     >
