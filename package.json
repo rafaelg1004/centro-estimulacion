@@ -15,19 +15,20 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.12.0",
-    "react-scripts": "5.0.1",
     "react-signature-canvas": "^1.1.0-alpha.2",
     "sweetalert2": "^11.26.17",
     "uuid": "^13.0.0",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "vite": "^5.4.11",
+    "@vitejs/plugin-react": "^4.3.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "DISABLE_ESLINT_PLUGIN=true GENERATE_SOURCEMAP=false INLINE_RUNTIME_CHUNK=false CI=false react-scripts build",
-    "test": "react-scripts test",
-    "test:perinatal": "node src/tests/valoracionperinatal.test.js",
-    "eject": "react-scripts eject"
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:perinatal": "node src/tests/valoracionperinatal.test.js"
   },
   "eslintConfig": {
     "extends": [
