@@ -510,7 +510,26 @@ export default function DynamicFormBuilder({
     });
 
     if (camposFaltantes.length > 0) {
-      setErrores(`Faltan campos obligatorios: ${camposFaltantes.join(", ")}`);
+      if (validarTodo) {
+        Swal.fire({
+          icon: "warning",
+          title: "Campos obligatorios incompletos",
+          html: `<div style="text-align: left; font-size: 14px; color: #374151;">
+            Por favor completa los siguientes campos obligatorios para continuar:
+            <ul style="margin-top: 10px; padding-left: 20px; color: #dc2626; font-weight: 600; line-height: 1.6;">
+              ${camposFaltantes.map((c) => `<li>${c}</li>`).join("")}
+            </ul>
+          </div>`,
+          confirmButtonColor: "#f59e0b",
+          confirmButtonText: "Entendido",
+          customClass: {
+            popup: "rounded-3xl shadow-2xl p-6 border border-amber-100",
+            confirmButton: "rounded-xl font-bold px-6 py-3",
+          },
+        });
+      } else {
+        setErrores(`Faltan campos obligatorios: ${camposFaltantes.join(", ")}`);
+      }
       return false;
     }
     setErrores("");
@@ -766,7 +785,19 @@ export default function DynamicFormBuilder({
         navigate(esquema.redireccion);
       }
     } catch (err) {
-      setErrores(`Error: ${err.message}`);
+      console.error("❌ Error al guardar formulario:", err);
+      setErrores(""); // No mostrar el banner superior
+      Swal.fire({
+        icon: "error",
+        title: "Error al guardar",
+        text: err.message || "Ocurrió un error al procesar el guardado en el servidor.",
+        confirmButtonColor: "#ef4444",
+        confirmButtonText: "Entendido",
+        customClass: {
+          popup: "rounded-3xl shadow-2xl p-6 border border-red-100",
+          confirmButton: "rounded-xl font-bold px-6 py-3",
+        },
+      });
     } finally {
       setGuardando(false);
     }

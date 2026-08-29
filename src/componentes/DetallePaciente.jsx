@@ -1,6 +1,6 @@
-import { useParams, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { parseFechaLocal, formatearFecha, obtenerFechaInput } from "../utils/dateUtils";
+import { useParams, useNavigate } from "react-router-dom";
+import { parseFechaLocal, formatearFecha, obtenerFechaInput, formatearFechaEspanol, calcularProximoCumpleanos } from "../utils/dateUtils";
 import {
   ClipboardDocumentListIcon,
   ArrowLeftIcon,
@@ -269,8 +269,21 @@ export default function DetallePacienteUnificado() {
               </p>
               <p>
                 <span className="font-bold">F. Nacimiento:</span>{" "}
-                {obtenerFechaInput(paciente.fecha_nacimiento)}
+                {formatearFechaEspanol(paciente.fecha_nacimiento || paciente.fechaNacimiento)}
               </p>
+              {calcularProximoCumpleanos(paciente.fecha_nacimiento || paciente.fechaNacimiento) && (
+                <div className="mt-2 p-2.5 bg-emerald-50/80 rounded-xl border border-emerald-200">
+                  <div className="text-xs font-bold text-emerald-800 uppercase flex items-center gap-1">
+                    🎈 Próx. Cumpleaños:
+                  </div>
+                  <div className="text-xs text-emerald-900 font-bold mt-0.5">
+                    {calcularProximoCumpleanos(paciente.fecha_nacimiento || paciente.fechaNacimiento).fechaFormateada}
+                  </div>
+                  <span className="inline-block mt-1 text-[11px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">
+                    {calcularProximoCumpleanos(paciente.fecha_nacimiento || paciente.fechaNacimiento).textoFaltante}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
