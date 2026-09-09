@@ -594,15 +594,31 @@ export default function DetalleValoracion() {
       const tp = valoracionRaw.tipo_programa || "";
       const codConsultaRaw = String(valoracionRaw.cod_consulta || '').split(' ')[0].trim();
       let type = "nino";
-      if (
+
+      const esPediatrico =
+        tp.toLowerCase().includes("pediatr") ||
+        tp.toLowerCase().includes("estimulaci") ||
+        Boolean(valoracionRaw.modulo_pediatria && Object.keys(valoracionRaw.modulo_pediatria).length > 0 && Object.values(valoracionRaw.modulo_pediatria).some(v => v && (typeof v !== 'object' || Object.keys(v).length > 0))) ||
+        (valoracionRaw.datos_legacy?.tipoPrograma === "Pediatría") ||
+        (valoracionRaw.paciente?.fecha_nacimiento && (() => {
+          const diffAnios = (new Date() - new Date(valoracionRaw.paciente.fecha_nacimiento)) / (1000 * 60 * 60 * 24 * 365.25);
+          return diffAnios < 12;
+        })());
+
+      if (esPediatrico) {
+        type = "nino";
+      } else if (
         tp.includes("Lactancia") ||
         valoracionRaw.modulo_lactancia?.tipo_lactancia
-      )
+      ) {
         type = "lactancia";
-      else if (tp.includes("Piso") || codConsultaRaw === "890202")
+      } else if (tp.includes("Piso") || codConsultaRaw === "890202") {
         type = "adulto";
-      else if (tp === "Perinatal" || codConsultaRaw === "890211")
+      } else if (tp.toLowerCase().includes("perinatal")) {
         type = "perinatal";
+      } else {
+        type = "nino";
+      }
       const blob = await apiDownload(
         `/valoraciones/reporte/exportar-pdf/${id}?type=${type}`,
       );
