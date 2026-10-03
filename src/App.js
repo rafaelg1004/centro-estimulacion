@@ -107,6 +107,22 @@ function RutasAutenticadas({ usuario, setUsuario }) {
     return () => window.removeEventListener('session:expired', handleExpired);
   }, [setUsuario, navigate]);
 
+  // Alerta amigable cuando se excede el límite de peticiones (HTTP 429)
+  useEffect(() => {
+    const handleRateLimited = (event) => {
+      Swal.fire({
+        title: "Límite de solicitudes alcanzado",
+        text:
+          event.detail?.message ||
+          "Has realizado demasiadas solicitudes en poco tiempo. Por favor espera unos minutos antes de continuar.",
+        icon: "warning",
+        confirmButtonColor: "#6366f1",
+      });
+    };
+    window.addEventListener("api:rate-limited", handleRateLimited);
+    return () => window.removeEventListener("api:rate-limited", handleRateLimited);
+  }, []);
+
   // Obtener rol del usuario desde sessionStorage
   const userRole = sessionStorage.getItem("userRole");
 

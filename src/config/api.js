@@ -101,6 +101,19 @@ export const apiRequest = async (endpoint, options = {}) => {
         window.dispatchEvent(new CustomEvent("session:expired"));
       }
 
+      // Si se excede el límite de peticiones (Rate Limit - HTTP 429)
+      // Excepción: no disparar si es login para que la vista de login muestre su propio mensaje inline
+      if (response.status === 429 && !isLoginEndpoint) {
+        window.dispatchEvent(
+          new CustomEvent("api:rate-limited", {
+            detail: {
+              endpoint,
+              message: errorMessage,
+            },
+          }),
+        );
+      }
+
       // Crear un error que incluya los datos del backend
       const error = new Error(errorMessage);
       error.response = { data: errorData, status: response.status };
