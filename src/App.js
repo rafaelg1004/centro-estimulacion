@@ -32,6 +32,7 @@ import ListaGlobalSesionesPerinatal from "./componentes/ListaGlobalSesionesPerin
 import EditarClase from "./componentes/EditarClase";
 import MiPerfil from "./componentes/MiPerfil";
 import ConfiguracionClinica from "./componentes/ConfiguracionClinica";
+import Cumpleanos from "./componentes/Cumpleanos";
 import Swal from "sweetalert2";
 
 
@@ -186,6 +187,14 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               >
                 <UsersIcon className="h-5 w-5" />
                 Ver Pacientes
+              </Link>
+              <Link
+                to="/cumpleanos"
+                className="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold py-2 px-4 rounded transition text-center shadow flex items-center gap-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <span className="text-lg">🎂</span>
+                Cumpleaños
               </Link>
               <Link
                 to="/sesiones-perinatal"
@@ -344,6 +353,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             <Route path="/pacientes" element={<ListaPacientes />} />
             <Route path="/pacientes/:id" element={<DetallePaciente />} />
             <Route path="/pacientes/editar/:id" element={<EditarPaciente />} />
+            <Route path="/cumpleanos" element={<Cumpleanos />} />
 
             {/* --- CLASES Y SESIONES --- */}
             <Route path="/" element={<Home />} />

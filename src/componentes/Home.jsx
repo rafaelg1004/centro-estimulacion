@@ -10,6 +10,7 @@ export default function Home() {
   // eslint-disable-next-line no-unused-vars
   const [borradores, setBorradores] = useState([]);
   const [faltaFirma, setFaltaFirma] = useState(false);
+  const [cumpleanosResumen, setCumpleanosResumen] = useState(null);
 
   useEffect(() => {
     const fetchBorradores = async () => {
@@ -71,9 +72,21 @@ export default function Home() {
         console.error("Error verificando perfil", e);
       }
     };
+
+    const fetchCumpleanos = async () => {
+      try {
+        const data = await apiRequest("/cumpleanos/proximos?dias=7&limit=5");
+        if (data && data.success && data.resumen) {
+          setCumpleanosResumen(data.resumen);
+        }
+      } catch (e) {
+        // Silencioso en home si falla
+      }
+    };
     
     fetchBorradores();
     fetchPerfil();
+    fetchCumpleanos();
   }, [navigate]);
 
   return (
@@ -100,12 +113,44 @@ export default function Home() {
           </div>
         )}
 
+        {cumpleanosResumen && (cumpleanosResumen.hoy > 0 || cumpleanosResumen.esta_semana > 0) && (
+          <div className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎂</span>
+              <div>
+                <p className="font-bold text-sm">
+                  {cumpleanosResumen.hoy > 0
+                    ? `¡Hoy cumplen ${cumpleanosResumen.hoy} paciente${cumpleanosResumen.hoy > 1 ? "s" : ""}!`
+                    : `Hay ${cumpleanosResumen.esta_semana} cumpleaños esta semana`}
+                </p>
+                <p className="text-xs text-green-100">
+                  {cumpleanosResumen.hoy > 0
+                    ? "Envíales una felicitación por WhatsApp desde el sistema."
+                    : "Consulta la lista y prepárate para felicitarlos."}
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/cumpleanos"
+              className="whitespace-nowrap bg-white text-green-700 hover:bg-green-50 px-4 py-2 rounded-xl font-bold text-xs shadow transition transform hover:scale-105"
+            >
+              Ver Cumpleaños ➡️
+            </Link>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4 w-full">
           <Link
             to="/pacientes"
             className="flex items-center justify-center gap-2 bg-indigo-200 hover:bg-indigo-300 text-indigo-800 font-bold py-3 rounded-xl text-center transition transform hover:scale-105 shadow"
           >
             <UserGroupIcon className="h-6 w-6" /> Lista de Pacientes
+          </Link>
+          <Link
+            to="/cumpleanos"
+            className="flex items-center justify-center gap-2 bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 rounded-xl text-center transition transform hover:scale-105 shadow"
+          >
+            <span className="text-xl">🎂</span> Cumpleaños
           </Link>
           <Link
             to="/clases"
@@ -135,4 +180,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+}
