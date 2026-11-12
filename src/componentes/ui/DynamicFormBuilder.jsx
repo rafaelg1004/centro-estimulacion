@@ -1501,28 +1501,29 @@ export default function DynamicFormBuilder({
       };
 
       return (
-        <div className="flex flex-col gap-4 md:col-span-2 p-5 bg-gradient-to-br from-indigo-50/40 via-white to-pink-50/30 rounded-3xl border border-indigo-100 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100 pb-3">
-            <div>
-              <h4 className="text-sm font-black text-indigo-900 uppercase tracking-tight flex items-center gap-2">
+        <div className="flex flex-col gap-5 md:col-span-2 p-6 bg-gradient-to-br from-indigo-50/50 via-white to-pink-50/40 rounded-3xl border border-indigo-200 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-indigo-100 pb-4">
+            <div className="max-w-2xl">
+              <h4 className="text-base font-black text-indigo-900 tracking-tight flex items-center gap-2">
                 <span>✨</span> {campo.etiqueta}
               </h4>
-              {campo.descripcion && (
-                <p className="text-xs text-gray-500 mt-0.5">{campo.descripcion}</p>
-              )}
+              <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                {campo.descripcion ||
+                  "Utiliza este espacio para registrar mediciones específicas, respuestas a ejercicios, escalas clínicas o tablas de control propias de la sesión actual."}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={agregarPregunta}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
               >
                 <span>➕</span> Nueva Pregunta
               </button>
               <button
                 type="button"
                 onClick={agregarTabla}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
               >
                 <span>📊</span> Nueva Tabla
               </button>
@@ -1530,12 +1531,13 @@ export default function DynamicFormBuilder({
           </div>
 
           {bloques.length === 0 ? (
-            <div className="text-center py-8 px-4 border-2 border-dashed border-indigo-200 rounded-2xl bg-white/70">
-              <p className="text-xs font-semibold text-gray-500">
-                Aún no has agregado preguntas ni tablas adicionales a este seguimiento.
+            <div className="text-center py-8 px-6 border-2 border-dashed border-indigo-200 rounded-2xl bg-white/80 space-y-2">
+              <p className="text-sm font-bold text-gray-700">
+                No hay preguntas ni tablas agregadas para esta sesión.
               </p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                Usa los botones superiores si deseas registrar controles o preguntas especiales para esta sesión.
+              <p className="text-xs text-gray-500 max-w-xl mx-auto leading-relaxed">
+                • Usa <strong>➕ Nueva Pregunta</strong> para anotar un dato puntual de hoy (ejemplo: <em>“¿Tolera posición prona?”</em>, <em>“Nivel de dolor EVA”</em> o <em>“Observación en casa”</em>).<br />
+                • Usa <strong>📊 Nueva Tabla</strong> si necesitas registrar varias filas o mediciones en columnas (ejemplo: ejercicios realizados, repeticiones y tolerancia).
               </p>
             </div>
           ) : (
@@ -1673,10 +1675,17 @@ export default function DynamicFormBuilder({
               ))}
             </div>
           )}
-          <p className="mt-3 text-[11px] text-gray-500 flex items-center gap-1.5">
-            <span>💡</span>
-            <span>Las preguntas y tablas fijas de seguimiento se configuran desde Configuración de la Clínica → Plantillas.</span>
-          </p>
+          <div className="mt-2 p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-xs text-indigo-950 space-y-1.5 leading-relaxed">
+            <p className="font-bold flex items-center gap-1.5 text-indigo-900">
+              <span>💡</span> ¿Cómo funciona esta sección?
+            </p>
+            <p>
+              • <strong>Para esta consulta únicamente:</strong> Las preguntas o tablas que agregues aquí con <em>Nueva Pregunta</em> o <em>Nueva Tabla</em> quedan guardadas solo en la historia clínica de este paciente en la sesión de hoy.
+            </p>
+            <p>
+              • <strong>Para que aparezcan siempre en todos los seguimientos:</strong> Si deseas que ciertas preguntas o tablas salgan precargadas automáticamente cada vez que atiendas un seguimiento de este programa, configúralas una sola vez en <strong>Configuración de la Clínica → Plantillas → Preguntas de Seguimiento</strong>.
+            </p>
+          </div>
         </div>
       );
     }
