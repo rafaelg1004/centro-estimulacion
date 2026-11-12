@@ -27,8 +27,23 @@ export default function NuevaValoracionUnificada() {
     const [subTipoLactancia, setSubTipoLactancia] = useState(null); // 'prenatal', 'postparto'
     const [modoSeguimiento, setModoSeguimiento] = useState(paramModo === "seguimiento");
     const [valoracionPrevia, setValoracionPrevia] = useState(null);
+    const [esquemaDinamicoPediatria, setEsquemaDinamicoPediatria] = useState(null);
     const navigate = useNavigate();
     const [actionsContainer, setActionsContainer] = useState(null);
+
+    // Cargar esquema dinámico relacional (BD) de Pediatría una sola vez.
+    // Si la API falla o la plantilla no existe, se usa el esquema local (fallback).
+    useEffect(() => {
+        apiRequest("/plantillas/PEDIATRIA_INICIAL/esquema")
+            .then((esq) => {
+                if (esq && Array.isArray(esq.secciones) && esq.secciones.length > 0) {
+                    setEsquemaDinamicoPediatria(esq);
+                }
+            })
+            .catch((e) => {
+                console.log("ℹ️ Usando esquema local de Pediatría como respaldo:", e?.message);
+            });
+    }, []);
 
     // Cargar valoración previa si se indicó en query param o si se entra en modo seguimiento
     useEffect(() => {
@@ -208,7 +223,7 @@ export default function NuevaValoracionUnificada() {
                 esquemaActivo = ESQUEMAS_SEGUIMIENTO.PEDIATRIA;
                 tipo_programaStr = "Pediatría (Seguimiento)";
             } else {
-                esquemaActivo = ESQUEMA_VALORACION_PEDIATRIA;
+                esquemaActivo = esquemaDinamicoPediatria || ESQUEMA_VALORACION_PEDIATRIA;
                 tipo_programaStr = "Pediatría";
             }
         } else if (pacienteElegido?.tipoModulo === 'adulto') {
