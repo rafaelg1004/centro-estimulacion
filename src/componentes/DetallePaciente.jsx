@@ -711,12 +711,28 @@ export default function DetallePacienteUnificado() {
                       v.diagnostico_fisioterapeutico ||
                       "Evaluación general"}
                   </p>
-                  <button
-                    onClick={() => navigate(v.ruta || `/valoraciones/${v.id || v._id}`)}
-                    className="w-full bg-gray-50 group-hover:bg-indigo-600 group-hover:text-white text-indigo-600 font-bold py-2 rounded-lg transition"
-                  >
-                    Ver Detalles
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const tp = v.tipo || "";
+                        let tipoParam = "pediatria";
+                        if (tp.includes("Lactancia")) tipoParam = "lactancia";
+                        else if (tp.includes("Piso")) tipoParam = "pisopelvico";
+                        else if (tp.includes("Perinatal")) tipoParam = "perinatal";
+                        navigate(`/valoraciones/nueva?paciente=${id}&tipo=${tipoParam}&modo=seguimiento&origen=${v.id || v._id}`);
+                      }}
+                      title="Crear nueva valoración de seguimiento o control a partir de esta"
+                      className="flex-1 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-bold py-2 rounded-lg text-xs transition"
+                    >
+                      📈 Seguimiento
+                    </button>
+                    <button
+                      onClick={() => navigate(v.ruta || `/valoraciones/${v.id || v._id}`)}
+                      className="flex-1 bg-gray-50 hover:bg-gray-200 text-gray-700 font-bold py-2 rounded-lg text-xs transition"
+                    >
+                      Ver Detalles
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

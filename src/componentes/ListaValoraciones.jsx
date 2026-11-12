@@ -24,7 +24,7 @@ export default function HistoriaClinicaDigital() {
     {
       header: "Especialidad / Tipo",
       accessor: "tipo",
-      format: (val) => {
+      format: (val, row) => {
         const colors = {
           Pediatría: "bg-indigo-100 text-indigo-700 border-indigo-200",
           Lactancia: "bg-pink-100 text-pink-700 border-pink-200",
@@ -32,13 +32,26 @@ export default function HistoriaClinicaDigital() {
           Perinatal: "bg-purple-100 text-purple-700 border-purple-200",
           General: "bg-gray-100 text-gray-700 border-gray-200 shadow-sm",
         };
-        const color = colors[val] || colors.General;
+        const rawTipo = String(val || "General");
+        const baseKey = Object.keys(colors).find((k) => rawTipo.includes(k)) || "General";
+        const color = colors[baseKey];
+        const esSeguimiento =
+          rawTipo.toLowerCase().includes("seguimiento") ||
+          String(row?.cod_consulta || "").includes("890311");
+
         return (
-          <span
-            className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter border ${color}`}
-          >
-            {val || "General"}
-          </span>
+          <div className="flex flex-col gap-1 items-start">
+            <span
+              className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter border ${color}`}
+            >
+              {rawTipo}
+            </span>
+            {esSeguimiento && (
+              <span className="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold">
+                📈 Control / Progreso
+              </span>
+            )}
+          </div>
         );
       },
     },

@@ -5,6 +5,7 @@ import { ESQUEMA_VALORACION_LACTANCIA_PRENATAL } from "../config/esquemaValoraci
 import { ESQUEMA_VALORACION_LACTANCIA_POSTPARTO } from "../config/esquemaValoracionLactanciaPostparto";
 import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPisoPelvico";
 import { ESQUEMA_VALORACION_PERINATAL } from "../config/esquemaValoracionPerinatal";
+import { ESQUEMAS_SEGUIMIENTO } from "../config/esquemaValoracionSeguimiento";
 import { apiRequest } from "../config/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import { parseFechaLocal } from "../utils/dateUtils";
@@ -15,6 +16,8 @@ export default function NuevaValoracionUnificada() {
     const paramPacienteId = query.get("paciente");
     const paramTipo = query.get("tipo");
     const paramBorradorId = query.get("borradorId");
+    const paramModo = query.get("modo"); // 'seguimiento' o null
+    const paramOrigenId = query.get("origen");
 
     const [pacienteId, setPacienteId] = useState(paramPacienteId || null);
     const [pacientes, setPacientes] = useState([]);
@@ -22,8 +25,31 @@ export default function NuevaValoracionUnificada() {
     const [filtro, setFiltro] = useState("");
     const [tipoValoracionAdulto, setTipoValoracionAdulto] = useState(paramTipo || null); // 'lactancia', 'pisopelvico', 'perinatal'
     const [subTipoLactancia, setSubTipoLactancia] = useState(null); // 'prenatal', 'postparto'
+    const [modoSeguimiento, setModoSeguimiento] = useState(paramModo === "seguimiento");
+    const [valoracionPrevia, setValoracionPrevia] = useState(null);
     const navigate = useNavigate();
     const [actionsContainer, setActionsContainer] = useState(null);
+
+    // Cargar valoración previa si se indicó en query param o si se entra en modo seguimiento
+    useEffect(() => {
+        if (!pacienteId) return;
+
+        if (paramOrigenId) {
+            apiRequest(`/valoraciones/${paramOrigenId}`)
+                .then((val) => {
+                    setValoracionPrevia(val);
+                })
+                .catch((e) => console.warn("No se pudo cargar valoración origen:", e));
+        } else if (modoSeguimiento) {
+            apiRequest(`/valoraciones/paciente/${pacienteId}`)
+                .then((lista) => {
+                    if (Array.isArray(lista) && lista.length > 0) {
+                        setValoracionPrevia(lista[0]);
+                    }
+                })
+                .catch((e) => console.warn("No se pudo cargar última valoración del paciente:", e));
+        }
+    }, [pacienteId, paramOrigenId, modoSeguimiento]);
 
     // Paso 1: Cargar pacientes
     useEffect(() => {
@@ -175,19 +201,42 @@ export default function NuevaValoracionUnificada() {
     if (pacienteId && pacienteElegido && (pacienteElegido.tipoModulo === 'pediatria' || (tipoValoracionAdulto && (tipoValoracionAdulto !== 'lactancia' || subTipoLactancia)))) {
 
         let esquemaActivo = ESQUEMA_VALORACION_PEDIATRIA;
-        if (pacienteElegido?.tipoModulo === 'adulto') {
-            if (tipoValoracionAdulto === 'lactancia') {
-                esquemaActivo = subTipoLactancia === 'prenatal' ? ESQUEMA_VALORACION_LACTANCIA_PRENATAL : ESQUEMA_VALORACION_LACTANCIA_POSTPARTO;
-            }
-            if (tipoValoracionAdulto === 'pisopelvico') esquemaActivo = ESQUEMA_VALORACION_PISO_PELVICO;
-            if (tipoValoracionAdulto === 'perinatal') esquemaActivo = ESQUEMA_VALORACION_PERINATAL;
-        }
-
         let tipo_programaStr = "Pediatría";
-        if (pacienteElegido?.tipoModulo === 'adulto') {
-            if (tipoValoracionAdulto === 'lactancia') tipo_programaStr = subTipoLactancia === 'prenatal' ? "Lactancia (Prenatal)" : "Lactancia (Postparto)";
-            if (tipoValoracionAdulto === 'pisopelvico') tipo_programaStr = "Piso Pélvico";
-            if (tipoValoracionAdulto === 'perinatal') tipo_programaStr = "Perinatal";
+
+        if (pacienteElegido?.tipoModulo === 'pediatria') {
+            if (modoSeguimiento) {
+                esquemaActivo = ESQUEMAS_SEGUIMIENTO.PEDIATRIA;
+                tipo_programaStr = "Pediatría (Seguimiento)";
+            } else {
+                esquemaActivo = ESQUEMA_VALORACION_PEDIATRIA;
+                tipo_programaStr = "Pediatría";
+            }
+        } else if (pacienteElegido?.tipoModulo === 'adulto') {
+            if (tipoValoracionAdulto === 'lactancia') {
+                if (modoSeguimiento) {
+                    esquemaActivo = ESQUEMAS_SEGUIMIENTO.LACTANCIA;
+                    tipo_programaStr = "Lactancia (Seguimiento)";
+                } else {
+                    esquemaActivo = subTipoLactancia === 'prenatal' ? ESQUEMA_VALORACION_LACTANCIA_PRENATAL : ESQUEMA_VALORACION_LACTANCIA_POSTPARTO;
+                    tipo_programaStr = subTipoLactancia === 'prenatal' ? "Lactancia (Prenatal)" : "Lactancia (Postparto)";
+                }
+            } else if (tipoValoracionAdulto === 'pisopelvico') {
+                if (modoSeguimiento) {
+                    esquemaActivo = ESQUEMAS_SEGUIMIENTO.PISO_PELVICO;
+                    tipo_programaStr = "Piso Pélvico (Seguimiento)";
+                } else {
+                    esquemaActivo = ESQUEMA_VALORACION_PISO_PELVICO;
+                    tipo_programaStr = "Piso Pélvico";
+                }
+            } else if (tipoValoracionAdulto === 'perinatal') {
+                if (modoSeguimiento) {
+                    esquemaActivo = ESQUEMAS_SEGUIMIENTO.PERINATAL;
+                    tipo_programaStr = "Perinatal (Seguimiento)";
+                } else {
+                    esquemaActivo = ESQUEMA_VALORACION_PERINATAL;
+                    tipo_programaStr = "Perinatal";
+                }
+            }
         }
 
         const esquemaConPaciente = {
@@ -199,7 +248,15 @@ export default function NuevaValoracionUnificada() {
                         campos: [
                             { nombre: "paciente", tipo: "hidden", valorPorDefecto: pacienteId },
                             { nombre: "tipo_programa", tipo: "hidden", valorPorDefecto: tipo_programaStr },
-                            ...sec.campos
+                            { nombre: "esSeguimiento", tipo: "hidden", valorPorDefecto: modoSeguimiento },
+                            { nombre: "permitirDuplicado", tipo: "hidden", valorPorDefecto: modoSeguimiento },
+                            ...(valoracionPrevia?.id ? [{ nombre: "valoracionOrigenId", tipo: "hidden", valorPorDefecto: valoracionPrevia.id }] : []),
+                            ...sec.campos.map((c) => {
+                                if (modoSeguimiento && c.nombre === "codDiagnosticoPrincipal" && valoracionPrevia?.cod_diagnostico_principal) {
+                                    return { ...c, valorPorDefecto: valoracionPrevia.cod_diagnostico_principal };
+                                }
+                                return c;
+                            })
                         ]
                     };
                 }
@@ -235,9 +292,22 @@ export default function NuevaValoracionUnificada() {
                                 <h2 className="text-xl font-black text-gray-800 leading-tight uppercase tracking-tight">
                                     {pacienteElegido.nombres} {pacienteElegido.apellidos}
                                 </h2>
-                                <p className="text-[11px] font-bold text-indigo-400 tracking-widest uppercase">
-                                    {pacienteElegido.tipo_documento_identificacion || pacienteElegido.tipoDocumentoIdentificacion || "HC"}: {pacienteElegido.num_documento_identificacion || pacienteElegido.numDocumentoIdentificacion} • {pacienteElegido.tipoModulo === 'pediatria' ? 'PROGRAMA PEDIÁTRICO' : 'PROGRAMA MATERNO'}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-[11px] font-bold text-indigo-400 tracking-widest uppercase">
+                                        {pacienteElegido.tipo_documento_identificacion || pacienteElegido.tipoDocumentoIdentificacion || "HC"}: {pacienteElegido.num_documento_identificacion || pacienteElegido.numDocumentoIdentificacion} • {pacienteElegido.tipoModulo === 'pediatria' ? 'PROGRAMA PEDIÁTRICO' : 'PROGRAMA MATERNO'}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setModoSeguimiento(!modoSeguimiento)}
+                                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${
+                                            modoSeguimiento
+                                                ? "bg-purple-100 text-purple-800 border-purple-300 shadow-sm"
+                                                : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                                        }`}
+                                    >
+                                        {modoSeguimiento ? "📈 Modo: Seguimiento / Control" : "📋 Modo: Valoración Inicial"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

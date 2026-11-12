@@ -189,6 +189,7 @@ export default function DynamicDetailBuilder({
   data,
   onBack,
   onEdit,
+  onCreateFollowup,
   onPrint,
   onExportPDF,
   onLock,
@@ -257,6 +258,14 @@ export default function DynamicDetailBuilder({
             </button>
 
             <div className="flex flex-wrap gap-3">
+              {onCreateFollowup && (
+                <button
+                  onClick={onCreateFollowup}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-indigo-100 transition-all flex items-center gap-2"
+                >
+                  <span>📈</span> Nuevo Seguimiento
+                </button>
+              )}
               {onEdit && (
                 <button
                   onClick={data.bloqueada ? undefined : onEdit}
@@ -404,6 +413,70 @@ export default function DynamicDetailBuilder({
                       const audit = data.auditTrail
                         ? getNestedValue(data.auditTrail, campo.nombre)
                         : null;
+
+                      if (campo.tipo === "bloques_dinamicos") {
+                        const bloques = Array.isArray(val) ? val : [];
+                        if (bloques.length === 0) return null;
+                        return (
+                          <div key={cIdx} className="md:col-span-2 lg:col-span-3 my-3">
+                            <span className="font-bold text-indigo-900 mb-3 text-xs uppercase tracking-tight block">
+                              {campo.etiqueta}
+                            </span>
+                            <div className="space-y-4">
+                              {bloques.map((b, bIdx) => (
+                                <div
+                                  key={b.id || bIdx}
+                                  className="p-4 bg-white rounded-2xl border border-indigo-100 shadow-sm"
+                                >
+                                  {b.tipoBloque === "pregunta" ? (
+                                    <div>
+                                      <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-1">
+                                        Pregunta #{bIdx + 1}: {b.pregunta || "Sin pregunta"}
+                                      </span>
+                                      <p className="text-sm font-medium text-gray-800 bg-gray-50 p-3 rounded-xl border border-gray-100 whitespace-pre-wrap">
+                                        {b.respuesta || "Sin respuesta registrada"}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <span className="text-xs font-black text-pink-700 uppercase tracking-wider block mb-2">
+                                        📊 {b.titulo || `Tabla #${bIdx + 1}`}
+                                      </span>
+                                      <div className="overflow-x-auto rounded-xl border border-gray-200">
+                                        <table className="min-w-full divide-y divide-gray-200 text-xs">
+                                          <thead className="bg-indigo-50/70">
+                                            <tr>
+                                              {(b.columnas || []).map((col, idxCol) => (
+                                                <th
+                                                  key={idxCol}
+                                                  className="px-3 py-2 text-left font-bold text-indigo-900 uppercase tracking-wider"
+                                                >
+                                                  {col}
+                                                </th>
+                                              ))}
+                                            </tr>
+                                          </thead>
+                                          <tbody className="bg-white divide-y divide-gray-100">
+                                            {(b.filas || []).map((fila, idxFila) => (
+                                              <tr key={idxFila} className="hover:bg-gray-50/60">
+                                                {(b.columnas || []).map((_, idxCol) => (
+                                                  <td key={idxCol} className="px-3 py-2 text-gray-700">
+                                                    {fila[idxCol] || "-"}
+                                                  </td>
+                                                ))}
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
 
                       return (
                         <div

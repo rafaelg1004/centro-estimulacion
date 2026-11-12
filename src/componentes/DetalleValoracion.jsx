@@ -6,6 +6,7 @@ import { ESQUEMA_VALORACION_PEDIATRIA } from "../config/esquemaValoracionPediatr
 import { ESQUEMA_VALORACION_LACTANCIA } from "../config/esquemaValoracionLactancia";
 import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPisoPelvico";
 import { ESQUEMA_VALORACION_PERINATAL } from "../config/esquemaValoracionPerinatal";
+import { ESQUEMAS_SEGUIMIENTO } from "../config/esquemaValoracionSeguimiento";
 import Swal from "sweetalert2";
 
 // Helper: Convertir snake_case a camelCase
@@ -480,8 +481,26 @@ export default function DetalleValoracion() {
         // Nota: cod_consulta puede incluir descripción (ej. "890211 - CONSULTA..."), extraer solo el código
         const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
         const tp = data.tipo_programa || "";
+        const esSeguimiento =
+          tp.toLowerCase().includes("seguimiento") ||
+          codConsulta === "890311" ||
+          data.modulo_pediatria?.esSeguimiento ||
+          data.modulo_piso_pelvico?.esSeguimiento ||
+          data.modulo_lactancia?.esSeguimiento ||
+          data.modulo_perinatal?.esSeguimiento ||
+          data.examen_fisico?.esSeguimiento;
 
-        if (tp === "Pediatría" || tp === "Pediatria") {
+        if (esSeguimiento) {
+          if (tp.includes("Perinatal") || data.modulo_perinatal) {
+            setEsquema(ESQUEMAS_SEGUIMIENTO.PERINATAL);
+          } else if (tp.includes("Piso") || data.modulo_piso_pelvico) {
+            setEsquema(ESQUEMAS_SEGUIMIENTO.PISO_PELVICO);
+          } else if (tp.includes("Lactancia") || data.modulo_lactancia) {
+            setEsquema(ESQUEMAS_SEGUIMIENTO.LACTANCIA);
+          } else {
+            setEsquema(ESQUEMAS_SEGUIMIENTO.PEDIATRIA);
+          }
+        } else if (tp === "Pediatría" || tp === "Pediatria") {
           setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
         } else if (tp === "Perinatal") {
           setEsquema(ESQUEMA_VALORACION_PERINATAL);
@@ -690,6 +709,15 @@ export default function DetalleValoracion() {
       data={valoracion}
       onBack={() => navigate("/valoraciones")}
       onEdit={() => navigate(`/valoraciones/editar/${id}`)}
+      onCreateFollowup={() => {
+        const pId = valoracionRaw.paciente_id || valoracionRaw.paciente?.id || valoracionRaw.paciente;
+        const tp = valoracionRaw.tipo_programa || "";
+        let tipoParam = "pediatria";
+        if (tp.includes("Lactancia")) tipoParam = "lactancia";
+        else if (tp.includes("Piso")) tipoParam = "pisopelvico";
+        else if (tp.includes("Perinatal")) tipoParam = "perinatal";
+        navigate(`/valoraciones/nueva?paciente=${pId}&tipo=${tipoParam}&modo=seguimiento&origen=${id}`);
+      }}
       onExportPDF={handleExportPDF}
       onLock={handleLock}
     />

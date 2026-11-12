@@ -1350,6 +1350,306 @@ export default function DynamicFormBuilder({
       );
     }
 
+    if (campo.tipo === "bloques_dinamicos") {
+      const bloques = Array.isArray(formData[campo.nombre]) ? formData[campo.nombre] : [];
+
+      const actualizarBloques = (nuevosBloques) => {
+        setFormData((prev) => ({
+          ...prev,
+          [campo.nombre]: nuevosBloques,
+        }));
+      };
+
+      const agregarPregunta = () => {
+        const nueva = {
+          id: `pregunta_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+          tipoBloque: "pregunta",
+          pregunta: "",
+          respuesta: "",
+        };
+        actualizarBloques([...bloques, nueva]);
+      };
+
+      const agregarTabla = () => {
+        const nueva = {
+          id: `tabla_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+          tipoBloque: "tabla",
+          titulo: "Tabla de Progreso",
+          columnas: ["Fecha / Parámetro", "Medición / Avance", "Observaciones"],
+          filas: [
+            ["", "", ""],
+          ],
+        };
+        actualizarBloques([...bloques, nueva]);
+      };
+
+      const eliminarBloque = (id) => {
+        actualizarBloques(bloques.filter((b) => b.id !== id));
+      };
+
+      const cambiarPreguntaTexto = (id, field, val) => {
+        actualizarBloques(
+          bloques.map((b) => (b.id === id ? { ...b, [field]: val } : b))
+        );
+      };
+
+      const cambiarTituloTabla = (id, titulo) => {
+        actualizarBloques(
+          bloques.map((b) => (b.id === id ? { ...b, titulo } : b))
+        );
+      };
+
+      const agregarColumnaTabla = (id) => {
+        actualizarBloques(
+          bloques.map((b) => {
+            if (b.id !== id) return b;
+            const cols = [...(b.columnas || [])];
+            cols.push(`Columna ${cols.length + 1}`);
+            const filas = (b.filas || []).map((f) => [...f, ""]);
+            return { ...b, columnas: cols, filas };
+          })
+        );
+      };
+
+      const renombrarColumna = (id, cIdx, val) => {
+        actualizarBloques(
+          bloques.map((b) => {
+            if (b.id !== id) return b;
+            const cols = [...(b.columnas || [])];
+            cols[cIdx] = val;
+            return { ...b, columnas: cols };
+          })
+        );
+      };
+
+      const eliminarColumna = (id, cIdx) => {
+        actualizarBloques(
+          bloques.map((b) => {
+            if (b.id !== id) return b;
+            if ((b.columnas || []).length <= 1) return b;
+            const cols = b.columnas.filter((_, i) => i !== cIdx);
+            const filas = (b.filas || []).map((f) => f.filter((_, i) => i !== cIdx));
+            return { ...b, columnas: cols, filas };
+          })
+        );
+      };
+
+      const agregarFilaTabla = (id) => {
+        actualizarBloques(
+          bloques.map((b) => {
+            if (b.id !== id) return b;
+            const colsCount = (b.columnas || []).length || 1;
+            const filas = [...(b.filas || [])];
+            filas.push(new Array(colsCount).fill(""));
+            return { ...b, filas };
+          })
+        );
+      };
+
+      const cambiarCelda = (id, rIdx, cIdx, val) => {
+        actualizarBloques(
+          bloques.map((b) => {
+            if (b.id !== id) return b;
+            const filas = (b.filas || []).map((f, r) => {
+              if (r !== rIdx) return f;
+              const nuevaFila = [...f];
+              nuevaFila[cIdx] = val;
+              return nuevaFila;
+            });
+            return { ...b, filas };
+          })
+        );
+      };
+
+      const eliminarFila = (id, rIdx) => {
+        actualizarBloques(
+          bloques.map((b) => {
+            if (b.id !== id) return b;
+            return {
+              ...b,
+              filas: (b.filas || []).filter((_, r) => r !== rIdx),
+            };
+          })
+        );
+      };
+
+      return (
+        <div className="flex flex-col gap-4 md:col-span-2 p-5 bg-gradient-to-br from-indigo-50/40 via-white to-pink-50/30 rounded-3xl border border-indigo-100 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+            <div>
+              <h4 className="text-sm font-black text-indigo-900 uppercase tracking-tight flex items-center gap-2">
+                <span>✨</span> {campo.etiqueta}
+              </h4>
+              {campo.descripcion && (
+                <p className="text-xs text-gray-500 mt-0.5">{campo.descripcion}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={agregarPregunta}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+              >
+                <span>➕</span> Nueva Pregunta
+              </button>
+              <button
+                type="button"
+                onClick={agregarTabla}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+              >
+                <span>📊</span> Nueva Tabla
+              </button>
+            </div>
+          </div>
+
+          {bloques.length === 0 ? (
+            <div className="text-center py-8 px-4 border-2 border-dashed border-indigo-200 rounded-2xl bg-white/70">
+              <p className="text-xs font-semibold text-gray-500">
+                Aún no has agregado preguntas ni tablas adicionales a este seguimiento.
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Usa los botones superiores si deseas registrar controles o preguntas especiales para esta sesión.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {bloques.map((b, bIdx) => (
+                <div
+                  key={b.id || bIdx}
+                  className="p-4 bg-white rounded-2xl border border-indigo-100 shadow-sm relative group"
+                >
+                  <button
+                    type="button"
+                    onClick={() => eliminarBloque(b.id)}
+                    title="Eliminar este bloque"
+                    className="absolute top-3 right-3 text-gray-400 hover:text-red-600 p-1 rounded-lg hover:bg-red-50 text-xs font-bold transition-all"
+                  >
+                    ✕ Quitar
+                  </button>
+
+                  {b.tipoBloque === "pregunta" ? (
+                    <div className="space-y-2 pr-16">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-indigo-600 uppercase tracking-wider bg-indigo-50 px-2 py-0.5 rounded-md">
+                          Pregunta #{bIdx + 1}
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={b.pregunta || ""}
+                        onChange={(e) => cambiarPreguntaTexto(b.id, "pregunta", e.target.value)}
+                        placeholder="Escribe aquí la pregunta o indicador (Ej: ¿Tolera posición prona?)"
+                        className="w-full px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-300 outline-none"
+                      />
+                      <textarea
+                        rows={2}
+                        value={b.respuesta || ""}
+                        onChange={(e) => cambiarPreguntaTexto(b.id, "respuesta", e.target.value)}
+                        placeholder="Escribe la respuesta o evolución observada..."
+                        className="w-full px-3 py-2 text-sm text-gray-700 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-300 outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-3 pr-16">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-black text-pink-600 uppercase tracking-wider bg-pink-50 px-2 py-0.5 rounded-md">
+                          Tabla #{bIdx + 1}
+                        </span>
+                        <input
+                          type="text"
+                          value={b.titulo || ""}
+                          onChange={(e) => cambiarTituloTabla(b.id, e.target.value)}
+                          placeholder="Título de la tabla..."
+                          className="px-3 py-1 text-xs font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-pink-300 outline-none flex-1 min-w-[200px]"
+                        />
+                      </div>
+
+                      <div className="overflow-x-auto rounded-xl border border-gray-200">
+                        <table className="min-w-full divide-y divide-gray-200 text-xs">
+                          <thead className="bg-indigo-50/60">
+                            <tr>
+                              {(b.columnas || []).map((col, cIdx) => (
+                                <th key={cIdx} className="p-2 text-left">
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="text"
+                                      value={col}
+                                      onChange={(e) => renombrarColumna(b.id, cIdx, e.target.value)}
+                                      className="w-full px-2 py-1 text-xs font-bold text-indigo-900 bg-white border border-indigo-200 rounded outline-none"
+                                    />
+                                    {b.columnas.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => eliminarColumna(b.id, cIdx)}
+                                        title="Eliminar columna"
+                                        className="text-gray-400 hover:text-red-500 px-1"
+                                      >
+                                        ✕
+                                      </button>
+                                    )}
+                                  </div>
+                                </th>
+                              ))}
+                              <th className="p-2 w-12 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => agregarColumnaTabla(b.id)}
+                                  title="Añadir columna"
+                                  className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-white px-2 py-1 rounded border border-indigo-200"
+                                >
+                                  + Col
+                                </button>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-100">
+                            {(b.filas || []).map((fila, rIdx) => (
+                              <tr key={rIdx} className="hover:bg-gray-50/50">
+                                {(b.columnas || []).map((_, cIdx) => (
+                                  <td key={cIdx} className="p-1.5">
+                                    <input
+                                      type="text"
+                                      value={fila[cIdx] || ""}
+                                      onChange={(e) => cambiarCelda(b.id, rIdx, cIdx, e.target.value)}
+                                      className="w-full px-2 py-1.5 text-xs text-gray-700 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-300 outline-none"
+                                      placeholder="..."
+                                    />
+                                  </td>
+                                ))}
+                                <td className="p-1.5 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => eliminarFila(b.id, rIdx)}
+                                    title="Eliminar fila"
+                                    className="text-gray-400 hover:text-red-500 px-1.5 py-1 text-xs"
+                                  >
+                                    ✕
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => agregarFilaTabla(b.id)}
+                          className="text-xs font-bold text-pink-600 hover:text-pink-700 bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                        >
+                          <span>+</span> Añadir Fila
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     if (campo.tipo === "hidden") {
       return (
         <input
