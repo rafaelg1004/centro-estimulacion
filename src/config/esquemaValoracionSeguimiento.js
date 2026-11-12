@@ -1,6 +1,6 @@
 export const ESQUEMAS_SEGUIMIENTO = {
   PEDIATRIA: {
-    titulo: "Valoración de Seguimiento y Progreso - Fisioterapia Pediátrica",
+    titulo: "Seguimiento - Fisioterapia Pediátrica",
     endpoint: "/valoraciones",
     redireccion: "/valoraciones",
     secciones: [
@@ -58,142 +58,42 @@ export const ESQUEMAS_SEGUIMIENTO = {
         ],
       },
       {
-        titulo: "Evolución y Progreso Actual",
+        titulo: "Evolución y Plan de Seguimiento",
+        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
-            etiqueta: "Motivo del Control / Evolución Subjetiva",
+            etiqueta: "Evolución de la Sesión / Progreso",
             tipo: "textarea",
             requerido: true,
-            placeholder: "Describa el motivo del control, cómo ha respondido el niño a las sesiones o pautas previas...",
+            placeholder: "Describa brevemente la evolución del paciente, avances y respuesta al tratamiento...",
             presets: [
               {
                 etiqueta: "Control Estimulación",
-                texto: "Acude a valoración de control y seguimiento para reevaluación del desarrollo neuromotor, seguimiento a los objetivos del programa de estimulación y ajuste de plan terapéutico según evolución en casa y sesiones previas.",
+                texto: "Acude a control y seguimiento para reevaluación del desarrollo neuromotor y ajuste del plan terapéutico según evolución.",
               },
               {
                 etiqueta: "Control Fisioterapia",
-                texto: "Control y seguimiento por fisioterapia pediátrica para evaluar respuesta al tratamiento, ganancias funcionales, tono, patrones de movimiento y progresión de hitos motores.",
-              },
-            ],
-          },
-          {
-            nombre: "moduloPediatria.avancesObservados",
-            etiqueta: "Avances Observados por Padres / Cuidador",
-            tipo: "textarea",
-            placeholder: "Nuevas habilidades adquiridas, cambios en comportamiento, respuesta en casa...",
-          },
-          {
-            nombre: "moduloPediatria.adherenciaCasa",
-            etiqueta: "Adherencia a Recomendaciones y Ejercicios en Casa",
-            tipo: "select",
-            opciones: [
-              "Excelente (Diaria y constante)",
-              "Buena (Frecuente con apoyo)",
-              "Regular (Ocasional)",
-              "Baja (No se realizaron actividades)",
-            ],
-          },
-        ],
-      },
-      {
-        titulo: "Reevaluación de Signos Vitales y Medidas",
-        campos: [
-          { nombre: "moduloPediatria.examen.fc", etiqueta: "Frecuencia Cardíaca (ppm)", tipo: "text" },
-          { nombre: "moduloPediatria.examen.fr", etiqueta: "Frecuencia Respiratoria (rpm)", tipo: "text" },
-          { nombre: "moduloPediatria.examen.temperatura", etiqueta: "Temperatura (°C)", tipo: "text" },
-          { nombre: "signosVitales.pesoActual", etiqueta: "Peso Actual (kg)", tipo: "text" },
-          { nombre: "signosVitales.talla", etiqueta: "Talla Actual (cm)", tipo: "text" },
-        ],
-      },
-      {
-        titulo: "Reevaluación de Hitos Motores y Tono",
-        campos: [
-          {
-            nombre: "moduloPediatria.hitos.controlCefalico.si",
-            etiqueta: "Control Cefálico",
-            tipo: "select",
-            opciones: ["Sí", "En proceso", "No"],
-          },
-          {
-            nombre: "moduloPediatria.hitos.rolados.si",
-            etiqueta: "Rolados / Giros",
-            tipo: "select",
-            opciones: ["Sí", "En proceso", "No"],
-          },
-          {
-            nombre: "moduloPediatria.hitos.sedente.si",
-            etiqueta: "Sedestación / Se Sienta",
-            tipo: "select",
-            opciones: ["Sí", "En proceso", "No"],
-          },
-          {
-            nombre: "moduloPediatria.hitos.gateo.si",
-            etiqueta: "Gateo / Desplazamiento",
-            tipo: "select",
-            opciones: ["Sí", "En proceso", "No"],
-          },
-          {
-            nombre: "moduloPediatria.hitos.bipedo.si",
-            etiqueta: "Bipedestación / De Pie",
-            tipo: "select",
-            opciones: ["Sí", "En proceso", "No"],
-          },
-          {
-            nombre: "moduloPediatria.hitos.marcha.si",
-            etiqueta: "Marcha / Camina",
-            tipo: "select",
-            opciones: ["Sí", "En proceso", "No"],
-          },
-          {
-            nombre: "moduloPediatria.examen.tonoMuscular",
-            etiqueta: "Tono Muscular Actual y Control Postural",
-            tipo: "textarea",
-            placeholder: "Normotono, hipotonía, hipertonía, simetría postural, reacciones de enderezamiento...",
-          },
-          {
-            nombre: "moduloPediatria.examen.controlMotor",
-            etiqueta: "Calidad del Movimiento y Transiciones",
-            tipo: "textarea",
-          },
-        ],
-      },
-      {
-        titulo: "Preguntas y Tablas Adicionales de Progreso",
-        campos: [
-          {
-            nombre: "moduloPediatria.bloquesSeguimiento",
-            etiqueta: "Información Complementaria de Progreso",
-            tipo: "bloques_dinamicos",
-            descripcion: "Agregue preguntas libres o tablas de control personalizadas para registrar cualquier escala, medición o progreso específico.",
-          },
-        ],
-      },
-      {
-        titulo: "Diagnóstico de Seguimiento y Ajustes al Plan",
-        campos: [
-          {
-            nombre: "diagnosticoFisioterapeutico",
-            etiqueta: "Concepto / Diagnóstico Fisioterapéutico de Seguimiento",
-            tipo: "textarea",
-            requerido: true,
-            presets: [
-              {
-                etiqueta: "Evolución Favorable",
-                texto: "Paciente pediátrico con evolución neuromotora favorable, evidencia ganancia en habilidades funcionales acorde a objetivos terapéuticos. Se continúa plan de estímulo y consolidación.",
-              },
-              {
-                etiqueta: "Ajuste de Objetivos",
-                texto: "Paciente con evolución parcial; se requiere reorientar metas terapéuticas hacia mayor control postural, inhibición de compensaciones y fortalecimiento funcional.",
+                texto: "Control por fisioterapia pediátrica. Se evalúa respuesta al tratamiento, ganancias funcionales y progresión de hitos.",
               },
             ],
           },
           {
             nombre: "planTratamiento",
-            etiqueta: "Ajustes al Plan de Tratamiento y Recomendaciones",
+            etiqueta: "Concepto y Plan a Seguir",
             tipo: "textarea",
-            requerido: true,
-            placeholder: "Continuación de sesiones, nuevos ejercicios para casa, derivación a interconsulta si aplica...",
+            placeholder: "Indicaciones, pautas en casa o continuidad de sesiones...",
+          },
+        ],
+      },
+      {
+        titulo: "Preguntas y Tablas de Seguimiento",
+        siempreVisible: true,
+        campos: [
+          {
+            nombre: "moduloPediatria.bloquesSeguimiento",
+            etiqueta: "Controles y Preguntas Personalizadas",
+            tipo: "bloques_dinamicos",
           },
         ],
       },
@@ -201,7 +101,7 @@ export const ESQUEMAS_SEGUIMIENTO = {
   },
 
   PISO_PELVICO: {
-    titulo: "Valoración de Seguimiento y Progreso - Piso Pélvico",
+    titulo: "Seguimiento - Piso Pélvico",
     endpoint: "/valoraciones",
     redireccion: "/valoraciones",
     secciones: [
@@ -214,7 +114,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Código Consulta (CUPS)",
             tipo: "cups",
             requerido: true,
-            placeholder: "Buscar procedimiento...",
             valorPorDefecto: "890311 - CONSULTA DE CONTROL O DE SEGUIMIENTO POR FISIOTERAPIA",
           },
           {
@@ -230,7 +129,8 @@ export const ESQUEMAS_SEGUIMIENTO = {
             tipo: "select",
             opciones: [
               { valor: "44", etiqueta: "44 - Rehabilitación funcional" },
-              { valor: "10", etiqueta: "10 - Promoción de la salud" },
+              { valor: "11", etiqueta: "11 - Atención del parto / puerperio" },
+              { valor: "12", etiqueta: "12 - Prevención / Educación terapéutica" },
             ],
             requerido: true,
             valorPorDefecto: "44",
@@ -241,7 +141,7 @@ export const ESQUEMAS_SEGUIMIENTO = {
             tipo: "select",
             opciones: [
               { valor: "29", etiqueta: "29 - Consulta de seguimiento (control)" },
-              { valor: "21", etiqueta: "21 - Enfermedad general" },
+              { valor: "21", etiqueta: "21 - Enfermedad general (disfunción pélvica)" },
             ],
             requerido: true,
             valorPorDefecto: "29",
@@ -251,94 +151,42 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Diagnóstico CIE-10",
             tipo: "cie10",
             requerido: true,
-            placeholder: "Buscar diagnóstico...",
           },
         ],
       },
       {
-        titulo: "Evolución de Síntomas",
+        titulo: "Evolución y Plan de Seguimiento",
+        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
-            etiqueta: "Evolución Subjetiva / Motivo del Control",
+            etiqueta: "Evolución de la Sesión / Síntomas",
             tipo: "textarea",
             requerido: true,
-            placeholder: "Cambios en síntomas desde la última sesión (incontinencia, pesadez, dolor, actividad física)...",
-          },
-          {
-            nombre: "moduloPisoPelvico.evolucionSintomasUrinarios",
-            etiqueta: "Evolución Síntomas Urinarios (Escapes, urgencia, frecuencia)",
-            tipo: "textarea",
-          },
-          {
-            nombre: "moduloPisoPelvico.evolucionSintomasDefecatorios",
-            etiqueta: "Evolución Síntomas Defecatorios / Bristol",
-            tipo: "textarea",
-          },
-          {
-            nombre: "moduloPisoPelvico.evolucionDolor",
-            etiqueta: "Evolución de Dolor (EVA / Localización)",
-            tipo: "text",
-            placeholder: "Ej: EVA disminuyó de 7/10 a 2/10 en cicatriz...",
-          },
-        ],
-      },
-      {
-        titulo: "Reevaluación Funcional y Examen Físico",
-        campos: [
-          {
-            nombre: "moduloPisoPelvico.evaluacionInterna.fuerzaOxford.global",
-            etiqueta: "Oxford Global Actual (0-5)",
-            tipo: "select",
-            opciones: ["0", "1", "2", "3", "4", "5"],
-          },
-          {
-            nombre: "moduloPisoPelvico.evaluacionInterna.perfect.endurance",
-            etiqueta: "PERFECT Endurance Actual (segundos)",
-            tipo: "text",
-          },
-          {
-            nombre: "moduloPisoPelvico.evaluacionInterna.perfect.repetitions",
-            etiqueta: "PERFECT Repetitions Actuales",
-            tipo: "text",
-          },
-          {
-            nombre: "moduloPisoPelvico.evaluacionFisica.diastasis.umbi",
-            etiqueta: "Diástasis Umbilical Actual (cm / dedos)",
-            tipo: "text",
-          },
-          {
-            nombre: "moduloPisoPelvico.evaluacionFisica.abdomenTos",
-            etiqueta: "Competencia Abdominal (Test de tos / esfuerzo)",
-            tipo: "text",
-          },
-        ],
-      },
-      {
-        titulo: "Preguntas y Tablas Adicionales de Progreso",
-        campos: [
-          {
-            nombre: "moduloPisoPelvico.bloquesSeguimiento",
-            etiqueta: "Información Complementaria de Progreso",
-            tipo: "bloques_dinamicos",
-            descripcion: "Agregue preguntas o tablas adicionales (ej. registro semanal de escapes, evolución de diástasis, etc.).",
-          },
-        ],
-      },
-      {
-        titulo: "Diagnóstico y Ajustes al Plan",
-        campos: [
-          {
-            nombre: "diagnosticoFisioterapeutico",
-            etiqueta: "Concepto / Diagnóstico Fisioterapéutico de Seguimiento",
-            tipo: "textarea",
-            requerido: true,
+            placeholder: "Evolución de síntomas, control urinario/dolor y respuesta a los ejercicios...",
+            presets: [
+              {
+                etiqueta: "Control Piso Pélvico",
+                texto: "Sesión de control y seguimiento de piso pélvico. Se evalúa evolución clínica de síntomas, adherencia a ejercicios y técnica perineal.",
+              },
+            ],
           },
           {
             nombre: "planTratamiento",
-            etiqueta: "Plan de Intervención / Progresión de Ejercicios",
+            etiqueta: "Concepto y Plan a Seguir",
             tipo: "textarea",
-            requerido: true,
+            placeholder: "Ajustes de rutina en casa, progresión de cargas o próximas sesiones...",
+          },
+        ],
+      },
+      {
+        titulo: "Preguntas y Tablas de Seguimiento",
+        siempreVisible: true,
+        campos: [
+          {
+            nombre: "moduloPisoPelvico.bloquesSeguimiento",
+            etiqueta: "Controles y Preguntas Personalizadas",
+            tipo: "bloques_dinamicos",
           },
         ],
       },
@@ -346,7 +194,7 @@ export const ESQUEMAS_SEGUIMIENTO = {
   },
 
   LACTANCIA: {
-    titulo: "Valoración de Seguimiento y Progreso - Asesoría de Lactancia",
+    titulo: "Seguimiento - Asesoría de Lactancia",
     endpoint: "/valoraciones",
     redireccion: "/valoraciones",
     secciones: [
@@ -359,8 +207,7 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Código Consulta (CUPS)",
             tipo: "cups",
             requerido: true,
-            placeholder: "Buscar procedimiento...",
-            valorPorDefecto: "890311 - CONSULTA DE CONTROL O DE SEGUIMIENTO POR FISIOTERAPIA",
+            valorPorDefecto: "890301 - CONSULTA DE CONTROL O DE SEGUIMIENTO POR MEDICINA GENERAL",
           },
           {
             nombre: "fechaInicioAtencion",
@@ -374,8 +221,8 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Finalidad",
             tipo: "select",
             opciones: [
-              { valor: "10", etiqueta: "10 - Promoción de la salud" },
-              { valor: "44", etiqueta: "44 - Rehabilitación" },
+              { valor: "10", etiqueta: "10 - Promoción de la salud / Lactancia materna" },
+              { valor: "12", etiqueta: "12 - Prevención / Educación materna" },
             ],
             requerido: true,
             valorPorDefecto: "10",
@@ -396,73 +243,42 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Diagnóstico CIE-10",
             tipo: "cie10",
             requerido: true,
-            placeholder: "Buscar diagnóstico...",
           },
         ],
       },
       {
-        titulo: "Evolución de la Lactancia",
+        titulo: "Evolución y Plan de Seguimiento",
+        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
-            etiqueta: "Evolución y Motivo del Control",
+            etiqueta: "Evolución de la Lactancia / Control",
             tipo: "textarea",
             requerido: true,
-            placeholder: "Evolución del agarre, dolor, tomas, suplementación...",
-          },
-          {
-            nombre: "moduloLactancia.pesoActualBebe",
-            etiqueta: "Peso Actual del Bebé (g / kg)",
-            tipo: "text",
-          },
-          {
-            nombre: "moduloLactancia.gananciaPesoDiaria",
-            etiqueta: "Ganancia Ponderal Estimada (g/día)",
-            tipo: "text",
-          },
-          {
-            nombre: "moduloLactancia.estadoPezonesMamas",
-            etiqueta: "Estado Actual de Pezones y Mamas (Grietas, congestión, dolor)",
-            tipo: "textarea",
-          },
-          {
-            nombre: "moduloLactancia.tipoAlimentacionActual",
-            etiqueta: "Tipo de Alimentación Actual",
-            tipo: "select",
-            opciones: [
-              "Lactancia Materna Exclusiva (LME)",
-              "Lactancia Mixta / Suplementada",
-              "Lactancia con Leche Materna Extraída",
-              "Fórmula Infantil",
+            placeholder: "Evolución del agarre, comodidad materna, producción y progreso del bebé...",
+            presets: [
+              {
+                etiqueta: "Control Lactancia",
+                texto: "Acude a control de asesoría en lactancia materna para seguimiento de técnica de agarre, comodidad durante la toma y evolución general.",
+              },
             ],
-          },
-        ],
-      },
-      {
-        titulo: "Preguntas y Tablas Adicionales de Progreso",
-        campos: [
-          {
-            nombre: "moduloLactancia.bloquesSeguimiento",
-            etiqueta: "Información Complementaria de Progreso",
-            tipo: "bloques_dinamicos",
-            descripcion: "Agregue preguntas o tablas de control (ej. registro de tomas, control de peso por fecha, etc.).",
-          },
-        ],
-      },
-      {
-        titulo: "Concepto y Plan",
-        campos: [
-          {
-            nombre: "diagnosticoFisioterapeutico",
-            etiqueta: "Diagnóstico / Impresión Clínica de Seguimiento",
-            tipo: "textarea",
-            requerido: true,
           },
           {
             nombre: "planTratamiento",
-            etiqueta: "Plan y Recomendaciones de Lactancia",
+            etiqueta: "Concepto y Recomendaciones",
             tipo: "textarea",
-            requerido: true,
+            placeholder: "Indicaciones de postura, extracción o próximo control...",
+          },
+        ],
+      },
+      {
+        titulo: "Preguntas y Tablas de Seguimiento",
+        siempreVisible: true,
+        campos: [
+          {
+            nombre: "moduloLactancia.bloquesSeguimiento",
+            etiqueta: "Controles y Preguntas Personalizadas",
+            tipo: "bloques_dinamicos",
           },
         ],
       },
@@ -470,7 +286,7 @@ export const ESQUEMAS_SEGUIMIENTO = {
   },
 
   PERINATAL: {
-    titulo: "Valoración de Seguimiento y Progreso - Programa Perinatal",
+    titulo: "Seguimiento - Programa Perinatal",
     endpoint: "/valoraciones",
     redireccion: "/valoraciones",
     secciones: [
@@ -483,7 +299,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Código Consulta (CUPS)",
             tipo: "cups",
             requerido: true,
-            placeholder: "Buscar procedimiento...",
             valorPorDefecto: "890311 - CONSULTA DE CONTROL O DE SEGUIMIENTO POR FISIOTERAPIA",
           },
           {
@@ -498,11 +313,12 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Finalidad",
             tipo: "select",
             opciones: [
-              { valor: "10", etiqueta: "10 - Promoción de la Salud / Preventivo" },
-              { valor: "44", etiqueta: "44 - Rehabilitación" },
+              { valor: "11", etiqueta: "11 - Atención del parto / puerperio / prenatal" },
+              { valor: "10", etiqueta: "10 - Promoción de la salud" },
+              { valor: "44", etiqueta: "44 - Rehabilitación funcional" },
             ],
             requerido: true,
-            valorPorDefecto: "10",
+            valorPorDefecto: "11",
           },
           {
             nombre: "causaMotivoAtencion",
@@ -510,7 +326,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
             tipo: "select",
             opciones: [
               { valor: "29", etiqueta: "29 - Consulta de seguimiento (control)" },
-              { valor: "22", etiqueta: "22 - Manejo del embarazo normal" },
               { valor: "21", etiqueta: "21 - Enfermedad general" },
             ],
             requerido: true,
@@ -521,70 +336,45 @@ export const ESQUEMAS_SEGUIMIENTO = {
             etiqueta: "Diagnóstico CIE-10",
             tipo: "cie10",
             requerido: true,
-            placeholder: "Ej. Z349 - Supervisión de embarazo normal",
           },
         ],
       },
       {
-        titulo: "Evolución Gestacional y Síntomas",
+        titulo: "Evolución y Plan de Seguimiento",
+        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
-            etiqueta: "Evolución y Motivo del Control",
+            etiqueta: "Evolución Gestacional / Postparto",
             tipo: "textarea",
             requerido: true,
-            placeholder: "Evolución del bienestar materno, tolerancia al ejercicio, síntomas...",
-          },
-          {
-            nombre: "moduloPerinatal.semanasGestacionActual",
-            etiqueta: "Semanas de Gestación Actuales",
-            tipo: "number",
-          },
-          {
-            nombre: "moduloPerinatal.evolucionSintomas",
-            etiqueta: "Síntomas Musculoesqueléticos / Dolor Pélvico / Lumbar",
-            tipo: "textarea",
-          },
-        ],
-      },
-      {
-        titulo: "Signos Vitales y Estado Físico",
-        campos: [
-          { nombre: "signosVitales.ta", etiqueta: "Tensión Arterial (mmHg)", tipo: "text" },
-          { nombre: "signosVitales.fc", etiqueta: "Frecuencia Cardíaca (lpm)", tipo: "text" },
-          { nombre: "signosVitales.fr", etiqueta: "Frecuencia Respiratoria (rpm)", tipo: "text" },
-          { nombre: "signosVitales.pesoActual", etiqueta: "Peso Actual (kg)", tipo: "text" },
-        ],
-      },
-      {
-        titulo: "Preguntas y Tablas Adicionales de Progreso",
-        campos: [
-          {
-            nombre: "moduloPerinatal.bloquesSeguimiento",
-            etiqueta: "Información Complementaria de Progreso",
-            tipo: "bloques_dinamicos",
-            descripcion: "Agregue preguntas libres o tablas de progreso personalizadas.",
-          },
-        ],
-      },
-      {
-        titulo: "Concepto y Ajustes al Plan",
-        campos: [
-          {
-            nombre: "diagnosticoFisioterapeutico",
-            etiqueta: "Diagnóstico / Impresión Clínica de Seguimiento",
-            tipo: "textarea",
-            requerido: true,
+            placeholder: "Cómo se ha sentido la gestante/mamá, molestias o avances...",
+            presets: [
+              {
+                etiqueta: "Control Perinatal",
+                texto: "Control de seguimiento perinatal para evaluar evolución física, comodidad gestacional y respuesta al plan de acondicionamiento.",
+              },
+            ],
           },
           {
             nombre: "planTratamiento",
-            etiqueta: "Ajuste al Plan y Recomendaciones",
+            etiqueta: "Concepto y Plan a Seguir",
             tipo: "textarea",
-            requerido: true,
+            placeholder: "Recomendaciones posturales, ejercicios y continuidad...",
+          },
+        ],
+      },
+      {
+        titulo: "Preguntas y Tablas de Seguimiento",
+        siempreVisible: true,
+        campos: [
+          {
+            nombre: "moduloPerinatal.bloquesSeguimiento",
+            etiqueta: "Controles y Preguntas Personalizadas",
+            tipo: "bloques_dinamicos",
           },
         ],
       },
     ],
   },
 };
-

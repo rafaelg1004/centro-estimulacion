@@ -1668,7 +1668,7 @@ export default function DynamicFormBuilder({
           )}
           <p className="mt-3 text-[11px] text-gray-500 flex items-center gap-1.5">
             <span>💡</span>
-            <span>La estructura de preguntas y tablas de este seguimiento se recordará automáticamente para futuros controles.</span>
+            <span>Las preguntas y tablas fijas de seguimiento se configuran desde Configuración de la Clínica → Plantillas.</span>
           </p>
         </div>
       );

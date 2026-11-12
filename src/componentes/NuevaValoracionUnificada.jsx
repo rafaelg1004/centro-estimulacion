@@ -415,20 +415,7 @@ export default function NuevaValoracionUnificada() {
                         borradorId={paramBorradorId}
                         pacienteNombre={`${pacienteElegido.nombres} ${pacienteElegido.apellidos}`}
                         actionsPortalTarget={actionsContainer}
-                        onSubmitSuccess={(datosGuardados) => {
-                            if (modoSeguimiento && programaSeguimientoClave && datosGuardados) {
-                                const bloques =
-                                    datosGuardados.moduloPediatria?.bloquesSeguimiento ??
-                                    datosGuardados.moduloPisoPelvico?.bloquesSeguimiento ??
-                                    datosGuardados.moduloLactancia?.bloquesSeguimiento ??
-                                    datosGuardados.moduloPerinatal?.bloquesSeguimiento;
-                                if (Array.isArray(bloques)) {
-                                    apiRequest(`/plantillas/seguimiento-bloques/${programaSeguimientoClave}`, {
-                                        method: "PUT",
-                                        body: JSON.stringify({ bloques }),
-                                    }).catch(() => {});
-                                }
-                            }
+                        onSubmitSuccess={() => {
                             if (tipoValoracionAdulto === 'perinatal') {
                                 navigate(`/pacientes/${pacienteId}/sesiones-perinatal`);
                             } else {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { apiRequest } from "../config/api";
 import Swal from "sweetalert2";
+import ConfiguradorPlantillas from "./ConfiguradorPlantillas";
 import {
   BuildingOfficeIcon,
   PhoneIcon,
@@ -25,44 +26,10 @@ export default function ConfiguracionClinica() {
     registro_profesional_representante: "",
   });
   const [loading, setLoading] = useState(true);
-  const [sincronizandoPlantilla, setSincronizandoPlantilla] = useState(false);
-  const [pediatriaEnBD, setPediatriaEnBD] = useState(null);
 
   useEffect(() => {
     cargarConfiguracion();
-    verificarEstadoPlantillas();
   }, []);
-
-  const verificarEstadoPlantillas = async () => {
-    try {
-      const lista = await apiRequest("/plantillas");
-      const existe = Array.isArray(lista) && lista.some((p) => p.codigo === "PEDIATRIA_INICIAL");
-      setPediatriaEnBD(existe);
-    } catch {
-      setPediatriaEnBD(false);
-    }
-  };
-
-  const handleSincronizarPediatria = async () => {
-    setSincronizandoPlantilla(true);
-    try {
-      const resp = await apiRequest("/plantillas/sincronizar-pediatria", {
-        method: "POST",
-      });
-      setPediatriaEnBD(true);
-      Swal.fire({
-        title: "¡Plantilla Sincronizada!",
-        text: resp?.mensaje || "La historia clínica de Pediatría se creó y cargó en PostgreSQL correctamente.",
-        icon: "success",
-        confirmButtonColor: "#4F46E5",
-      });
-    } catch (error) {
-      console.error("Error sincronizando plantilla:", error);
-      Swal.fire("Error", error?.message || "No se pudo sincronizar la plantilla en base de datos.", "error");
-    } finally {
-      setSincronizandoPlantilla(false);
-    }
-  };
 
   const cargarConfiguracion = async () => {
     try {
@@ -304,44 +271,8 @@ export default function ConfiguracionClinica() {
         </form>
       </div>
 
-      {/* Motor Dinámico de Historias Clínicas */}
-      <div className="mt-8 bg-white rounded-2xl shadow-xl border border-indigo-50 overflow-hidden">
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-white font-bold text-lg flex items-center gap-2">
-            🧩 Historias Clínicas Dinámicas (Base de Datos)
-          </h2>
-          {pediatriaEnBD !== null && (
-            <span
-              className={`text-xs font-bold px-3 py-1 rounded-full ${
-                pediatriaEnBD
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-amber-100 text-amber-800"
-              }`}
-            >
-              {pediatriaEnBD ? "✓ Pediatría activa en BD" : "⚠ Pendiente de sincronizar"}
-            </span>
-          )}
-        </div>
-
-        <div className="p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-base font-bold text-gray-800">
-              Plantilla Piloto: Historia Clínica de Pediatría (Niños)
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Crea las tablas relacionales en PostgreSQL y carga las 15 secciones y 122 campos de Pediatría. Puedes volver a ejecutarlo sin riesgo para actualizar la plantilla.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleSincronizarPediatria}
-            disabled={sincronizandoPlantilla}
-            className="shrink-0 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all"
-          >
-            {sincronizandoPlantilla ? "Sincronizando..." : "Sincronizar Pediatría en BD"}
-          </button>
-        </div>
-      </div>
+      {/* Motor Dinámico y Editor Visual de Historias Clínicas y Seguimiento */}
+      <ConfiguradorPlantillas />
     </div>
   );
 }
