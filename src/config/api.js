@@ -130,7 +130,9 @@ export const apiRequest = async (endpoint, options = {}) => {
       throw new Error("El servidor no devolvió JSON válido");
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log(`✅ ${config.method || "GET"} ${endpoint} (${response.status}):`, data);
+    return data;
   } catch (error) {
     // Mejorar el manejo de errores de red
     if (error.name === "TypeError" && error.message.includes("fetch")) {
