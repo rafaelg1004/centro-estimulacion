@@ -28,6 +28,7 @@ export default function NuevaValoracionUnificada() {
     const [modoSeguimiento, setModoSeguimiento] = useState(paramModo === "seguimiento");
     const [valoracionPrevia, setValoracionPrevia] = useState(null);
     const [esquemaDinamicoPediatria, setEsquemaDinamicoPediatria] = useState(null);
+    const [bloquesSeguimientoPlantilla, setBloquesSeguimientoPlantilla] = useState([]);
     const navigate = useNavigate();
     const [actionsContainer, setActionsContainer] = useState(null);
 
@@ -116,6 +117,38 @@ export default function NuevaValoracionUnificada() {
     );
 
     const pacienteElegido = pacientes.find(p => (p._id || p.id) === pacienteId);
+
+    const programaSeguimientoClave =
+        modoSeguimiento && pacienteElegido
+            ? pacienteElegido.tipoModulo === "pediatria"
+                ? "PEDIATRIA"
+                : tipoValoracionAdulto === "lactancia"
+                    ? "LACTANCIA"
+                    : tipoValoracionAdulto === "pisopelvico"
+                        ? "PISO_PELVICO"
+                        : tipoValoracionAdulto === "perinatal"
+                            ? "PERINATAL"
+                            : null
+            : null;
+
+    // Cargar preguntas/tablas base configuradas para este programa de seguimiento
+    useEffect(() => {
+        if (!modoSeguimiento || !programaSeguimientoClave) {
+            setBloquesSeguimientoPlantilla([]);
+            return;
+        }
+        apiRequest(`/plantillas/seguimiento-bloques/${programaSeguimientoClave}`)
+            .then((res) => {
+                if (Array.isArray(res?.bloques)) {
+                    setBloquesSeguimientoPlantilla(res.bloques);
+                } else {
+                    setBloquesSeguimientoPlantilla([]);
+                }
+            })
+            .catch(() => {
+                setBloquesSeguimientoPlantilla([]);
+            });
+    }, [modoSeguimiento, programaSeguimientoClave]);
 
     // Pantalla de carga
     if (pacienteId && cargando) {
@@ -291,6 +324,17 @@ export default function NuevaValoracionUnificada() {
                     };
                 }
 
+                if (modoSeguimiento && bloquesSeguimientoPlantilla.length > 0) {
+                    return {
+                        ...sec,
+                        campos: (sec.campos || []).map((c) =>
+                            c.tipo === "bloques_dinamicos"
+                                ? { ...c, valorPorDefecto: bloquesSeguimientoPlantilla }
+                                : c
+                        ),
+                    };
+                }
+
                 return sec;
             })
         };
@@ -371,7 +415,20 @@ export default function NuevaValoracionUnificada() {
                         borradorId={paramBorradorId}
                         pacienteNombre={`${pacienteElegido.nombres} ${pacienteElegido.apellidos}`}
                         actionsPortalTarget={actionsContainer}
-                        onSubmitSuccess={() => {
+                        onSubmitSuccess={(datosGuardados) => {
+                            if (modoSeguimiento && programaSeguimientoClave && datosGuardados) {
+                                const bloques =
+                                    datosGuardados.moduloPediatria?.bloquesSeguimiento ??
+                                    datosGuardados.moduloPisoPelvico?.bloquesSeguimiento ??
+                                    datosGuardados.moduloLactancia?.bloquesSeguimiento ??
+                                    datosGuardados.moduloPerinatal?.bloquesSeguimiento;
+                                if (Array.isArray(bloques)) {
+                                    apiRequest(`/plantillas/seguimiento-bloques/${programaSeguimientoClave}`, {
+                                        method: "PUT",
+                                        body: JSON.stringify({ bloques }),
+                                    }).catch(() => {});
+                                }
+                            }
                             if (tipoValoracionAdulto === 'perinatal') {
                                 navigate(`/pacientes/${pacienteId}/sesiones-perinatal`);
                             } else {

@@ -3,10 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest } from "../config/api";
 import { parseFechaLocal } from "../utils/dateUtils";
 import DynamicFormBuilder from "./ui/DynamicFormBuilder";
-import { ESQUEMA_VALORACION_PEDIATRIA } from "../config/esquemaValoracionPediatria";
-import { ESQUEMA_VALORACION_LACTANCIA } from "../config/esquemaValoracionLactancia";
-import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPisoPelvico";
-import { ESQUEMA_VALORACION_PERINATAL } from "../config/esquemaValoracionPerinatal";
+import { seleccionarEsquemaValoracion } from "../utils/plantillasHelper";
 import Swal from 'sweetalert2';
 
 // Helper: Convertir snake_case a camelCase
@@ -271,27 +268,9 @@ export default function EditarValoracion() {
 
         setValoracion(converted);
 
-        // Determinar el esquema usando tipo_programa o cod_consulta
-        // Nota: cod_consulta puede traer descripción adjunta (ej. "890211 - CONSULTA..."), usar startsWith
-        const tp = data.tipo_programa || '';
-        const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
-        if (tp === 'Pediatría' || tp === 'Pediatria') {
-          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-        } else if (tp === 'Perinatal') {
-          setEsquema(ESQUEMA_VALORACION_PERINATAL);
-        } else if (tp.includes('Piso')) {
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (tp.includes('Lactancia') || data.modulo_lactancia?.tipo_lactancia) {
-          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else if (codConsulta === '890211') {
-          setEsquema(ESQUEMA_VALORACION_PERINATAL);
-        } else if (codConsulta === '890202') {
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (codConsulta === '890203') {
-          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else {
-          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-        }
+        // Determinar el esquema (usando BD dinámica para Pediatría y soporte de seguimientos)
+        const esquemaSeleccionado = await seleccionarEsquemaValoracion(data);
+        setEsquema(esquemaSeleccionado);
         setValoracion(converted);
 
         setLoadingText("Preparando la interfaz de edición...");

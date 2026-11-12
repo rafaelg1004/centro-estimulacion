@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest, apiDownload } from "../config/api";
 import DynamicDetailBuilder from "./ui/DynamicDetailBuilder";
-import { ESQUEMA_VALORACION_PEDIATRIA } from "../config/esquemaValoracionPediatria";
-import { ESQUEMA_VALORACION_LACTANCIA } from "../config/esquemaValoracionLactancia";
-import { ESQUEMA_VALORACION_PISO_PELVICO } from "../config/esquemaValoracionPisoPelvico";
-import { ESQUEMA_VALORACION_PERINATAL } from "../config/esquemaValoracionPerinatal";
-import { ESQUEMAS_SEGUIMIENTO } from "../config/esquemaValoracionSeguimiento";
+import { seleccionarEsquemaValoracion } from "../utils/plantillasHelper";
 import Swal from "sweetalert2";
 
 // Helper: Convertir snake_case a camelCase
@@ -477,69 +473,9 @@ export default function DetalleValoracion() {
 
         setLoadingText("Configurando esquema correspondiente...");
 
-        // Determinar el esquema usando campos snake_case de PostgreSQL
-        // Nota: cod_consulta puede incluir descripción (ej. "890211 - CONSULTA..."), extraer solo el código
-        const codConsulta = String(data.cod_consulta || '').split(' ')[0].trim();
-        const tp = data.tipo_programa || "";
-        const esSeguimiento =
-          tp.toLowerCase().includes("seguimiento") ||
-          codConsulta === "890311" ||
-          data.modulo_pediatria?.esSeguimiento ||
-          data.modulo_piso_pelvico?.esSeguimiento ||
-          data.modulo_lactancia?.esSeguimiento ||
-          data.modulo_perinatal?.esSeguimiento ||
-          data.examen_fisico?.esSeguimiento;
-
-        if (esSeguimiento) {
-          if (tp.includes("Perinatal") || data.modulo_perinatal) {
-            setEsquema(ESQUEMAS_SEGUIMIENTO.PERINATAL);
-          } else if (tp.includes("Piso") || data.modulo_piso_pelvico) {
-            setEsquema(ESQUEMAS_SEGUIMIENTO.PISO_PELVICO);
-          } else if (tp.includes("Lactancia") || data.modulo_lactancia) {
-            setEsquema(ESQUEMAS_SEGUIMIENTO.LACTANCIA);
-          } else {
-            setEsquema(ESQUEMAS_SEGUIMIENTO.PEDIATRIA);
-          }
-        } else if (tp === "Pediatría" || tp === "Pediatria") {
-          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-        } else if (tp === "Perinatal") {
-          setEsquema(ESQUEMA_VALORACION_PERINATAL);
-        } else if (tp.includes("Piso")) {
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (
-          tp.includes("Lactancia") ||
-          data.modulo_lactancia?.tipo_lactancia
-        ) {
-          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else if (codConsulta === "890211") {
-          setEsquema(ESQUEMA_VALORACION_PERINATAL);
-        } else if (codConsulta === "890202") {
-          setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-        } else if (codConsulta === "890201") {
-          setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-        } else if (codConsulta === "890203") {
-          setEsquema(ESQUEMA_VALORACION_LACTANCIA);
-        } else {
-          // Default según módulos poblados
-          if (
-            data.modulo_perinatal &&
-            Object.keys(data.modulo_perinatal).length > 0
-          ) {
-            setEsquema(ESQUEMA_VALORACION_PERINATAL);
-          } else if (
-            data.modulo_pediatria &&
-            Object.keys(data.modulo_pediatria).length > 0
-          ) {
-            setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-          } else if (
-            data.modulo_piso_pelvico &&
-            Object.keys(data.modulo_piso_pelvico).length > 0
-          ) {
-            setEsquema(ESQUEMA_VALORACION_PISO_PELVICO);
-          } else {
-            setEsquema(ESQUEMA_VALORACION_PEDIATRIA);
-          }
-        }
+        // Determinar el esquema (usando BD dinámica para Pediatría con respaldo local)
+        const esquemaSeleccionado = await seleccionarEsquemaValoracion(data);
+        setEsquema(esquemaSeleccionado);
 
         // Convertir a camelCase para los esquemas del frontend
         let converted = convertKeysToCamelCase(data);

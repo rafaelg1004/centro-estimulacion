@@ -182,7 +182,27 @@ export default function DynamicFormBuilder({
           }
         });
       });
-      setFormData(defaultData);
+      setFormData((prev) => {
+        // Si ya hay datos cargados para este mismo formulario (p. ej. carga asíncrona de bloques_dinamicos),
+        // preservar lo que el usuario ya escribió y solo completar bloques_dinamicos si aún están vacíos.
+        if (Object.keys(prev).length > 0 && prev.__esquemaTitulo === esquema.titulo) {
+          const merged = { ...prev };
+          esquema.secciones.forEach((seccion) => {
+            (seccion.campos || []).forEach((campo) => {
+              if (
+                campo.tipo === "bloques_dinamicos" &&
+                Array.isArray(campo.valorPorDefecto) &&
+                campo.valorPorDefecto.length > 0 &&
+                (!Array.isArray(prev[campo.nombre]) || prev[campo.nombre].length === 0)
+              ) {
+                merged[campo.nombre] = campo.valorPorDefecto;
+              }
+            });
+          });
+          return merged;
+        }
+        return { ...defaultData, __esquemaTitulo: esquema.titulo };
+      });
     }
   }, [esquema, initialData, isEdit]);
 
@@ -856,7 +876,7 @@ export default function DynamicFormBuilder({
         "success",
       );
       if (onSubmitSuccess) {
-        onSubmitSuccess();
+        onSubmitSuccess(unflattenedData);
       } else if (esquema.redireccion) {
         navigate(esquema.redireccion);
       }
@@ -1646,6 +1666,10 @@ export default function DynamicFormBuilder({
               ))}
             </div>
           )}
+          <p className="mt-3 text-[11px] text-gray-500 flex items-center gap-1.5">
+            <span>💡</span>
+            <span>La estructura de preguntas y tablas de este seguimiento se recordará automáticamente para futuros controles.</span>
+          </p>
         </div>
       );
     }
