@@ -1501,15 +1501,15 @@ export default function DynamicFormBuilder({
       };
 
       return (
-        <div className="flex flex-col gap-5 md:col-span-2 p-6 bg-gradient-to-br from-indigo-50/50 via-white to-pink-50/40 rounded-3xl border border-indigo-200 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-indigo-100 pb-4">
+        <div className="w-full flex flex-col gap-5 p-6 bg-gradient-to-br from-indigo-50/50 via-white to-pink-50/40 rounded-3xl border border-indigo-200 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-indigo-100 pb-4">
             <div className="max-w-2xl">
               <h4 className="text-base font-black text-indigo-900 tracking-tight flex items-center gap-2">
                 <span>✨</span> {campo.etiqueta}
               </h4>
               <p className="text-sm text-gray-600 mt-1 leading-relaxed">
                 {campo.descripcion ||
-                  "Utiliza este espacio para registrar mediciones específicas, respuestas a ejercicios, escalas clínicas o tablas de control propias de la sesión actual."}
+                  "¿Necesitas anotar algo adicional de esta sesión que no está en los cuadros de arriba? Agrégalo aquí como una pregunta rápida o como una tabla."}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -1531,14 +1531,26 @@ export default function DynamicFormBuilder({
           </div>
 
           {bloques.length === 0 ? (
-            <div className="text-center py-8 px-6 border-2 border-dashed border-indigo-200 rounded-2xl bg-white/80 space-y-2">
-              <p className="text-sm font-bold text-gray-700">
-                No hay preguntas ni tablas agregadas para esta sesión.
+            <div className="p-6 border-2 border-dashed border-indigo-200 rounded-2xl bg-white/80 space-y-3">
+              <p className="text-sm font-bold text-gray-800 text-center">
+                Aún no hay preguntas ni tablas en este seguimiento.
               </p>
-              <p className="text-xs text-gray-500 max-w-xl mx-auto leading-relaxed">
-                • Usa <strong>➕ Nueva Pregunta</strong> para anotar un dato puntual de hoy (ejemplo: <em>“¿Tolera posición prona?”</em>, <em>“Nivel de dolor EVA”</em> o <em>“Observación en casa”</em>).<br />
-                • Usa <strong>📊 Nueva Tabla</strong> si necesitas registrar varias filas o mediciones en columnas (ejemplo: ejercicios realizados, repeticiones y tolerancia).
-              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600">
+                <div className="p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                  <p className="font-bold text-indigo-900 mb-1">➕ ¿Cuándo usar "Nueva Pregunta"?</p>
+                  <p className="leading-relaxed">
+                    Cuando quieras hacer una pregunta puntual y escribir su respuesta.<br />
+                    <strong>Ejemplos:</strong> <em>“¿Tolera posición boca abajo?”</em>, <em>“¿Cuánto dolor sintió (1 al 10)?”</em> o <em>“¿Cómo durmió esta semana?”</em>
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-pink-50/60 border border-pink-100">
+                  <p className="font-bold text-pink-900 mb-1">📊 ¿Cuándo usar "Nueva Tabla"?</p>
+                  <p className="leading-relaxed">
+                    Cuando necesites anotar varios datos ordenados en columnas.<br />
+                    <strong>Ejemplo:</strong> Columna 1: <em>Ejercicio</em> | Columna 2: <em>Repeticiones</em> | Columna 3: <em>¿Cómo le fue?</em>
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -1675,16 +1687,8 @@ export default function DynamicFormBuilder({
               ))}
             </div>
           )}
-          <div className="mt-2 p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-xs text-indigo-950 space-y-1.5 leading-relaxed">
-            <p className="font-bold flex items-center gap-1.5 text-indigo-900">
-              <span>💡</span> ¿Cómo funciona esta sección?
-            </p>
-            <p>
-              • <strong>Para esta consulta únicamente:</strong> Las preguntas o tablas que agregues aquí con <em>Nueva Pregunta</em> o <em>Nueva Tabla</em> quedan guardadas solo en la historia clínica de este paciente en la sesión de hoy.
-            </p>
-            <p>
-              • <strong>Para que aparezcan siempre en todos los seguimientos:</strong> Si deseas que ciertas preguntas o tablas salgan precargadas automáticamente cada vez que atiendas un seguimiento de este programa, configúralas una sola vez en <strong>Configuración de la Clínica → Plantillas → Preguntas de Seguimiento</strong>.
-            </p>
+          <div className="mt-1 px-4 py-3 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-xs text-indigo-950 leading-relaxed">
+            <strong>💡 Consejo:</strong> Lo que agregues aquí solo aplica para la consulta de hoy. Si quieres que ciertas preguntas o tablas aparezcan siempre listas en todos los seguimientos, agrégalas en <strong>Configuración de la Clínica → Plantillas → Preguntas de Seguimiento</strong>.
           </div>
         </div>
       );
@@ -1819,7 +1823,8 @@ export default function DynamicFormBuilder({
         (c.tipo === "textarea" ||
           c.tipo === "firma" ||
           c.tipo === "checkbox" ||
-          c.tipo === "checkbox_group"),
+          c.tipo === "checkbox_group" ||
+          c.tipo === "bloques_dinamicos"),
     );
     const camposOcultos = camposSeguros.filter(
       (c) => c.tipo === "hidden" || c.oculto,
@@ -1866,7 +1871,8 @@ export default function DynamicFormBuilder({
                     c.tipo !== "firma" &&
                     c.tipo !== "checkbox" &&
                     c.tipo !== "textarea" &&
-                    c.tipo !== "checkbox_group",
+                    c.tipo !== "checkbox_group" &&
+                    c.tipo !== "bloques_dinamicos",
                 )
                 .map((c, i) => (
                   <React.Fragment key={i}>
