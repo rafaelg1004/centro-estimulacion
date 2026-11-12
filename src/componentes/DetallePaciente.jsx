@@ -719,7 +719,7 @@ export default function DetallePacienteUnificado() {
                         if (tp.includes("Lactancia")) tipoParam = "lactancia";
                         else if (tp.includes("Piso")) tipoParam = "pisopelvico";
                         else if (tp.includes("Perinatal")) tipoParam = "perinatal";
-                        navigate(`/valoraciones/nueva?paciente=${id}&tipo=${tipoParam}&modo=seguimiento&origen=${v.id || v._id}`);
+                        navigate(`/valoracion?paciente=${id}&tipo=${tipoParam}&modo=seguimiento&origen=${v.id || v._id}`);
                       }}
                       title="Crear nueva valoración de seguimiento o control a partir de esta"
                       className="flex-1 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-bold py-2 rounded-lg text-xs transition"

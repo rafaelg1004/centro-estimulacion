@@ -344,6 +344,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
             {/* --- HISTORIA CLÍNICA UNIFICADA --- */}
             {/* --- HISTORIA CLÍNICA UNIFICADA --- */}
             <Route path="/valoraciones" element={<ListaValoraciones />} />
+            <Route path="/valoraciones/nueva" element={<NuevaValoracionUnificada />} />
             <Route path="/valoraciones/:id" element={<DetalleValoracion />} />
             <Route path="/valoraciones/editar/:id" element={<EditarValoracion />} />
             <Route path="/valoracion" element={<NuevaValoracionUnificada />} />

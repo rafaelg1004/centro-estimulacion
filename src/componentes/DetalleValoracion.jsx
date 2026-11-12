@@ -716,7 +716,7 @@ export default function DetalleValoracion() {
         if (tp.includes("Lactancia")) tipoParam = "lactancia";
         else if (tp.includes("Piso")) tipoParam = "pisopelvico";
         else if (tp.includes("Perinatal")) tipoParam = "perinatal";
-        navigate(`/valoraciones/nueva?paciente=${pId}&tipo=${tipoParam}&modo=seguimiento&origen=${id}`);
+        navigate(`/valoracion?paciente=${pId}&tipo=${tipoParam}&modo=seguimiento&origen=${id}`);
       }}
       onExportPDF={handleExportPDF}
       onLock={handleLock}
