@@ -59,7 +59,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Evolución y Plan de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
@@ -88,7 +87,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Preguntas y Tablas de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "moduloPediatria.bloquesSeguimiento",
@@ -156,7 +154,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Evolución y Plan de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
@@ -181,7 +178,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Preguntas y Tablas de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "moduloPisoPelvico.bloquesSeguimiento",
@@ -248,7 +244,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Evolución y Plan de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
@@ -273,7 +268,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Preguntas y Tablas de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "moduloLactancia.bloquesSeguimiento",
@@ -341,7 +335,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Evolución y Plan de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "motivoConsulta",
@@ -366,7 +359,6 @@ export const ESQUEMAS_SEGUIMIENTO = {
       },
       {
         titulo: "Preguntas y Tablas de Seguimiento",
-        siempreVisible: true,
         campos: [
           {
             nombre: "moduloPerinatal.bloquesSeguimiento",

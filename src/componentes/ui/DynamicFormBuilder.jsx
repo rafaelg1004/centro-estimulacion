@@ -196,6 +196,13 @@ export default function DynamicFormBuilder({
                 (!Array.isArray(prev[campo.nombre]) || prev[campo.nombre].length === 0)
               ) {
                 merged[campo.nombre] = campo.valorPorDefecto;
+              } else if (
+                campo.tipo !== "bloques_dinamicos" &&
+                campo.valorPorDefecto !== undefined &&
+                campo.valorPorDefecto !== "" &&
+                (prev[campo.nombre] === undefined || prev[campo.nombre] === "")
+              ) {
+                merged[campo.nombre] = campo.valorPorDefecto;
               }
             });
           });

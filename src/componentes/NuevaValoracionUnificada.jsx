@@ -300,8 +300,9 @@ export default function NuevaValoracionUnificada() {
                             { nombre: "permitirDuplicado", tipo: "hidden", valorPorDefecto: modoSeguimiento },
                             ...(valoracionPrevia?.id ? [{ nombre: "valoracionOrigenId", tipo: "hidden", valorPorDefecto: valoracionPrevia.id }] : []),
                             ...sec.campos.map((c) => {
-                                if (modoSeguimiento && c.nombre === "codDiagnosticoPrincipal" && valoracionPrevia?.cod_diagnostico_principal) {
-                                    return { ...c, valorPorDefecto: valoracionPrevia.cod_diagnostico_principal };
+                                const cie10Previo = valoracionPrevia?.cod_diagnostico_principal || valoracionPrevia?.codDiagnosticoPrincipal;
+                                if (modoSeguimiento && c.nombre === "codDiagnosticoPrincipal" && cie10Previo) {
+                                    return { ...c, valorPorDefecto: cie10Previo };
                                 }
                                 return c;
                             })
