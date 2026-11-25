@@ -17,3 +17,25 @@ code {
 .input {
   @apply border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-full bg-white;
 }
+
+/* Scrollbar sutil y transparente acorde al estilo pastel del menú lateral */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 9999px;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 70, 229, 0.65);
+}
+.sidebar-scroll::-webkit-scrollbar-button {
+  display: none;
+}

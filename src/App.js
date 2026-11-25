@@ -165,11 +165,11 @@ function RutasAutenticadas({ usuario, setUsuario }) {
       {usuario && (
         <aside
           className={`
-            fixed z-40 top-0 left-0 h-full w-60 py-8 px-4 flex flex-col justify-between transition-transform duration-300 bg-gradient-to-b from-indigo-100 via-pink-100 to-green-100 shadow-xl border-r border-indigo-200 overflow-y-auto
+            fixed z-40 top-0 left-0 h-full w-60 py-8 px-4 flex flex-col justify-between transition-transform duration-300 bg-gradient-to-b from-indigo-100 via-pink-100 to-green-100 shadow-xl border-r border-indigo-200 overflow-hidden
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
         >
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto sidebar-scroll pr-1">
             <h2 className="text-2xl font-bold mb-8 text-center text-indigo-700 drop-shadow">Menú</h2>
             <nav className="flex flex-col gap-4 pb-4">
               <Link
