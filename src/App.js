@@ -33,6 +33,7 @@ import EditarClase from "./componentes/EditarClase";
 import MiPerfil from "./componentes/MiPerfil";
 import ConfiguracionClinica from "./componentes/ConfiguracionClinica";
 import Cumpleanos from "./componentes/Cumpleanos";
+import Header from "./componentes/Header";
 import Swal from "sweetalert2";
 
 
@@ -40,12 +41,10 @@ import {
   HomeIcon,
   UsersIcon,
   AcademicCapIcon,
-  ArrowLeftOnRectangleIcon,
   ClipboardDocumentCheckIcon,
   DocumentTextIcon,
   ChartBarIcon,
   CalendarDaysIcon,
-  UserCircleIcon,
   BuildingOfficeIcon,
 } from "@heroicons/react/24/solid";
 import { logAPIConfig, testAPIConnection, apiRequest, API_ENDPOINTS } from "./config/api";
@@ -80,15 +79,44 @@ function RutasAutenticadas({ usuario, setUsuario }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
 
   // Verificar token en cada cambio de ruta
   useEffect(() => {
     if (!usuario) return;
-    apiRequest(API_ENDPOINTS.USER_INFO).catch(() => {
-      // Si falla con 401, el evento session:expired ya se dispara desde apiRequest
-    });
+    apiRequest(API_ENDPOINTS.USER_INFO)
+      .then((info) => {
+        if (info?.nombre) setUserName(info.nombre);
+      })
+      .catch(() => {
+        // Si falla con 401, el evento session:expired ya se dispara desde apiRequest
+      });
   }, [location.pathname, usuario]);
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "¿Deseas cerrar sesión?",
+      text: "Tu sesión se cerrará y volverás al inicio.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#e53e3e",
+      cancelButtonColor: "#6366f1",
+      confirmButtonText: "Sí, cerrar sesión",
+      cancelButtonText: "Cancelar"
+    });
+    if (result.isConfirmed) {
+      setCerrandoSesion(true);
+      setTimeout(() => {
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("userRole");
+        setUsuario(null);
+        setUserName("");
+        navigate("/");
+        setCerrandoSesion(false);
+      }, 1200);
+    }
+  };
 
   // Cerrar sesión automáticamente cuando el token vence
   useEffect(() => {
@@ -151,26 +179,16 @@ function RutasAutenticadas({ usuario, setUsuario }) {
       {/* Indicador de estado de API (solo en desarrollo) */}
       {process.env.NODE_ENV === 'development' && <APIStatusIndicator />}
 
-      {/* Botón hamburguesa solo en móvil */}
-      {usuario && (
-        <button
-          className="fixed top-4 left-4 z-50 bg-indigo-700 text-white p-2 rounded"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          {sidebarOpen ? "✖" : "☰"}
-        </button>
-      )}
-
       {/* Sidebar */}
       {usuario && (
         <aside
           className={`
-            fixed z-40 top-0 left-0 h-full w-60 py-8 px-4 flex flex-col justify-between transition-transform duration-300 bg-gradient-to-b from-indigo-100 via-pink-100 to-green-100 shadow-xl border-r border-indigo-200 overflow-hidden
+            fixed z-40 top-16 left-0 h-[calc(100vh-4rem)] w-60 py-6 px-4 flex flex-col transition-transform duration-300 bg-gradient-to-b from-indigo-100 via-pink-100 to-green-100 shadow-xl border-r border-indigo-200 overflow-hidden
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
         >
           <div className="flex-1 overflow-y-auto sidebar-scroll pr-1">
-            <h2 className="text-2xl font-bold mb-8 text-center text-indigo-700 drop-shadow">Menú</h2>
+            <h2 className="text-xl font-bold mb-6 text-center text-indigo-700 drop-shadow">Menú</h2>
             <nav className="flex flex-col gap-4 pb-4">
               <Link
                 to="/"
@@ -267,75 +285,38 @@ function RutasAutenticadas({ usuario, setUsuario }) {
               </Link>
             </nav>
           </div>
-          <div className="mt-8 space-y-2">
-            {/* Información del usuario */}
-            <div className="text-center text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
-
-              <div className="text-xs capitalize">
-                {userRole === 'fisioterapeuta' ? 'Fisioterapeuta' :
-                  userRole === 'auxiliar' ? 'Auxiliar' :
-                    userRole === 'administracion' ? 'Administración' : userRole}
-              </div>
-            </div>
-
-            <Link
-              to="/mi-perfil"
-              className="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-2 px-4 rounded transition text-center shadow flex items-center justify-center gap-2"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <UserCircleIcon className="h-5 w-5" />
-              Mi Perfil / Firma
-            </Link>
-
-            <button
-              onClick={async () => {
-                const result = await Swal.fire({
-                  title: "¿Deseas cerrar sesión?",
-                  text: "Tu sesión se cerrará y volverás al inicio.",
-                  icon: "question",
-                  showCancelButton: true,
-                  confirmButtonColor: "#e53e3e",
-                  cancelButtonColor: "#6366f1",
-                  confirmButtonText: "Sí, cerrar sesión",
-                  cancelButtonText: "Cancelar"
-                });
-                if (result.isConfirmed) {
-                  setCerrandoSesion(true);
-                  setTimeout(() => {
-                    sessionStorage.removeItem("token");
-                    sessionStorage.removeItem("userRole");
-                    setUsuario(null);
-                    navigate("/");
-                    setCerrandoSesion(false);
-                  }, 1200);
-                }
-              }}
-              className="bg-red-200 hover:bg-red-300 text-red-700 font-bold py-2 px-4 rounded transition w-full shadow flex items-center justify-center gap-2"
-            >
-              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-              Cerrar sesión
-            </button>
-          </div>
         </aside>
       )}
 
       {/* Overlay para cerrar el sidebar en móvil */}
       {usuario && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-30 md:hidden"
+          className="fixed inset-0 top-16 bg-black bg-opacity-30 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Contenido principal */}
-      <main
-        className={`flex-1 bg-gray-50 min-h-screen transition-all duration-300
-          ${usuario && sidebarOpen
-            ? "md:ml-56"
-            : "flex items-center justify-center"
-          }
-        `}
-      >
+      {/* Columna principal: Header arriba + Contenido */}
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        {usuario && (
+          <Header
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+            userRole={userRole}
+            userName={userName}
+            onLogout={handleLogout}
+          />
+        )}
+
+        {/* Contenido principal */}
+        <main
+          className={`flex-1 bg-gray-50 transition-all duration-300
+            ${usuario && sidebarOpen
+              ? "md:ml-60"
+              : "flex items-center justify-center"
+            }
+          `}
+        >
         <div className={usuario && !sidebarOpen ? "w-full max-w-8xl mx-auto px-2" : "w-full"}>
           <Routes>
             <Route path="/registrar-usuario" element={<RegistroUsuario />} />
@@ -379,6 +360,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
           </Routes>
         </div>
       </main>
+      </div>
     </div>
   );
 }
