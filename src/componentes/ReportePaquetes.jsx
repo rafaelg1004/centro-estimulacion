@@ -15,8 +15,10 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
+import ReporteMedicosRemitentes from "./ReporteMedicosRemitentes";
 
 export default function ReportePaquetes() {
+  const [pestanaActiva, setPestanaActiva] = useState("paquetes"); // "paquetes" | "medicos"
   const [paquetes, setPaquetes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -216,29 +218,35 @@ export default function ReportePaquetes() {
           <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
             <div>
               <h1 className="text-3xl font-extrabold text-indigo-700 drop-shadow mb-2">
-                📊 Reporte de Paquetes
+                📊 Módulo de Reportes
               </h1>
               <p className="text-gray-600">
-                Seguimiento de paquetes de clases comprados por los pacientes
+                {pestanaActiva === "paquetes"
+                  ? "Seguimiento de facturas y paquetes de clases comprados por los pacientes"
+                  : "Listado agrupado de pediatras y médicos tratantes que envían pacientes a la clínica"}
               </p>
             </div>
             <div className="flex gap-3 flex-wrap">
-              <button
-                onClick={exportarAExcel}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
-                disabled={paquetesFiltrados.length === 0}
-              >
-                <DocumentArrowDownIcon className="h-5 w-5" />
-                Exportar Excel
-              </button>
-              <button
-                onClick={recalcularContadores}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
-                title="Recalcular contadores de clases usadas desde las sesiones reales"
-              >
-                <ArrowPathIcon className="h-5 w-5" />
-                Recalcular
-              </button>
+              {pestanaActiva === "paquetes" && (
+                <>
+                  <button
+                    onClick={exportarAExcel}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
+                    disabled={paquetesFiltrados.length === 0}
+                  >
+                    <DocumentArrowDownIcon className="h-5 w-5" />
+                    Exportar Excel
+                  </button>
+                  <button
+                    onClick={recalcularContadores}
+                    className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
+                    title="Recalcular contadores de clases usadas desde las sesiones reales"
+                  >
+                    <ArrowPathIcon className="h-5 w-5" />
+                    Recalcular
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => navigate("/")}
                 className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-bold shadow transition flex items-center gap-2"
@@ -248,7 +256,38 @@ export default function ReportePaquetes() {
               </button>
             </div>
           </div>
+
+          {/* Selector de Pestañas del Módulo de Reportes */}
+          <div className="flex flex-wrap gap-3 mt-6 pt-6 border-t border-indigo-50">
+            <button
+              type="button"
+              onClick={() => setPestanaActiva("paquetes")}
+              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 ${
+                pestanaActiva === "paquetes"
+                  ? "bg-indigo-600 text-white shadow-md"
+                  : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+              }`}
+            >
+              <span>📦</span> Facturas y Paquetes ({paquetes.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setPestanaActiva("medicos")}
+              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 ${
+                pestanaActiva === "medicos"
+                  ? "bg-pink-600 text-white shadow-md"
+                  : "bg-pink-50 text-pink-700 hover:bg-pink-100"
+              }`}
+            >
+              <span>🩺</span> Médicos que Envían Pacientes (Pediatras)
+            </button>
+          </div>
         </div>
+
+        {pestanaActiva === "medicos" ? (
+          <ReporteMedicosRemitentes />
+        ) : (
+          <>
 
         {/* Estadísticas */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6">
@@ -764,6 +803,8 @@ export default function ReportePaquetes() {
             </span>
           )}
         </div>
+          </>
+        )}
       </div>
     </div>
   );

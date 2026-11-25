@@ -168,7 +168,7 @@ export default function Home() {
             to="/reporte-paquetes"
             className="flex items-center justify-center gap-2 bg-yellow-200 hover:bg-yellow-300 text-yellow-800 font-bold py-3 rounded-xl text-center transition transform hover:scale-105 shadow"
           >
-            <ChartBarIcon className="h-6 w-6" /> Reporte de Paquetes
+            <ChartBarIcon className="h-6 w-6" /> Reportes (Facturas y Médicos)
           </Link>
           <Link
             to="/mi-perfil"

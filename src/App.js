@@ -229,7 +229,7 @@ function RutasAutenticadas({ usuario, setUsuario }) {
                     onClick={() => setSidebarOpen(false)}
                   >
                     <ChartBarIcon className="h-5 w-5" />
-                    Reporte de Paquetes
+                    Reportes (Facturas / Médicos)
                   </Link>
                   <Link
                     to="/gestion-usuarios"
